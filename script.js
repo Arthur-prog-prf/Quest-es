@@ -145,9 +145,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 option.correct = (option.letter === correctLetter);
             });
             
-            // Adiciona fundamentação
-            question.explanation = fundamentacao[`${question.number}-${correctLetter}`] || 
-                                 "Fundamentação não disponível.";
+           // CORREÇÃO: Remove o parêntese da chave de busca
+            const fundKey = `${question.number}-${correctLetter}`;  // SEM ")" no final
+            question.explanation = fundamentacao[fundKey] || "Fundamentação não disponível.";
         });
 
         startQuiz();
