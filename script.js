@@ -25,22 +25,30 @@ document.addEventListener('DOMContentLoaded', () => {
     let quizTitle = '';
     let quizDescription = '';
 
-    // Carrega a lista de matérias
     async function loadMaterias() {
-        // Simulação - na prática, você precisaria listar os arquivos da pasta materias/
-        const materias = [
-            { name: 'Direito Penal', file: 'direito_penal.txt' },
-            { name: 'Direito Civil', file: 'direito_civil.txt' }
-            // Adicione mais conforme necessário
-        ];
+        try {
+            const response = await fetch('materias/materias.json');
+            if (!response.ok) throw new Error('Erro ao carregar materias.json');
 
-        materias.forEach(materia => {
-            const option = document.createElement('option');
-            option.value = materia.file;
-            option.textContent = materia.name;
-            materiasSelect.appendChild(option);
-        });
+            const materias = await response.json();
+
+            const defaultOption = document.createElement('option');
+            defaultOption.textContent = '-- Selecione --';
+            defaultOption.value = '';
+            materiasSelect.appendChild(defaultOption);
+
+            materias.forEach(materia => {
+                const option = document.createElement('option');
+                option.value = materia.arquivo;
+                option.textContent = materia.nome;
+                materiasSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Erro ao carregar lista de matérias:', error);
+            alert('Erro ao carregar lista de matérias.');
+        }
     }
+
 
     // Carrega o quiz selecionado
     async function loadQuiz(file) {
