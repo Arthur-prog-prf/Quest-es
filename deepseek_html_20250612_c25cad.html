@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulados Jurídicos Interativos</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1 id="quiz-title">Simulados Jurídicos</h1>
+        <p id="quiz-description">Selecione uma matéria para começar</p>
+        
+        <div class="controls">
+            <div class="control-group">
+                <button id="decrease-font">A-</button>
+                <button id="increase-font">A+</button>
+                <button id="reset-font">Resetar Fonte</button>
+            </div>
+            <div class="control-group">
+                <select id="materias">
+                    <option value="">-- Selecione --</option>
+                </select>
+                <button id="start-btn">Iniciar Simulado</button>
+            </div>
+            <div class="control-group">
+                <button id="export-pdf">Exportar PDF</button>
+                <button id="print">Imprimir</button>
+                <button id="theme-toggle">Modo Escuro</button>
+            </div>
+        </div>
+        
+        <div id="quiz-area" class="hidden">
+            <div class="progress">
+                <span id="current-question">1</span> de <span id="total-questions">0</span> questões
+            </div>
+            
+            <div id="questions-area"></div>
+            
+            <div class="navigation">
+                <button id="prev-btn" disabled>Anterior</button>
+                <button id="next-btn">Próxima</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
