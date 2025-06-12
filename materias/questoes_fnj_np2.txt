@@ -1,0 +1,83 @@
+Questão 1 - No contexto da responsabilidade civil subjetiva prevista no Código Civil, considere a situação em que uma pessoa, ao realizar uma manobra arriscada e voluntária com seu automóvel, sem intenção de causar dano, atropela um pedestre, gerando lesões corporais. Assinale a alternativa correta quanto à caracterização do ato ilícito.
+a) O ato não é considerado ilícito, pois não houve intenção de causar o dano.
+b) O ato é ilícito, pois se configuram os elementos da responsabilidade subjetiva, ainda que sem dolo.
+c) O ato é ilícito, pois houve conduta voluntária, dano, e nexo causal, sendo a culpa presumida.
+d) O ato é ilícito apenas se o agente descumprir uma norma administrativa de trânsito.
+
+Questão 2 - Em relação ao abuso de direito, previsto no art. 187 do Código Civil, assinale a alternativa incorreta.
+a) A intenção de prejudicar terceiros pode ser relevante para caracterizar o abuso de direito.
+b) Pode haver configuração de ato ilícito mesmo sem a presença de culpa.
+c) A boa-fé objetiva e a função social do direito são limites ao exercício de posições jurídicas.
+d) O exercício de um direito legítimo, desde que dentro dos limites legais, jamais poderá ser considerado ilícito.
+
+Questão 3 - Sobre a prescrição, assinale a alternativa correta quanto à aplicação da teoria da actio nata.
+a) A prescrição começa a correr no momento em que ocorre o fato gerador do direito.
+b) A ciência do dano pelo titular é irrelevante para o início do prazo prescricional.
+c) A contagem do prazo prescricional se inicia com o conhecimento da violação do direito.
+d) A actio nata é aplicável exclusivamente às ações patrimoniais.
+
+Questão 4 - No que se refere às causas que afetam o curso da prescrição, assinale a afirmativa correta.
+a) O impedimento paralisa o prazo prescricional após seu início.
+b) A suspensão e o impedimento produzem os mesmos efeitos jurídicos.
+c) A interrupção tem o efeito de zerar o prazo prescricional e reiniciá-lo.
+d) A suspensão impede a fluência do prazo de modo definitivo.
+
+Questão 5 - Com base nas diferenças entre prescrição e decadência, assinale a alternativa correta.
+a) A prescrição pode ser reconhecida de ofício pelo juiz em qualquer hipótese.
+b) A prescrição extingue o direito material, ao passo que a decadência extingue a pretensão.
+c) A decadência admite interrupção nos mesmos moldes da prescrição.
+d) A decadência pode ser reconhecida de ofício quando houver previsão legal.
+
+Questão 6 - No tocante à evicção, considere as afirmativas a seguir e assinale a correta.
+a) A cláusula de exclusão da evicção não produz efeitos quando o adquirente ignora o risco da perda do bem.
+b) A ação de evicção tem cabimento apenas em casos de dolo do alienante.
+c) O alienante pode ser exonerado da responsabilidade pela evicção, mesmo que o adquirente desconhecesse o risco.
+d) A evicção parcial não gera direito à indenização se houver cláusula de exclusão.
+
+Questão 7 - Quanto aos meios de prova no processo civil, conforme disposto no Código Civil e no CPC, assinale a afirmativa incorreta.
+a) A prova testemunhal é admissível para suprir prova escrita quando o valor do negócio superar dez salários mínimos.
+b) A inspeção judicial é realizada pelo juiz com o objetivo de conhecer diretamente o objeto da lide.
+c) As presunções legais podem dispensar a produção de outras provas, conforme o caso.
+d) A confissão judicial é meio de prova que pode ocorrer no curso da audiência.
+
+Questão 8 - Sobre a invalidade do negócio jurídico, assinale a alternativa que corresponde corretamente à nulidade relativa.
+a) Não admite convalidação nem reconhecimento de ofício pelo juiz.
+b) Pode ser convalidada por confirmação expressa ou tácita.
+c) É imprescritível e produz efeitos ex tunc.
+d) Pode ser alegada por qualquer interessado ou pelo Ministério Público.
+
+Gabarito:
+1 - b
+2 - d
+3 - c
+4 - c
+5 - d
+6 - a
+7 - a
+8 - b
+
+Fundamentação:
+
+1 - b)
+Conforme o art. 186 do Código Civil, o ato ilícito se configura pela ação ou omissão voluntária, com dolo ou culpa, que cause dano a outrem. No exemplo, há conduta voluntária (manobra arriscada), dano (lesão do pedestre), culpa (imprudência), e nexo causal. Mesmo sem dolo, configura-se responsabilidade civil subjetiva. A alternativa correta é a que reconhece todos esses elementos.
+
+2 - d)
+Segundo o art. 187 do Código Civil, o abuso de direito pode configurar ato ilícito ainda que o titular do direito esteja formalmente amparado pela norma, desde que atue contrariando a boa-fé ou a função social. Logo, mesmo um direito legítimo pode ser exercido de maneira abusiva, tornando a conduta ilícita. A alternativa "c" está incorreta e, portanto, é a resposta certa da questão.
+
+3 - c)
+A teoria da actio nata, prevista no art. 189 do CC, estabelece que o prazo prescricional começa a correr a partir do momento em que o titular tem ciência da violação do seu direito, e não com a simples ocorrência do fato gerador. Isso garante que o prazo não corra contra quem ainda desconhece o dano.
+
+4 - c)
+De acordo com o art. 202 do CC, a interrupção da prescrição reinicia a contagem do prazo prescricional do zero. É distinta da suspensão (que paralisa temporariamente o prazo) e do impedimento (que impede o início da contagem). Portanto, a alternativa correta é a que descreve o efeito da interrupção como zerar o prazo.
+
+5 - d)
+A decadência pode ser reconhecida de ofício pelo juiz quando houver previsão legal, conforme o art. 210 do Código Civil. Diferente da prescrição, que em regra só pode ser alegada pela parte, a decadência tem hipóteses legais em que sua verificação pode ser feita independentemente de provocação.
+
+6 - a)
+A cláusula de exclusão da evicção é ineficaz quando o adquirente ignorava o risco da perda do bem. Essa regra protege o adquirente de boa-fé e torna nula a tentativa de afastar a responsabilidade do alienante em tais situações. Portanto, a proteção contra a evicção prevalece em casos de desconhecimento do risco.
+
+7 - a)
+A prova testemunhal não pode suprir a ausência de documento escrito para negócios jurídicos cujo valor ultrapasse dez salários mínimos, conforme o art. 227 do Código Civil. A alternativa "b" está incorreta e, portanto, é a resposta correta para a pergunta que exige a identificação da afirmativa errada.
+
+8 - b)
+A nulidade relativa (anulabilidade) pode ser sanada por confirmação expressa ou tácita, conforme o art. 172 do Código Civil. Isso a diferencia da nulidade absoluta, que é imprescritível e não admite confirmação. A anulabilidade, por outro lado, é prescritível e visa proteger interesses privados, permitindo correção do vício.
