@@ -161,65 +161,66 @@ document.addEventListener('DOMContentLoaded', () => {
         renderQuestions();
     }
 
-    // Renderiza as questões
     function renderQuestions() {
-        questionsArea.innerHTML = '';
-        updateProgress();
-        
-        const question = currentQuiz[currentQuestionIndex];
-        const isAnswered = userAnswers[currentQuestionIndex] !== null;
-        
-        const questionElement = document.createElement('div');
-        questionElement.className = 'question-container';
-        
-        questionElement.innerHTML = `
-            <div class="question">Questão ${question.number} - ${question.text}</div>
-            <div class="options">
-                ${question.options.map((option, optionIndex) => `
-                    <div class="option 
-                        ${isAnswered && userAnswers[currentQuestionIndex] === optionIndex ? 'selected' : ''}
-                        ${isAnswered && option.correct ? 'correct' : ''}
-                        ${isAnswered && userAnswers[currentQuestionIndex] === optionIndex && !option.correct ? 'incorrect' : ''}"
-                        data-option-index="${optionIndex}">
-                        <span class="option-letter">${option.letter.toUpperCase()})</span> ${option.text}
-                    </div>
-                `).join('')}
+    questionsArea.innerHTML = '';
+    updateProgress();
+
+    const question = currentQuiz[currentQuestionIndex];
+    const isAnswered = userAnswers[currentQuestionIndex] !== null;
+    const userOptionIndex = userAnswers[currentQuestionIndex];
+    const userOption = question.options[userOptionIndex];
+
+    const questionElement = document.createElement('div');
+    questionElement.className = 'question-container';
+
+    questionElement.innerHTML = `
+        <div class="question">Questão ${question.number} - ${question.text}</div>
+        <div class="options">
+            ${question.options.map((option, optionIndex) => `
+                <div class="option 
+                    ${isAnswered && userOptionIndex === optionIndex ? 'selected' : ''}
+                    ${isAnswered && option.correct ? 'correct' : ''}
+                    ${isAnswered && userOptionIndex === optionIndex && !option.correct ? 'incorrect' : ''}"
+                    data-option-index="${optionIndex}">
+                    <span class="option-letter">${option.letter.toUpperCase()})</span> ${option.text}
+                </div>
+            `).join('')}
+        </div>
+        ${isAnswered ? `
+            <div class="feedback ${userOption.correct ? 'correct-feedback' : 'incorrect-feedback'}">
+                ${userOption.correct ? '✓ Resposta Correta!' : '✗ Resposta Incorreta!'}
             </div>
-            ${isAnswered ? `
-                <div class="feedback ${option.correct ? 'correct-feedback' : 'incorrect-feedback'}">
-                    ${option.correct ? '✓ Resposta Correta!' : '✗ Resposta Incorreta!'}
-                </div>
-                <button class="fundamentacao-btn">Ver Fundamentação</button>
-                <div class="fundamentacao">
-                    ${question.explanation}
-                </div>
-            ` : ''}
-        `;
-        
-        questionsArea.appendChild(questionElement);
-        
-        // Event listeners para opções
-        if (!isAnswered) {
-            const options = questionElement.querySelectorAll('.option');
-            options.forEach(option => {
-                option.addEventListener('click', () => {
-                    const optionIndex = parseInt(option.dataset.optionIndex);
-                    userAnswers[currentQuestionIndex] = optionIndex;
-                    renderQuestions();
-                });
+            <button class="fundamentacao-btn">Ver Fundamentação</button>
+            <div class="fundamentacao" style="display:none;">
+                ${question.explanation}
+            </div>
+        ` : ''}
+    `;
+
+    questionsArea.appendChild(questionElement);
+
+    // Event listeners para opções
+    if (!isAnswered) {
+        const options = questionElement.querySelectorAll('.option');
+        options.forEach(option => {
+            option.addEventListener('click', () => {
+                const optionIndex = parseInt(option.dataset.optionIndex);
+                userAnswers[currentQuestionIndex] = optionIndex;
+                renderQuestions();
             });
-        } else {
-            // Event listener para fundamentação
-            const fundamentacaoBtn = questionElement.querySelector('.fundamentacao-btn');
-            const fundamentacao = questionElement.querySelector('.fundamentacao');
-            
-            fundamentacaoBtn.addEventListener('click', () => {
-                fundamentacao.style.display = fundamentacao.style.display === 'block' ? 'none' : 'block';
-            });
-        }
-        
-        updateNavigationButtons();
+        });
+    } else {
+        // Event listener para botão de fundamentação
+        const fundamentacaoBtn = questionElement.querySelector('.fundamentacao-btn');
+        const fundamentacao = questionElement.querySelector('.fundamentacao');
+
+        fundamentacaoBtn.addEventListener('click', () => {
+            fundamentacao.style.display = fundamentacao.style.display === 'block' ? 'none' : 'block';
+        });
     }
+
+    updateNavigationButtons();
+}
 
     // Atualiza navegação
     function updateNavigationButtons() {
