@@ -100,12 +100,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } 
             else if (inFundamentacao) {
-                // Processa fundamentação (formato "1 - b)")
-                const match = line.match(/(\d+)\s*-\s*([a-d]\))/i);
+                // Aceita formatos como "1 - a):", "1 - a)", "1 - a) " ou similares
+                const match = line.match(/(\d+)\s*-\s*([a-d]\))\s*:?\s*(.*)/i);
                 if (match) {
                     const questaoNum = match[1];
                     const fundKey = `${questaoNum}-${match[2].toLowerCase().charAt(0)}`;
-                    fundamentacao[fundKey] = line.substring(line.indexOf(')') + 1).trim();
+                    fundamentacao[fundKey] = match[3].trim(); // Pega o texto após o padrão
                 }
             }
             else {
