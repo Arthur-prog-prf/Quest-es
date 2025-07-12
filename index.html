@@ -3,47 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulados Jurídicos Interativos</title>
+    <title>Quiz de Estudos</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Incluindo a biblioteca do Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="quiz-container">
-        <h1 id="quiz-title">Simulados Jurídicos</h1>
-        <p id="quiz-description">Selecione uma matéria para começar</p>
-        
+        <h1 id="quiz-title">Quiz de Estudos</h1>
+        <p id="quiz-description">Clique no botão para carregar as questões do banco de dados.</p>
+
+        <div class="control-group">
+            <!-- O select de matérias foi removido por enquanto -->
+            <button id="start-btn">Carregar Questões</button>
+        </div>
+
         <div class="controls">
             <div class="control-group">
                 <button id="decrease-font">A-</button>
                 <button id="increase-font">A+</button>
-                <button id="reset-font">Resetar Fonte</button>
-            </div>
-            <div class="control-group">
-               <select id="materias"></select>
-                <button id="start-btn">Iniciar Simulado</button>
-            </div>
-            <div class="control-group">
-                <button id="export-pdf">Exportar PDF</button>
-                <button id="print">Imprimir</button>
                 <button id="theme-toggle">Modo Escuro</button>
+                <!-- O botão de PDF pode ser reimplementado no futuro -->
             </div>
         </div>
-        
+
         <div id="quiz-area" class="hidden">
             <div class="progress">
                 <span id="current-question">1</span> de <span id="total-questions">0</span> questões
             </div>
-            
             <div id="questions-area"></div>
-            
-            <div class="navigation">
-                <button id="prev-btn" disabled>Anterior</button>
-                <button id="next-btn">Próxima</button>
-            </div>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <div class="navigation hidden">
+        <button id="prev-btn" disabled>Anterior</button>
+        <input type="number" id="go-to-question" placeholder="Ir para questão" min="1" max="1">
+        <button id="next-btn">Próxima</button>
+    </div>
+
+    <!-- Nosso novo arquivo JavaScript principal -->
+    <script src="app.js"></script>
 </body>
 </html>
