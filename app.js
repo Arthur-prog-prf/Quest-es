@@ -3,8 +3,8 @@
 // =================================================================
 // !!! IMPORTANTE: Substitua os valores abaixo pelos seus !!!
 
-const SUPABASE_URL = 'COLE_AQUI_A_SUA_URL_DO_SUPABASE'; 
-const SUPABASE_ANON_KEY = 'COLE_AQUI_A_SUA_CHAVE_ANON_PUBLIC'; 
+const SUPABASE_URL = 'https://dibhqftndeggtrxbxjsn.supabase.co'; 
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpYmhxZnRuZGVnZ3RyeGJ4anNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNDg5NTAsImV4cCI6MjA2NzkyNDk1MH0.WV-UK5Au_Hhqp8R6D2mjwiRBtICrmISXoMgSCmx4ZgQ'; 
 
 // Inicializa o "telefone" para conversar com o Supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
