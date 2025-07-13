@@ -1,10 +1,11 @@
 // =================================================================
 // CONFIGURAÇÃO DO SUPABASE
 // =================================================================
-// !!! IMPORTANTE: Substitua os valores abaixo pelos seus !!!
+// Suas credenciais foram inseridas abaixo.
 const SUPABASE_URL = 'https://dibhqftndeggtrxbxjsn.supabase.co'; 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpYmhxZnRuZGVnZ3RyeGJ4anNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNDg5NTAsImV4cCI6MjA2NzkyNDk1MH0.WV-UK5Au_Hhqp8R6D2mjwiRBtICrmISXoMgSCmx4ZgQ'; 
 
+// Inicializa a conexão com o Supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // =================================================================
@@ -21,7 +22,9 @@ const currentQuestionSpan = document.getElementById('current-question');
 const totalQuestionsSpan = document.getElementById('total-questions');
 const goToQuestionInput = document.getElementById('go-to-question');
 const navigationDiv = document.querySelector('.navigation');
-// ... (outros elementos que você queira controlar)
+const decreaseFontBtn = document.getElementById('decrease-font');
+const increaseFontBtn = document.getElementById('increase-font');
+const themeToggleBtn = document.getElementById('theme-toggle');
 
 // =================================================================
 // ESTADO DO QUIZ
@@ -30,6 +33,7 @@ let allQuestions = [];
 let userAnswers = [];
 let currentQuestionIndex = 0;
 let materiasEAssuntos = []; // Para guardar os filtros
+let fontSize = 16;
 
 // =================================================================
 // FUNÇÕES PRINCIPAIS
@@ -122,7 +126,7 @@ async function fetchQuestions() {
         alert('Erro ao carregar as questões: ' + error.message);
     } finally {
         startBtn.textContent = 'Iniciar Exercício';
-        startBtn.disabled = false;
+        // O botão continuará desabilitado até uma nova seleção
     }
 }
 
@@ -130,11 +134,6 @@ async function fetchQuestions() {
  * Inicia a interface do quiz com as questões carregadas.
  */
 function startQuiz() {
-    // ... (O resto do seu código para iniciar e renderizar o quiz é o mesmo)
-    // A partir daqui, as funções `startQuiz`, `renderCurrentQuestion`, etc.,
-    // que já tínhamos, continuam funcionando perfeitamente.
-    // Colei elas abaixo para garantir que o arquivo esteja completo.
-    
     if (allQuestions.length === 0) {
         alert('Nenhuma questão encontrada para esta seleção.');
         return;
@@ -144,8 +143,7 @@ function startQuiz() {
     userAnswers = new Array(allQuestions.length).fill(null);
     
     document.getElementById('quiz-description').classList.add('hidden');
-    document.querySelector('.control-group').style.display = 'none'; // Esconde os filtros
-    startBtn.parentElement.style.display = 'none'; // Esconde o botão
+    document.querySelectorAll('.control-group').forEach(el => el.style.display = 'none');
 
     quizArea.classList.remove('hidden');
     navigationDiv.classList.remove('hidden');
@@ -155,6 +153,9 @@ function startQuiz() {
     setupQuestionNavigation();
 }
 
+/**
+ * Mostra a questão atual na tela.
+ */
 function renderCurrentQuestion() {
     questionsArea.innerHTML = '';
     updateProgress();
@@ -212,6 +213,7 @@ function updateNavigationButtons() {
     nextBtn.disabled = currentQuestionIndex >= allQuestions.length - 1;
     goToQuestionInput.max = allQuestions.length;
     goToQuestionInput.min = 1;
+    goToQuestionInput.value = '';
 }
 
 function updateProgress() {
@@ -224,6 +226,9 @@ function setupQuestionNavigation() {
         if (qNum >= 1 && qNum <= allQuestions.length) {
             currentQuestionIndex = qNum - 1;
             renderCurrentQuestion();
+            goToQuestionInput.value = '';
+            goToQuestionInput.blur(); // Tira o foco do input
+        } else {
             goToQuestionInput.value = '';
         }
     };
@@ -259,4 +264,24 @@ nextBtn.addEventListener('click', () => {
         currentQuestionIndex++;
         renderCurrentQuestion();
     }
+});
+
+// Controles de Acessibilidade
+decreaseFontBtn.addEventListener('click', () => {
+    if (fontSize > 12) {
+        fontSize -= 2;
+        document.documentElement.style.setProperty('--font-size', `${fontSize}px`);
+    }
+});
+
+increaseFontBtn.addEventListener('click', () => {
+    if (fontSize < 24) {
+        fontSize += 2;
+        document.documentElement.style.setProperty('--font-size', `${fontSize}px`);
+    }
+});
+
+themeToggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    themeToggleBtn.textContent = document.body.classList.contains('dark-mode') ? 'Modo Claro' : 'Modo Escuro';
 });
