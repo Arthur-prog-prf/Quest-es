@@ -11,11 +11,20 @@
 <body>
     <div class="quiz-container">
         <h1 id="quiz-title">Quiz de Estudos</h1>
-        <p id="quiz-description">Clique no botão para carregar as questões do banco de dados.</p>
+        <p id="quiz-description">Selecione a matéria e o assunto para começar.</p>
 
+        <!-- NOVOS MENUS DE FILTRO -->
         <div class="control-group">
-            <!-- O select de matérias foi removido por enquanto -->
-            <button id="start-btn">Carregar Questões</button>
+            <select id="materia-select">
+                <option value="">-- Carregando Matérias... --</option>
+            </select>
+            <select id="assunto-select" disabled>
+                <option value="">-- Escolha uma Matéria --</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <button id="start-btn" disabled>Iniciar Exercício</button>
         </div>
 
         <div class="controls">
@@ -23,7 +32,6 @@
                 <button id="decrease-font">A-</button>
                 <button id="increase-font">A+</button>
                 <button id="theme-toggle">Modo Escuro</button>
-                <!-- O botão de PDF pode ser reimplementado no futuro -->
             </div>
         </div>
 
@@ -41,7 +49,7 @@
         <button id="next-btn">Próxima</button>
     </div>
 
-    <!-- Nosso novo arquivo JavaScript principal -->
+    <!-- Nosso arquivo JavaScript principal -->
     <script src="app.js"></script>
 </body>
 </html>
