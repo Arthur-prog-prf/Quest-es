@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale-1.0">
     <title>Plataforma de Quiz Jurídico</title>
     
     <!-- Incluindo o Tailwind CSS -->
@@ -21,38 +21,38 @@
         :root {
             --font-size: 16px;
             /* Cores para o modo claro (padrão) */
-            --bg-color: #f3f4f6; /* gray-100 */
-            --text-color: #1f2937; /* gray-800 */
+            --bg-color: #f3f4f6;
+            --text-color: #1f2937;
             --card-bg-color: #ffffff;
-            --border-color: #d1d5db; /* gray-300 */
-            --primary-color: #3b82f6; /* blue-500 */
-            --primary-hover-color: #2563eb; /* blue-600 */
-            --correct-bg: #dcfce7; /* green-100 */
-            --correct-border: #22c55e; /* green-500 */
-            --correct-text: #15803d; /* green-700 */
-            --incorrect-bg: #fee2e2; /* red-100 */
-            --incorrect-border: #ef4444; /* red-500 */
-            --incorrect-text: #b91c1c; /* red-700 */
-            --fundamentacao-bg: #f9fafb; /* gray-50 */
-            --fundamentacao-text: #374151; /* gray-700 */
+            --border-color: #d1d5db;
+            --primary-color: #3b82f6;
+            --primary-hover-color: #2563eb;
+            --correct-bg: #dcfce7;
+            --correct-border: #22c55e;
+            --correct-text: #15803d;
+            --incorrect-bg: #fee2e2;
+            --incorrect-border: #ef4444;
+            --incorrect-text: #b91c1c;
+            --fundamentacao-bg: #f9fafb;
+            --fundamentacao-text: #374151;
         }
 
         .dark-mode {
             /* Cores para o modo escuro */
-            --bg-color: #111827; /* gray-900 */
-            --text-color: #f9fafb; /* gray-50 */
-            --card-bg-color: #1f2937; /* gray-800 */
-            --border-color: #4b5563; /* gray-600 */
-            --primary-color: #60a5fa; /* blue-400 */
-            --primary-hover-color: #3b82f6; /* blue-500 */
-            --correct-bg: #166534; /* green-800 */
-            --correct-border: #4ade80; /* green-400 */
-            --correct-text: #ecfdf5; /* green-50 */
-            --incorrect-bg: #991b1b; /* red-800 */
-            --incorrect-border: #f87171; /* red-400 */
-            --incorrect-text: #fef2f2; /* red-50 */
-            --fundamentacao-bg: #374151; /* gray-700 */
-            --fundamentacao-text: #d1d5db; /* gray-300 */
+            --bg-color: #111827;
+            --text-color: #f9fafb;
+            --card-bg-color: #1f2937;
+            --border-color: #4b5563;
+            --primary-color: #60a5fa;
+            --primary-hover-color: #3b82f6;
+            --correct-bg: #166534;
+            --correct-border: #4ade80;
+            --correct-text: #ecfdf5;
+            --incorrect-bg: #991b1b;
+            --incorrect-border: #f87171;
+            --incorrect-text: #fef2f2;
+            --fundamentacao-bg: #374151;
+            --fundamentacao-text: #d1d5db;
         }
 
         body {
@@ -63,8 +63,9 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* --- CORREÇÃO: Remove o realce de toque padrão em navegadores móveis --- */
-        * {
+        /* --- CORREÇÃO DEFINITIVA: Remove o realce de toque padrão em navegadores móveis --- */
+        /* Esta regra remove o fundo escuro que aparece ao tocar nos botões no telemóvel */
+        button, select, input {
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -84,13 +85,13 @@
 
         /* Estilos para o feedback de erro do input */
         #go-to-question.error {
-            border-color: #ef4444; /* red-500 */
+            border-color: #ef4444;
             box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
-            color: #b91c1c; /* red-700 */
+            color: #b91c1c;
         }
         .dark-mode #go-to-question.error {
-            border-color: #f87171; /* red-400 */
-            color: #fecaca; /* red-200 */
+            border-color: #f87171;
+            color: #fecaca;
         }
     </style>
 </head>
@@ -107,10 +108,10 @@
                     <span class="ml-3 text-xl font-bold">Quiz Jurídico</span>
                 </div>
                 <div class="flex items-center space-x-2 sm:space-x-4">
-                    <!-- --- CORREÇÃO: Adicionadas classes focus:* para um estado de foco controlado e com a cor do tema --- -->
-                    <button id="decrease-font" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A-</button>
-                    <button id="increase-font" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A+</button>
-                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">Modo Escuro</button>
+                    <!-- --- CORREÇÃO: Adicionada a classe `active:` para um feedback de toque que usa a cor do tema --- -->
+                    <button id="decrease-font" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 active:bg-blue-100 dark:active:bg-blue-900/50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A-</button>
+                    <button id="increase-font" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 active:bg-blue-100 dark:active:bg-blue-900/50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A+</button>
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 active:bg-blue-100 dark:active:bg-blue-900/50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">Modo Escuro</button>
                 </div>
             </div>
         </div>
