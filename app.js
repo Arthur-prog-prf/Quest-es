@@ -23,7 +23,7 @@ const navigationDiv = document.querySelector('.navigation');
 const decreaseFontBtn = document.getElementById('decrease-font');
 const increaseFontBtn = document.getElementById('increase-font');
 const themeToggleBtn = document.getElementById('theme-toggle');
-const selectionArea = document.getElementById('selection-area'); // Adicionado para controle
+const selectionArea = document.getElementById('selection-area');
 
 // =================================================================
 // ESTADO DO QUIZ
@@ -84,7 +84,7 @@ async function fetchQuestions() {
         alert('Por favor, selecione uma matéria e um assunto.');
         return;
     }
-    startBtn.textContent = 'Carregando...';
+    startBtn.textContent = 'A carregar...';
     startBtn.disabled = true;
     try {
         const { data, error } = await supabase
@@ -102,9 +102,6 @@ async function fetchQuestions() {
     }
 }
 
-/**
- * Inicia a interface do quiz com as questões carregadas.
- */
 function startQuiz() {
     if (allQuestions.length === 0) {
         alert('Nenhuma questão encontrada para esta seleção.');
@@ -113,20 +110,17 @@ function startQuiz() {
     currentQuestionIndex = 0;
     userAnswers = new Array(allQuestions.length).fill(null);
     
-    // --- CORREÇÃO PONTO 4: Esconde a área de seleção inicial ---
     selectionArea.classList.add('hidden');
-
     quizArea.classList.remove('hidden');
     navigationDiv.classList.remove('hidden');
     
     totalQuestionsSpan.textContent = allQuestions.length;
+    goToQuestionInput.placeholder = `Ir para (1-${allQuestions.length})`;
+
     renderCurrentQuestion();
     setupQuestionNavigation();
 }
 
-/**
- * Mostra a questão atual na tela.
- */
 function renderCurrentQuestion() {
     questionsArea.innerHTML = '';
     updateProgress();
@@ -143,12 +137,10 @@ function renderCurrentQuestion() {
     ];
 
     const questionElement = document.createElement('div');
-    // Adicionamos um espaçamento para o container da questão
-    questionElement.className = 'bg-[var(--card-bg-color)] p-8 rounded-xl shadow-lg';
+    questionElement.className = 'bg-[var(--card-bg-color)] p-6 sm:p-8 rounded-xl shadow-lg';
     
     let optionsHTML = '';
     options.forEach(option => {
-        // --- CORREÇÃO PONTO 1: Adicionando classes de estilo e interatividade ---
         let baseClasses = 'option flex items-start space-x-4 p-4 border-2 border-[var(--border-color)] rounded-lg transition-all duration-200';
         if (!isAnswered) {
              baseClasses += ' cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-700 hover:border-blue-400';
@@ -168,7 +160,6 @@ function renderCurrentQuestion() {
         `;
     });
 
-    // --- CORREÇÃO PONTO 2: Adicionando classes para destacar a pergunta e dar espaçamento ---
     questionElement.innerHTML = `
         <div class="question text-xl font-semibold mb-6 pb-4 border-b border-[var(--border-color)]">
             ${question.pergunta}
@@ -179,7 +170,7 @@ function renderCurrentQuestion() {
                 ${userAnswerLetter === question.gabarito ? '✓ Resposta Correta!' : '✗ Resposta Incorreta!'}
             </div>
             <button class="fundamentacao-btn mt-4 w-full text-white bg-[var(--primary-color)] hover:bg-[var(--primary-hover-color)] font-bold py-3 px-4 rounded-lg transition">ℹ️ Ver Fundamentação</button>
-            <div class="fundamentacao mt-4 p-4 bg-gray-100 dark:bg-gray-900 rounded-lg border-l-4 border-[var(--primary-color)]" style="display: none;">${question.fundamentacao}</div>
+            <div class="fundamentacao mt-4 p-4 rounded-lg border-l-4 border-[var(--primary-color)]" style="background-color: var(--fundamentacao-bg); color: var(--fundamentacao-text); display: none;">${question.fundamentacao}</div>
         ` : ''}
     `;
 
@@ -196,12 +187,7 @@ function renderCurrentQuestion() {
         if (fundBtn) {
             fundBtn.addEventListener('click', () => {
                 const fundBox = questionElement.querySelector('.fundamentacao');
-                // Alterna a exibição com um efeito suave
-                if (fundBox.style.display === 'none') {
-                    fundBox.style.display = 'block';
-                } else {
-                    fundBox.style.display = 'none';
-                }
+                fundBox.style.display = (fundBox.style.display === 'none') ? 'block' : 'none';
             });
         }
     }
@@ -228,16 +214,15 @@ function setupQuestionNavigation() {
             renderCurrentQuestion();
             goToQuestionInput.classList.remove('error');
             goToQuestionInput.value = '';
-            goToQuestionInput.placeholder = 'Ir para...';
+            goToQuestionInput.placeholder = `Ir para (1-${allQuestions.length})`;
             goToQuestionInput.blur();
         } else {
-            // --- CORREÇÃO PONTO 3: Lógica de erro já estava aqui, agora o estilo vai funcionar ---
             goToQuestionInput.classList.add('error');
             goToQuestionInput.value = '';
             goToQuestionInput.placeholder = `Inválido`;
             setTimeout(() => {
                 goToQuestionInput.classList.remove('error');
-                goToQuestionInput.placeholder = 'Ir para...';
+                goToQuestionInput.placeholder = `Ir para (1-${allQuestions.length})`;
             }, 2000);
         }
     };
