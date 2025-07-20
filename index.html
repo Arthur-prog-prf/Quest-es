@@ -63,6 +63,11 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
+        /* --- CORREÇÃO: Remove o realce de toque padrão em navegadores móveis --- */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
         /* Classes customizadas para aplicar as variáveis de cor */
         .option.correct {
             background-color: var(--correct-bg) !important;
@@ -101,17 +106,18 @@
                     </svg>
                     <span class="ml-3 text-xl font-bold">Quiz Jurídico</span>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <button id="decrease-font" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">A-</button>
-                    <button id="increase-font" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">A+</button>
-                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">Modo Escuro</button>
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <!-- --- CORREÇÃO: Adicionadas classes focus:* para um estado de foco controlado --- -->
+                    <button id="decrease-font" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A-</button>
+                    <button id="increase-font" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A+</button>
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">Modo Escuro</button>
                 </div>
             </div>
         </div>
     </header>
 
     <!-- CONTEÚDO PRINCIPAL -->
-    <main class="pt-24 pb-24"> <!-- Ajustado o padding-bottom -->
+    <main class="pt-24 pb-24">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             
             <!-- ÁREA DE SELEÇÃO INICIAL -->
