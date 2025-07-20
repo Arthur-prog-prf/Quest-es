@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Estilos base e variáveis que o app.js controla -->
+    <!-- Estilos base e variáveis -->
     <style>
         :root {
             --font-size: 16px;
@@ -72,6 +72,17 @@
         }
         .correct-feedback { color: var(--correct-border); }
         .incorrect-feedback { color: var(--incorrect-border); }
+
+        /* Estilos para o feedback de erro do input */
+        #go-to-question.error {
+            border-color: #ef4444; /* red-500 */
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+            color: #b91c1c; /* red-700 */
+        }
+        .dark-mode #go-to-question.error {
+            border-color: #f87171; /* red-400 */
+            color: #fecaca; /* red-200 */
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -96,7 +107,7 @@
     </header>
 
     <!-- CONTEÚDO PRINCIPAL -->
-    <main class="pt-24 pb-12">
+    <main class="pt-24 pb-28"> <!-- Aumentado o padding-bottom para não sobrepor a navegação -->
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             
             <!-- ÁREA DE SELEÇÃO INICIAL -->
@@ -133,7 +144,7 @@
                 <div class="progress text-center mb-6 font-semibold text-lg">
                     Questão <span id="current-question">1</span> de <span id="total-questions">0</span>
                 </div>
-                <div id="questions-area">
+                <div id="questions-area" class="space-y-8">
                     <!-- As questões serão renderizadas aqui pelo app.js -->
                 </div>
             </div>
@@ -150,7 +161,7 @@
         </div>
     </div>
 
-    <!-- Nosso arquivo JavaScript principal (sem alterações) -->
+    <!-- Nosso arquivo JavaScript principal -->
     <script src="app.js"></script>
 </body>
 </html>
