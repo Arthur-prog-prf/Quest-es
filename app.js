@@ -233,10 +233,51 @@ function setupQuestionNavigation() {
 }
 
 // =================================================================
+// FUNÇÕES DE ACESSIBILIDADE E TEMA (COM MELHORIAS)
+// =================================================================
+
+/**
+ * Aplica o tema (claro ou escuro) guardado na memória do navegador.
+ * Roda assim que a página carrega.
+ */
+function applyInitialTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        themeToggleBtn.textContent = 'Modo Claro';
+    } else {
+        document.body.classList.remove('dark-mode');
+        themeToggleBtn.textContent = 'Modo Escuro';
+    }
+}
+
+/**
+ * Alterna o tema e guarda a escolha na memória do navegador.
+ */
+function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    
+    let newTheme = 'light';
+    if (document.body.classList.contains('dark-mode')) {
+        newTheme = 'dark';
+        themeToggleBtn.textContent = 'Modo Claro';
+    } else {
+        themeToggleBtn.textContent = 'Modo Escuro';
+    }
+    
+    localStorage.setItem('theme', newTheme);
+}
+
+// =================================================================
 // EVENT LISTENERS
 // =================================================================
 
-document.addEventListener('DOMContentLoaded', popularFiltros);
+// Aplica o tema guardado assim que o conteúdo da página é carregado
+document.addEventListener('DOMContentLoaded', () => {
+    applyInitialTheme();
+    popularFiltros();
+});
+
 materiaSelect.addEventListener('change', popularAssuntos);
 assuntoSelect.addEventListener('change', () => {
     startBtn.disabled = !assuntoSelect.value;
@@ -268,7 +309,6 @@ increaseFontBtn.addEventListener('click', () => {
         document.documentElement.style.setProperty('--font-size', `${fontSize}px`);
     }
 });
-themeToggleBtn.addEventListener('click', () => {
-    document.body.classList.toggle('dark-mode');
-    themeToggleBtn.textContent = document.body.classList.contains('dark-mode') ? 'Modo Claro' : 'Modo Escuro';
-});
+
+// O botão de tema agora chama a nova função que guarda a escolha
+themeToggleBtn.addEventListener('click', toggleTheme);
