@@ -35,6 +35,7 @@
             --incorrect-text: #b91c1c;
             --fundamentacao-bg: #f9fafb;
             --fundamentacao-text: #374151;
+            --header-btn-active-bg: #e5e7eb; /* gray-200 */
         }
 
         .dark-mode {
@@ -53,6 +54,7 @@
             --incorrect-text: #fef2f2;
             --fundamentacao-bg: #374151;
             --fundamentacao-text: #d1d5db;
+            --header-btn-active-bg: #374151; /* gray-700 */
         }
 
         body {
@@ -63,10 +65,16 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* Remove o realce de toque padrão em navegadores móveis */
-        button, select, input {
-            -webkit-tap-highlight-color: transparent;
+        /* --- CORREÇÃO DEFINITIVA v4: Abordagem mais forte --- */
+        .header-btn {
+            /* Remove completamente o realce de toque do sistema */
+            -webkit-tap-highlight-color: transparent !important;
         }
+        /* Força a cor de fundo no estado ativo para anular o padrão do navegador */
+        .header-btn:active {
+            background-color: var(--header-btn-active-bg) !important;
+        }
+
 
         /* Classes customizadas para aplicar as variáveis de cor */
         .option.correct {
@@ -106,11 +114,11 @@
                     </svg>
                     <span class="ml-3 text-xl font-bold">Quiz Jurídico</span>
                 </div>
-                <!-- --- CORREÇÃO: Removida a classe 'transition-colors' para feedback instantâneo --- -->
+                <!-- --- CORREÇÃO: Removidas as classes 'active:*' e 'transition-colors' e adicionada a classe 'header-btn' --- -->
                 <div class="flex items-center space-x-2 sm:space-x-4">
-                    <button id="decrease-font" class="p-2 rounded-full active:bg-gray-200 dark:active:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A-</button>
-                    <button id="increase-font" class="p-2 rounded-full active:bg-gray-200 dark:active:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A+</button>
-                    <button id="theme-toggle" class="p-2 rounded-full active:bg-gray-200 dark:active:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">Modo Escuro</button>
+                    <button id="decrease-font" class="header-btn p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A-</button>
+                    <button id="increase-font" class="header-btn p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A+</button>
+                    <button id="theme-toggle" class="header-btn p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">Modo Escuro</button>
                 </div>
             </div>
         </div>
