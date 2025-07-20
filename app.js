@@ -1,11 +1,9 @@
 // =================================================================
 // CONFIGURAÇÃO DO SUPABASE
 // =================================================================
-// Suas credenciais foram inseridas abaixo.
 const SUPABASE_URL = 'https://dibhqftndeggtrxbxjsn.supabase.co'; 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpYmhxZnRuZGVnZ3RyeGJ4anNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNDg5NTAsImV4cCI6MjA2NzkyNDk1MH0.WV-UK5Au_Hhqp8R6D2mjwiRBtICrmISXoMgSCmx4ZgQ'; 
 
-// Inicializa a conexão com o Supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // =================================================================
@@ -25,6 +23,7 @@ const navigationDiv = document.querySelector('.navigation');
 const decreaseFontBtn = document.getElementById('decrease-font');
 const increaseFontBtn = document.getElementById('increase-font');
 const themeToggleBtn = document.getElementById('theme-toggle');
+const selectionArea = document.getElementById('selection-area'); // Adicionado para controle
 
 // =================================================================
 // ESTADO DO QUIZ
@@ -32,59 +31,42 @@ const themeToggleBtn = document.getElementById('theme-toggle');
 let allQuestions = [];
 let userAnswers = [];
 let currentQuestionIndex = 0;
-let materiasEAssuntos = []; // Para guardar os filtros
+let materiasEAssuntos = [];
 let fontSize = 16;
 
 // =================================================================
 // FUNÇÕES PRINCIPAIS
 // =================================================================
 
-/**
- * Roda quando a página carrega. Busca as matérias e assuntos disponíveis.
- */
 async function popularFiltros() {
     try {
-        const { data, error } = await supabase
-            .from('questoes')
-            .select('materia, assunto'); // Pede apenas as colunas que nos interessam
-
+        const { data, error } = await supabase.from('questoes').select('materia, assunto');
         if (error) throw error;
-
         materiasEAssuntos = data;
-        
-        // Pega uma lista de matérias únicas
         const materiasUnicas = [...new Set(data.map(item => item.materia))];
-        
-        materiaSelect.innerHTML = '<option value="">-- Selecione a Matéria --</option>'; // Opção padrão
+        materiaSelect.innerHTML = '<option value="">-- Selecione a Matéria --</option>';
         materiasUnicas.forEach(materia => {
             const option = document.createElement('option');
             option.value = materia;
             option.textContent = materia;
             materiaSelect.appendChild(option);
         });
-
     } catch (error) {
         materiaSelect.innerHTML = '<option value="">-- Erro ao carregar --</option>';
         alert('Não foi possível carregar as matérias: ' + error.message);
     }
 }
 
-/**
- * Roda quando o usuário escolhe uma matéria. Popula o filtro de assuntos.
- */
 function popularAssuntos() {
     const materiaSelecionada = materiaSelect.value;
     assuntoSelect.innerHTML = '<option value="">-- Escolha um Assunto --</option>';
     assuntoSelect.disabled = true;
     startBtn.disabled = true;
-
     if (materiaSelecionada) {
-        // Filtra os assuntos que pertencem à matéria selecionada
         const assuntosDaMateria = [...new Set(materiasEAssuntos
             .filter(item => item.materia === materiaSelecionada)
             .map(item => item.assunto)
         )];
-
         assuntosDaMateria.forEach(assunto => {
             const option = document.createElement('option');
             option.value = assunto;
@@ -95,38 +77,28 @@ function popularAssuntos() {
     }
 }
 
-/**
- * Busca as questões filtradas do banco de dados.
- */
 async function fetchQuestions() {
     const materia = materiaSelect.value;
     const assunto = assuntoSelect.value;
-
     if (!materia || !assunto) {
         alert('Por favor, selecione uma matéria e um assunto.');
         return;
     }
-
     startBtn.textContent = 'Carregando...';
     startBtn.disabled = true;
-
     try {
         const { data, error } = await supabase
             .from('questoes')
             .select('*')
-            .eq('materia', materia) // Filtra pela matéria
-            .eq('assunto', assunto); // Filtra pelo assunto
-
+            .eq('materia', materia)
+            .eq('assunto', assunto);
         if (error) throw error;
-
         allQuestions = data;
         startQuiz();
-
     } catch (error) {
         alert('Erro ao carregar as questões: ' + error.message);
     } finally {
         startBtn.textContent = 'Iniciar Exercício';
-        // O botão continuará desabilitado até uma nova seleção
     }
 }
 
@@ -138,12 +110,11 @@ function startQuiz() {
         alert('Nenhuma questão encontrada para esta seleção.');
         return;
     }
-    
     currentQuestionIndex = 0;
     userAnswers = new Array(allQuestions.length).fill(null);
     
-    document.getElementById('quiz-description').classList.add('hidden');
-    document.querySelectorAll('.control-group').forEach(el => el.style.display = 'none');
+    // --- CORREÇÃO PONTO 4: Esconde a área de seleção inicial ---
+    selectionArea.classList.add('hidden');
 
     quizArea.classList.remove('hidden');
     navigationDiv.classList.remove('hidden');
@@ -171,39 +142,68 @@ function renderCurrentQuestion() {
         { letter: 'D', text: question.alternativa_d }
     ];
 
+    const questionElement = document.createElement('div');
+    // Adicionamos um espaçamento para o container da questão
+    questionElement.className = 'bg-[var(--card-bg-color)] p-8 rounded-xl shadow-lg';
+    
     let optionsHTML = '';
     options.forEach(option => {
-        let optionClass = 'option';
+        // --- CORREÇÃO PONTO 1: Adicionando classes de estilo e interatividade ---
+        let baseClasses = 'option flex items-start space-x-4 p-4 border-2 border-[var(--border-color)] rounded-lg transition-all duration-200';
+        if (!isAnswered) {
+             baseClasses += ' cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-700 hover:border-blue-400';
+        }
+
+        let optionClass = baseClasses;
         if (isAnswered) {
             if (option.letter === question.gabarito) optionClass += ' correct';
             else if (option.letter === userAnswerLetter) optionClass += ' incorrect';
         }
-        optionsHTML += `<div class="${optionClass}" data-option-letter="${option.letter}"><span class="option-letter">${option.letter})</span> ${option.text}</div>`;
+        
+        optionsHTML += `
+            <div class="${optionClass}" data-option-letter="${option.letter}">
+                <span class="font-bold text-lg">${option.letter})</span> 
+                <span class="flex-1">${option.text}</span>
+            </div>
+        `;
     });
 
-    questionsArea.innerHTML = `
-        <div class="question-container">
-            <div class="question">Questão ${currentQuestionIndex + 1} - ${question.pergunta}</div>
-            <div class="options">${optionsHTML}</div>
-            ${isAnswered ? `
-                <div class="feedback ${userAnswerLetter === question.gabarito ? 'correct-feedback' : 'incorrect-feedback'}">
-                    ${userAnswerLetter === question.gabarito ? '✓ Resposta Correta!' : '✗ Resposta Incorreta!'}
-                </div>
-                <button class="fundamentacao-btn">ℹ️ Ver Fundamentação</button>
-                <div class="fundamentacao">${question.fundamentacao}</div>
-            ` : ''}
+    // --- CORREÇÃO PONTO 2: Adicionando classes para destacar a pergunta e dar espaçamento ---
+    questionElement.innerHTML = `
+        <div class="question text-xl font-semibold mb-6 pb-4 border-b border-[var(--border-color)]">
+            ${question.pergunta}
         </div>
+        <div class="options space-y-4">${optionsHTML}</div>
+        ${isAnswered ? `
+            <div class="feedback mt-6 text-lg font-semibold ${userAnswerLetter === question.gabarito ? 'correct-feedback' : 'incorrect-feedback'}">
+                ${userAnswerLetter === question.gabarito ? '✓ Resposta Correta!' : '✗ Resposta Incorreta!'}
+            </div>
+            <button class="fundamentacao-btn mt-4 w-full text-white bg-[var(--primary-color)] hover:bg-[var(--primary-hover-color)] font-bold py-3 px-4 rounded-lg transition">ℹ️ Ver Fundamentação</button>
+            <div class="fundamentacao mt-4 p-4 bg-gray-100 dark:bg-gray-900 rounded-lg border-l-4 border-[var(--primary-color)]" style="display: none;">${question.fundamentacao}</div>
+        ` : ''}
     `;
 
+    questionsArea.appendChild(questionElement);
+
     if (!isAnswered) {
-        questionsArea.querySelectorAll('.option').forEach(el => el.addEventListener('click', (e) => {
+        questionElement.querySelectorAll('.option').forEach(el => el.addEventListener('click', (e) => {
             const selectedLetter = e.currentTarget.dataset.optionLetter;
             userAnswers[currentQuestionIndex] = selectedLetter;
             renderCurrentQuestion();
         }));
     } else {
-        const fundBtn = questionsArea.querySelector('.fundamentacao-btn');
-        if (fundBtn) fundBtn.addEventListener('click', () => questionsArea.querySelector('.fundamentacao').classList.toggle('show'));
+        const fundBtn = questionElement.querySelector('.fundamentacao-btn');
+        if (fundBtn) {
+            fundBtn.addEventListener('click', () => {
+                const fundBox = questionElement.querySelector('.fundamentacao');
+                // Alterna a exibição com um efeito suave
+                if (fundBox.style.display === 'none') {
+                    fundBox.style.display = 'block';
+                } else {
+                    fundBox.style.display = 'none';
+                }
+            });
+        }
     }
     updateNavigationButtons();
 }
@@ -226,30 +226,36 @@ function setupQuestionNavigation() {
         if (qNum >= 1 && qNum <= allQuestions.length) {
             currentQuestionIndex = qNum - 1;
             renderCurrentQuestion();
+            goToQuestionInput.classList.remove('error');
             goToQuestionInput.value = '';
-            goToQuestionInput.blur(); // Tira o foco do input
+            goToQuestionInput.placeholder = 'Ir para...';
+            goToQuestionInput.blur();
         } else {
+            // --- CORREÇÃO PONTO 3: Lógica de erro já estava aqui, agora o estilo vai funcionar ---
+            goToQuestionInput.classList.add('error');
             goToQuestionInput.value = '';
+            goToQuestionInput.placeholder = `Inválido`;
+            setTimeout(() => {
+                goToQuestionInput.classList.remove('error');
+                goToQuestionInput.placeholder = 'Ir para...';
+            }, 2000);
         }
     };
     goToQuestionInput.addEventListener('change', (e) => validateAndNavigate(e.target.value));
+    goToQuestionInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') validateAndNavigate(e.target.value);
+    });
 }
 
 // =================================================================
 // EVENT LISTENERS
 // =================================================================
 
-// Roda a função para popular os filtros assim que a página carregar
 document.addEventListener('DOMContentLoaded', popularFiltros);
-
-// Quando o usuário muda a matéria, popula os assuntos
 materiaSelect.addEventListener('change', popularAssuntos);
-
-// Quando o usuário muda o assunto, habilita o botão de iniciar
 assuntoSelect.addEventListener('change', () => {
     startBtn.disabled = !assuntoSelect.value;
 });
-
 startBtn.addEventListener('click', fetchQuestions);
 
 prevBtn.addEventListener('click', () => {
@@ -258,7 +264,6 @@ prevBtn.addEventListener('click', () => {
         renderCurrentQuestion();
     }
 });
-
 nextBtn.addEventListener('click', () => {
     if (currentQuestionIndex < allQuestions.length - 1) {
         currentQuestionIndex++;
@@ -266,21 +271,18 @@ nextBtn.addEventListener('click', () => {
     }
 });
 
-// Controles de Acessibilidade
 decreaseFontBtn.addEventListener('click', () => {
     if (fontSize > 12) {
         fontSize -= 2;
         document.documentElement.style.setProperty('--font-size', `${fontSize}px`);
     }
 });
-
 increaseFontBtn.addEventListener('click', () => {
     if (fontSize < 24) {
         fontSize += 2;
         document.documentElement.style.setProperty('--font-size', `${fontSize}px`);
     }
 });
-
 themeToggleBtn.addEventListener('click', () => {
     document.body.classList.toggle('dark-mode');
     themeToggleBtn.textContent = document.body.classList.contains('dark-mode') ? 'Modo Claro' : 'Modo Escuro';
