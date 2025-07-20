@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plataforma de Quiz Jurídico</title>
     
     <!-- Incluindo o Tailwind CSS -->
@@ -107,11 +107,11 @@
                     </svg>
                     <span class="ml-3 text-xl font-bold">Quiz Jurídico</span>
                 </div>
+                <!-- --- CORREÇÃO: Removidas as classes 'hover:*' e simplificadas as classes 'active:*' --- -->
                 <div class="flex items-center space-x-2 sm:space-x-4">
-                    <!-- --- CORREÇÃO: Adicionada a classe `active:` para um feedback de toque que usa a cor do tema --- -->
-                    <button id="decrease-font" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 active:bg-blue-100 dark:active:bg-blue-900/50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A-</button>
-                    <button id="increase-font" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 active:bg-blue-100 dark:active:bg-blue-900/50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A+</button>
-                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 active:bg-blue-100 dark:active:bg-blue-900/50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">Modo Escuro</button>
+                    <button id="decrease-font" class="p-2 rounded-full active:bg-gray-200 dark:active:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A-</button>
+                    <button id="increase-font" class="p-2 rounded-full active:bg-gray-200 dark:active:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A+</button>
+                    <button id="theme-toggle" class="p-2 rounded-full active:bg-gray-200 dark:active:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">Modo Escuro</button>
                 </div>
             </div>
         </div>
