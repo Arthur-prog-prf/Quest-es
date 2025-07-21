@@ -141,9 +141,10 @@ function renderCurrentQuestion() {
     
     let optionsHTML = '';
     options.forEach(option => {
+        // --- CORREÇÃO: Removidas as classes 'hover:*' para evitar conflito no telemóvel ---
         let baseClasses = 'option flex items-start space-x-4 p-4 border-2 border-[var(--border-color)] rounded-lg transition-all duration-200';
         if (!isAnswered) {
-             baseClasses += ' cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-700 hover:border-blue-400';
+             baseClasses += ' cursor-pointer'; // Apenas o cursor é alterado
         }
 
         let optionClass = baseClasses;
@@ -233,51 +234,13 @@ function setupQuestionNavigation() {
 }
 
 // =================================================================
-// FUNÇÕES DE ACESSIBILIDADE E TEMA (COM MELHORIAS)
-// =================================================================
-
-/**
- * Aplica o tema (claro ou escuro) guardado na memória do navegador.
- * Roda assim que a página carrega.
- */
-function applyInitialTheme() {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-        themeToggleBtn.textContent = 'Modo Claro';
-    } else {
-        document.body.classList.remove('dark-mode');
-        themeToggleBtn.textContent = 'Modo Escuro';
-    }
-}
-
-/**
- * Alterna o tema e guarda a escolha na memória do navegador.
- */
-function toggleTheme() {
-    document.body.classList.toggle('dark-mode');
-    
-    let newTheme = 'light';
-    if (document.body.classList.contains('dark-mode')) {
-        newTheme = 'dark';
-        themeToggleBtn.textContent = 'Modo Claro';
-    } else {
-        themeToggleBtn.textContent = 'Modo Escuro';
-    }
-    
-    localStorage.setItem('theme', newTheme);
-}
-
-// =================================================================
 // EVENT LISTENERS
 // =================================================================
 
-// Aplica o tema guardado assim que o conteúdo da página é carregado
 document.addEventListener('DOMContentLoaded', () => {
     applyInitialTheme();
     popularFiltros();
 });
-
 materiaSelect.addEventListener('change', popularAssuntos);
 assuntoSelect.addEventListener('change', () => {
     startBtn.disabled = !assuntoSelect.value;
@@ -310,5 +273,27 @@ increaseFontBtn.addEventListener('click', () => {
     }
 });
 
-// O botão de tema agora chama a nova função que guarda a escolha
+function applyInitialTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        themeToggleBtn.textContent = 'Modo Claro';
+    } else {
+        document.body.classList.remove('dark-mode');
+        themeToggleBtn.textContent = 'Modo Escuro';
+    }
+}
+
+function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    let newTheme = 'light';
+    if (document.body.classList.contains('dark-mode')) {
+        newTheme = 'dark';
+        themeToggleBtn.textContent = 'Modo Claro';
+    } else {
+        themeToggleBtn.textContent = 'Modo Escuro';
+    }
+    localStorage.setItem('theme', newTheme);
+}
+
 themeToggleBtn.addEventListener('click', toggleTheme);
