@@ -33,6 +33,7 @@ let userAnswers = [];
 let currentQuestionIndex = 0;
 let materiasEAssuntos = [];
 let fontSize = 16;
+let tempSelectedAnswer = null; // Guarda a resposta selecionada antes de confirmar
 
 // =================================================================
 // FUNÇÕES PRINCIPAIS
@@ -115,7 +116,7 @@ function startQuiz() {
     navigationDiv.classList.remove('hidden');
     
     totalQuestionsSpan.textContent = allQuestions.length;
-    goToQuestionInput.placeholder = `Ir para (1-${allQuestions.length})`;
+    goToQuestionInput.placeholder = `Ir para questão`;
 
     renderCurrentQuestion();
     setupQuestionNavigation();
@@ -124,6 +125,7 @@ function startQuiz() {
 function renderCurrentQuestion() {
     questionsArea.innerHTML = '';
     updateProgress();
+    tempSelectedAnswer = null; // Limpa a seleção temporária
 
     const question = allQuestions[currentQuestionIndex];
     const isAnswered = userAnswers[currentQuestionIndex] !== null;
@@ -141,13 +143,8 @@ function renderCurrentQuestion() {
     
     let optionsHTML = '';
     options.forEach(option => {
-        // --- CORREÇÃO: Removidas as classes 'hover:*' para evitar conflito no telemóvel ---
-        let baseClasses = 'option flex items-start space-x-4 p-4 border-2 border-[var(--border-color)] rounded-lg transition-all duration-200';
-        if (!isAnswered) {
-             baseClasses += ' cursor-pointer'; // Apenas o cursor é alterado
-        }
-
-        let optionClass = baseClasses;
+        let optionClass = 'option flex items-start space-x-4 p-4 border-2 border-[var(--border-color)] rounded-lg transition-all duration-200 cursor-pointer';
+        
         if (isAnswered) {
             if (option.letter === question.gabarito) optionClass += ' correct';
             else if (option.letter === userAnswerLetter) optionClass += ' incorrect';
@@ -161,11 +158,19 @@ function renderCurrentQuestion() {
         `;
     });
 
+    // Adiciona o botão "Resolver" se a questão ainda não foi respondida
+    const resolverBtnHTML = !isAnswered ? `
+        <button id="resolver-btn" disabled class="mt-6 w-full text-white bg-gray-400 font-bold py-3 px-4 rounded-lg transition-all duration-300 cursor-not-allowed">
+            Resolver
+        </button>
+    ` : '';
+
     questionElement.innerHTML = `
         <div class="question text-xl font-semibold mb-6 pb-4 border-b border-[var(--border-color)]">
             ${question.pergunta}
         </div>
         <div class="options space-y-4">${optionsHTML}</div>
+        ${resolverBtnHTML}
         ${isAnswered ? `
             <div class="feedback mt-6 text-lg font-semibold ${userAnswerLetter === question.gabarito ? 'correct-feedback' : 'incorrect-feedback'}">
                 ${userAnswerLetter === question.gabarito ? '✓ Resposta Correta!' : '✗ Resposta Incorreta!'}
@@ -178,11 +183,28 @@ function renderCurrentQuestion() {
     questionsArea.appendChild(questionElement);
 
     if (!isAnswered) {
-        questionElement.querySelectorAll('.option').forEach(el => el.addEventListener('click', (e) => {
-            const selectedLetter = e.currentTarget.dataset.optionLetter;
-            userAnswers[currentQuestionIndex] = selectedLetter;
-            renderCurrentQuestion();
+        const optionElements = questionElement.querySelectorAll('.option');
+        const resolverBtn = document.getElementById('resolver-btn');
+
+        optionElements.forEach(el => el.addEventListener('click', () => {
+            // Remove a seleção de outras opções
+            optionElements.forEach(opt => opt.classList.remove('ring-2', 'ring-[var(--primary-color)]'));
+            // Adiciona um anel de destaque na opção selecionada
+            el.classList.add('ring-2', 'ring-[var(--primary-color)]');
+            
+            tempSelectedAnswer = el.dataset.optionLetter;
+            resolverBtn.disabled = false;
+            resolverBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+            resolverBtn.classList.add('bg-[var(--primary-color)]', 'hover:bg-[var(--primary-hover-color)]');
         }));
+
+        resolverBtn.addEventListener('click', () => {
+            if (tempSelectedAnswer) {
+                userAnswers[currentQuestionIndex] = tempSelectedAnswer;
+                renderCurrentQuestion(); // Re-renderiza para mostrar a correção
+            }
+        });
+
     } else {
         const fundBtn = questionElement.querySelector('.fundamentacao-btn');
         if (fundBtn) {
@@ -215,7 +237,7 @@ function setupQuestionNavigation() {
             renderCurrentQuestion();
             goToQuestionInput.classList.remove('error');
             goToQuestionInput.value = '';
-            goToQuestionInput.placeholder = `Ir para (1-${allQuestions.length})`;
+            goToQuestionInput.placeholder = `Ir para questão`;
             goToQuestionInput.blur();
         } else {
             goToQuestionInput.classList.add('error');
@@ -223,7 +245,7 @@ function setupQuestionNavigation() {
             goToQuestionInput.placeholder = `Inválido`;
             setTimeout(() => {
                 goToQuestionInput.classList.remove('error');
-                goToQuestionInput.placeholder = `Ir para (1-${allQuestions.length})`;
+                goToQuestionInput.placeholder = `Ir para questão`;
             }, 2000);
         }
     };
