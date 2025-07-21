@@ -65,11 +65,10 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* Remove o realce de toque padrão em navegadores móveis */
-        button, select, input {
-            -webkit-tap-highlight-color: transparent;
+        /* --- CORREÇÃO DEFINITIVA: Anula o realce de toque do sistema --- */
+        .header-btn {
+            -webkit-tap-highlight-color: transparent !important;
         }
-
         /* Força a cor de fundo no estado ativo para anular o padrão do navegador */
         .header-btn:active {
             background-color: var(--header-btn-active-bg) !important;
@@ -110,14 +109,15 @@
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
                     <svg class="h-8 w-8 text-[var(--primary-color)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18-3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
                     </svg>
                     <span class="ml-3 text-xl font-bold">Quiz Jurídico</span>
                 </div>
+                <!-- --- CORREÇÃO: Removidas as classes 'hover:*' e 'active:*' e adicionada a classe 'header-btn' --- -->
                 <div class="flex items-center space-x-2 sm:space-x-4">
-                    <button id="decrease-font" class="header-btn p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A-</button>
-                    <button id="increase-font" class="header-btn p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A+</button>
-                    <button id="theme-toggle" class="header-btn p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">Modo Escuro</button>
+                    <button id="decrease-font" class="header-btn p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A-</button>
+                    <button id="increase-font" class="header-btn p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A+</button>
+                    <button id="theme-toggle" class="header-btn p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">Modo Escuro</button>
                 </div>
             </div>
         </div>
@@ -128,7 +128,6 @@
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             
             <!-- ÁREA DE SELEÇÃO INICIAL -->
-            <!-- CORREÇÃO: Removidas as classes de hover do contentor principal -->
             <div id="selection-area" class="bg-[var(--card-bg-color)] p-8 rounded-xl shadow-lg space-y-6">
                 <div class="text-center">
                     <h1 id="quiz-title" class="text-3xl font-bold tracking-tight">Bem-vindo à Plataforma</h1>
@@ -138,14 +137,12 @@
                 <div class="space-y-4">
                     <div class="control-group">
                         <label for="materia-select" class="block text-sm font-medium mb-1">Matéria</label>
-                        <!-- CORREÇÃO: Adicionadas classes de transição e hover aos elementos individuais -->
                         <select id="materia-select" class="w-full p-3 border border-[var(--border-color)] rounded-lg bg-transparent focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition-all duration-200 hover:border-[var(--primary-color)] hover:shadow-md hover:-translate-y-0.5">
                             <option value="">-- Carregando Matérias... --</option>
                         </select>
                     </div>
                     <div class="control-group">
                         <label for="assunto-select" class="block text-sm font-medium mb-1">Assunto</label>
-                        <!-- CORREÇÃO: Adicionadas classes de transição e hover aos elementos individuais -->
                         <select id="assunto-select" disabled class="w-full p-3 border border-[var(--border-color)] rounded-lg bg-transparent focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition-all duration-200 disabled:opacity-50 disabled:transform-none disabled:shadow-none hover:border-[var(--primary-color)] hover:shadow-md hover:-translate-y-0.5">
                             <option value="">-- Escolha uma Matéria --</option>
                         </select>
@@ -153,7 +150,6 @@
                 </div>
                 
                 <div class="control-group pt-4">
-                     <!-- CORREÇÃO: Adicionadas classes de transição e hover ao botão -->
                     <button id="start-btn" disabled class="w-full text-white bg-[var(--primary-color)] hover:bg-[var(--primary-hover-color)] font-bold py-3 px-4 rounded-lg transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none hover:-translate-y-0.5 hover:shadow-lg">
                         Iniciar Exercício
                     </button>
