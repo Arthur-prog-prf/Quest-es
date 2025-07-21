@@ -105,7 +105,7 @@
             color: #fecaca;
         }
 
-        /* --- CORREÇÃO: Aplica os estilos de HOVER apenas em dispositivos com rato --- */
+        /* Aplica os estilos de HOVER apenas em dispositivos com rato */
         @media (hover: hover) and (pointer: fine) {
             .header-btn:hover {
                 background-color: var(--header-btn-active-bg);
@@ -139,11 +139,10 @@
                     </svg>
                     <span class="ml-3 text-xl font-bold">Quiz Jurídico</span>
                 </div>
-                <!-- Classes de hover foram removidas do HTML e movidas para o CSS -->
                 <div class="flex items-center space-x-2 sm:space-x-4">
-                    <button id="decrease-font" class="header-btn p-2 rounded-full transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A-</button>
-                    <button id="increase-font" class="header-btn p-2 rounded-full transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A+</button>
-                    <button id="theme-toggle" class="header-btn p-2 rounded-full transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">Modo Escuro</button>
+                    <button id="decrease-font" class="header-btn p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A-</button>
+                    <button id="increase-font" class="header-btn p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A+</button>
+                    <button id="theme-toggle" class="header-btn p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">Modo Escuro</button>
                 </div>
             </div>
         </div>
@@ -199,7 +198,8 @@
     <div class="navigation hidden fixed bottom-0 left-0 right-0 bg-[var(--card-bg-color)]/80 backdrop-blur-sm border-t border-[var(--border-color)] shadow-t-lg">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
             <button id="prev-btn" disabled class="px-6 py-2 rounded-lg font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition disabled:opacity-50">Anterior</button>
-            <input type="number" id="go-to-question" placeholder="Ir para..." min="1" max="1" class="w-32 text-center p-2 border-[var(--border-color)] rounded-lg bg-transparent focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition">
+            <!-- AJUSTE: Adicionada uma sombra à caixa de input -->
+            <input type="number" id="go-to-question" placeholder="Ir para..." min="1" max="1" class="w-32 text-center p-2 border-[var(--border-color)] rounded-lg bg-transparent focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition shadow-sm">
             <button id="next-btn" class="px-6 py-2 rounded-lg font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition">Próxima</button>
         </div>
     </div>
