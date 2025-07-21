@@ -36,7 +36,6 @@
             --fundamentacao-bg: #f9fafb;
             --fundamentacao-text: #374151;
             --header-btn-active-bg: #e5e7eb; /* gray-200 */
-            /* --- NOVA VARIÁVEL --- */
             --option-active-bg: #dbeafe; /* blue-100 */
         }
 
@@ -57,7 +56,6 @@
             --fundamentacao-bg: #374151;
             --fundamentacao-text: #d1d5db;
             --header-btn-active-bg: #374151; /* gray-700 */
-             /* --- NOVA VARIÁVEL --- */
             --option-active-bg: #1e40af; /* blue-800 */
         }
 
@@ -78,8 +76,6 @@
         .header-btn:active {
             background-color: var(--header-btn-active-bg) !important;
         }
-        
-        /* --- CORREÇÃO: Nova regra para o estado ativo das alternativas --- */
         .option:active {
             background-color: var(--option-active-bg) !important;
         }
@@ -108,6 +104,27 @@
             border-color: #f87171;
             color: #fecaca;
         }
+
+        /* --- CORREÇÃO: Aplica os estilos de HOVER apenas em dispositivos com rato --- */
+        @media (hover: hover) and (pointer: fine) {
+            .header-btn:hover {
+                background-color: var(--header-btn-active-bg);
+            }
+            #selection-area select:hover:not(:disabled) {
+                border-color: var(--primary-color);
+                box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+                transform: translateY(-2px);
+            }
+            #start-btn:hover:not(:disabled) {
+                background-color: var(--primary-hover-color);
+                box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+                transform: translateY(-2px);
+            }
+            .option:not(.correct):not(.incorrect):hover {
+                background-color: var(--option-active-bg);
+                border-color: var(--primary-color);
+            }
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -118,14 +135,15 @@
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
                     <svg class="h-8 w-8 text-[var(--primary-color)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18-3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
                     </svg>
                     <span class="ml-3 text-xl font-bold">Quiz Jurídico</span>
                 </div>
+                <!-- Classes de hover foram removidas do HTML e movidas para o CSS -->
                 <div class="flex items-center space-x-2 sm:space-x-4">
-                    <button id="decrease-font" class="header-btn p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A-</button>
-                    <button id="increase-font" class="header-btn p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A+</button>
-                    <button id="theme-toggle" class="header-btn p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">Modo Escuro</button>
+                    <button id="decrease-font" class="header-btn p-2 rounded-full transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A-</button>
+                    <button id="increase-font" class="header-btn p-2 rounded-full transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">A+</button>
+                    <button id="theme-toggle" class="header-btn p-2 rounded-full transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--card-bg-color)] focus:ring-[var(--primary-color)]">Modo Escuro</button>
                 </div>
             </div>
         </div>
@@ -145,20 +163,20 @@
                 <div class="space-y-4">
                     <div class="control-group">
                         <label for="materia-select" class="block text-sm font-medium mb-1">Matéria</label>
-                        <select id="materia-select" class="w-full p-3 border border-[var(--border-color)] rounded-lg bg-transparent focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition-all duration-200 hover:border-[var(--primary-color)] hover:shadow-md hover:-translate-y-0.5">
+                        <select id="materia-select" class="w-full p-3 border border-[var(--border-color)] rounded-lg bg-transparent focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition-all duration-200">
                             <option value="">-- Carregando Matérias... --</option>
                         </select>
                     </div>
                     <div class="control-group">
                         <label for="assunto-select" class="block text-sm font-medium mb-1">Assunto</label>
-                        <select id="assunto-select" disabled class="w-full p-3 border border-[var(--border-color)] rounded-lg bg-transparent focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition-all duration-200 disabled:opacity-50 disabled:transform-none disabled:shadow-none hover:border-[var(--primary-color)] hover:shadow-md hover:-translate-y-0.5">
+                        <select id="assunto-select" disabled class="w-full p-3 border border-[var(--border-color)] rounded-lg bg-transparent focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition-all duration-200 disabled:opacity-50">
                             <option value="">-- Escolha uma Matéria --</option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="control-group pt-4">
-                    <button id="start-btn" disabled class="w-full text-white bg-[var(--primary-color)] hover:bg-[var(--primary-hover-color)] font-bold py-3 px-4 rounded-lg transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none hover:-translate-y-0.5 hover:shadow-lg">
+                    <button id="start-btn" disabled class="w-full text-white bg-[var(--primary-color)] font-bold py-3 px-4 rounded-lg transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed">
                         Iniciar Exercício
                     </button>
                 </div>
