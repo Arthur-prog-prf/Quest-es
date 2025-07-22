@@ -200,18 +200,16 @@
         <!-- CORREÇÃO: Layout responsivo para a barra de navegação -->
         <div class="max-w-3xl mx-auto px-2 sm:px-6 lg:px-8 flex items-center justify-between h-16">
             <!-- Botões com padding e espaçamento ajustados para telemóveis -->
-            <button id="prev-btn" disabled class="nav-btn flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 rounded-lg font-semibold text-sm sm:text-base transition disabled:opacity-50">
+            <button id="prev-btn" disabled class="nav-btn flex items-center space-x-1.5 px-2 sm:px-4 py-2 rounded-lg font-semibold text-sm sm:text-base transition disabled:opacity-50">
                 <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>
-                <!-- O texto "Anterior" agora só aparece em ecrãs maiores -->
-                <span class="hidden sm:inline">Anterior</span>
+                <span>Anterior</span>
             </button>
             <!-- Input com largura responsiva aumentada -->
             <input type="number" id="go-to-question" placeholder="Ir para questão" min="1" max="1" class="w-32 sm:w-40 text-center p-2 border-[var(--border-color)] rounded-lg bg-transparent focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition shadow-sm mx-1">
-            <button id="next-btn" class="nav-btn flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 rounded-lg font-semibold text-sm sm:text-base transition">
-                <!-- O texto "Próxima" agora só aparece em ecrãs maiores -->
-                <span class="hidden sm:inline">Próxima</span>
+            <button id="next-btn" class="nav-btn flex items-center space-x-1.5 px-2 sm:px-4 py-2 rounded-lg font-semibold text-sm sm:text-base transition">
+                <span>Próxima</span>
                 <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                 </svg>
