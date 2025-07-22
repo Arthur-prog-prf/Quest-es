@@ -33,7 +33,7 @@ let userAnswers = [];
 let currentQuestionIndex = 0;
 let materiasEAssuntos = [];
 let fontSize = 16;
-let tempSelectedAnswer = null; // Guarda a resposta selecionada antes de confirmar
+let tempSelectedAnswer = null;
 
 // =================================================================
 // FUNÇÕES PRINCIPAIS
@@ -60,9 +60,10 @@ async function popularFiltros() {
 
 function popularAssuntos() {
     const materiaSelecionada = materiaSelect.value;
-    assuntoSelect.innerHTML = '<option value="">-- Escolha um Assunto --</option>';
+    // CORREÇÃO PONTO 2: Adicionada a opção "Todos os Assuntos"
+    assuntoSelect.innerHTML = '<option value="todos">-- Todos os Assuntos --</option>';
     assuntoSelect.disabled = true;
-    startBtn.disabled = true;
+    
     if (materiaSelecionada) {
         const assuntosDaMateria = [...new Set(materiasEAssuntos
             .filter(item => item.materia === materiaSelecionada)
@@ -81,21 +82,34 @@ function popularAssuntos() {
 async function fetchQuestions() {
     const materia = materiaSelect.value;
     const assunto = assuntoSelect.value;
-    if (!materia || !assunto) {
-        alert('Por favor, selecione uma matéria e um assunto.');
+
+    if (!materia) {
+        alert('Por favor, selecione uma matéria.');
         return;
     }
+
     startBtn.textContent = 'A carregar...';
     startBtn.disabled = true;
+
     try {
-        const { data, error } = await supabase
+        // CORREÇÃO PONTO 2: A query agora é construída dinamicamente
+        let query = supabase
             .from('questoes')
             .select('*')
-            .eq('materia', materia)
-            .eq('assunto', assunto);
+            .eq('materia', materia);
+
+        // Se um assunto específico (diferente de 'todos') for selecionado, adiciona o filtro
+        if (assunto && assunto !== 'todos') {
+            query = query.eq('assunto', assunto);
+        }
+
+        const { data, error } = await query;
+
         if (error) throw error;
+
         allQuestions = data;
         startQuiz();
+
     } catch (error) {
         alert('Erro ao carregar as questões: ' + error.message);
     } finally {
@@ -125,7 +139,7 @@ function startQuiz() {
 function renderCurrentQuestion() {
     questionsArea.innerHTML = '';
     updateProgress();
-    tempSelectedAnswer = null; // Limpa a seleção temporária
+    tempSelectedAnswer = null;
 
     const question = allQuestions[currentQuestionIndex];
     const isAnswered = userAnswers[currentQuestionIndex] !== null;
@@ -158,7 +172,6 @@ function renderCurrentQuestion() {
         `;
     });
 
-    // Adiciona o botão "Resolver" se a questão ainda não foi respondida
     const resolverBtnHTML = !isAnswered ? `
         <button id="resolver-btn" disabled class="mt-6 w-full text-white bg-gray-400 font-bold py-3 px-4 rounded-lg transition-all duration-300 cursor-not-allowed">
             Resolver
@@ -187,9 +200,7 @@ function renderCurrentQuestion() {
         const resolverBtn = document.getElementById('resolver-btn');
 
         optionElements.forEach(el => el.addEventListener('click', () => {
-            // Remove a seleção de outras opções
             optionElements.forEach(opt => opt.classList.remove('ring-2', 'ring-[var(--primary-color)]'));
-            // Adiciona um anel de destaque na opção selecionada
             el.classList.add('ring-2', 'ring-[var(--primary-color)]');
             
             tempSelectedAnswer = el.dataset.optionLetter;
@@ -201,7 +212,7 @@ function renderCurrentQuestion() {
         resolverBtn.addEventListener('click', () => {
             if (tempSelectedAnswer) {
                 userAnswers[currentQuestionIndex] = tempSelectedAnswer;
-                renderCurrentQuestion(); // Re-renderiza para mostrar a correção
+                renderCurrentQuestion();
             }
         });
 
@@ -263,10 +274,18 @@ document.addEventListener('DOMContentLoaded', () => {
     applyInitialTheme();
     popularFiltros();
 });
-materiaSelect.addEventListener('change', popularAssuntos);
-assuntoSelect.addEventListener('change', () => {
-    startBtn.disabled = !assuntoSelect.value;
+
+// CORREÇÃO PONTO 2: O botão de iniciar é ativado assim que uma matéria é selecionada
+materiaSelect.addEventListener('change', () => {
+    popularAssuntos();
+    startBtn.disabled = !materiaSelect.value;
 });
+
+assuntoSelect.addEventListener('change', () => {
+    // Este listener agora é redundante, mas não prejudica.
+    // A lógica principal está no listener da matéria.
+});
+
 startBtn.addEventListener('click', fetchQuestions);
 
 prevBtn.addEventListener('click', () => {
