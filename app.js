@@ -60,7 +60,6 @@ async function popularFiltros() {
 
 function popularAssuntos() {
     const materiaSelecionada = materiaSelect.value;
-    // CORREÇÃO PONTO 2: Adicionada a opção "Todos os Assuntos"
     assuntoSelect.innerHTML = '<option value="todos">-- Todos os Assuntos --</option>';
     assuntoSelect.disabled = true;
     
@@ -92,13 +91,11 @@ async function fetchQuestions() {
     startBtn.disabled = true;
 
     try {
-        // CORREÇÃO PONTO 2: A query agora é construída dinamicamente
         let query = supabase
             .from('questoes')
             .select('*')
             .eq('materia', materia);
 
-        // Se um assunto específico (diferente de 'todos') for selecionado, adiciona o filtro
         if (assunto && assunto !== 'todos') {
             query = query.eq('assunto', assunto);
         }
@@ -247,9 +244,8 @@ function setupQuestionNavigation() {
             currentQuestionIndex = qNum - 1;
             renderCurrentQuestion();
             goToQuestionInput.classList.remove('error');
-            goToQuestionInput.value = '';
+            goToQuestionInput.value = ''; // Limpa o input após o uso
             goToQuestionInput.placeholder = `Ir para questão`;
-            goToQuestionInput.blur();
         } else {
             goToQuestionInput.classList.add('error');
             goToQuestionInput.value = '';
@@ -260,9 +256,18 @@ function setupQuestionNavigation() {
             }, 2000);
         }
     };
-    goToQuestionInput.addEventListener('change', (e) => validateAndNavigate(e.target.value));
+
+    // --- CORREÇÃO: Removido o listener de 'change' que causava a navegação instantânea ---
+    // goToQuestionInput.addEventListener('change', (e) => validateAndNavigate(e.target.value));
+
+    // MANTIDO: O listener de 'keypress' para navegar apenas ao pressionar Enter.
     goToQuestionInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') validateAndNavigate(e.target.value);
+        if (e.key === 'Enter') {
+            // Só navega se houver um valor no input
+            if (e.target.value) {
+                validateAndNavigate(e.target.value);
+            }
+        }
     });
 }
 
@@ -275,14 +280,12 @@ document.addEventListener('DOMContentLoaded', () => {
     popularFiltros();
 });
 
-// CORREÇÃO PONTO 2: O botão de iniciar é ativado assim que uma matéria é selecionada
 materiaSelect.addEventListener('change', () => {
     popularAssuntos();
     startBtn.disabled = !materiaSelect.value;
 });
 
 assuntoSelect.addEventListener('change', () => {
-    // Este listener agora é redundante, mas não prejudica.
     // A lógica principal está no listener da matéria.
 });
 
