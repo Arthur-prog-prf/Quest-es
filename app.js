@@ -34,6 +34,7 @@ let currentQuestionIndex = 0;
 let materiasEAssuntos = [];
 let fontSize = 16;
 let tempSelectedAnswer = null;
+let eliminatedAnswers = []; // Guarda as alternativas eliminadas
 
 // =================================================================
 // FUNÇÕES PRINCIPAIS
@@ -121,6 +122,7 @@ function startQuiz() {
     }
     currentQuestionIndex = 0;
     userAnswers = new Array(allQuestions.length).fill(null);
+    eliminatedAnswers = new Array(allQuestions.length).fill([]);
     
     selectionArea.classList.add('hidden');
     quizArea.classList.remove('hidden');
@@ -141,6 +143,7 @@ function renderCurrentQuestion() {
     const question = allQuestions[currentQuestionIndex];
     const isAnswered = userAnswers[currentQuestionIndex] !== null;
     const userAnswerLetter = userAnswers[currentQuestionIndex];
+    const currentEliminated = eliminatedAnswers[currentQuestionIndex];
     
     const options = [
         { letter: 'A', text: question.alternativa_a },
@@ -154,7 +157,15 @@ function renderCurrentQuestion() {
     
     let optionsHTML = '';
     options.forEach(option => {
-        let optionClass = 'option flex items-start space-x-4 p-4 border-2 border-[var(--border-color)] rounded-lg transition-all duration-200 cursor-pointer';
+        let optionClass = 'option relative flex items-center space-x-4 p-4 border-2 border-[var(--border-color)] rounded-lg transition-all duration-200';
+        
+        if (!isAnswered) {
+             optionClass += ' cursor-pointer';
+        }
+
+        if (currentEliminated.includes(option.letter)) {
+            optionClass += ' eliminated';
+        }
         
         if (isAnswered) {
             if (option.letter === question.gabarito) optionClass += ' correct';
@@ -163,8 +174,13 @@ function renderCurrentQuestion() {
         
         optionsHTML += `
             <div class="${optionClass}" data-option-letter="${option.letter}">
-                <span class="font-bold text-lg">${option.letter})</span> 
-                <span class="flex-1">${option.text}</span>
+                <button class="eliminate-btn absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 bg-[var(--card-bg-color)] p-2 rounded-full shadow-md border border-[var(--border-color)] z-10">
+                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.848 8.473 7.5 12h9l.348-3.527a1.234 1.234 0 0 0-2.42-1.023L12 9.5l-2.428-2.05a1.234 1.234 0 0 0-2.42 1.023Zm-2.27 4.782.348-3.527m2.27 3.527a5.25 5.25 0 0 1-4.598-2.202 1.234 1.234 0 0 0-2.138 1.452l2.23 4.866a1.234 1.234 0 0 0 2.14 0l2.23-4.866a1.234 1.234 0 0 0-2.138-1.452 5.25 5.25 0 0 1-4.598 2.202Zm13.596-2.202a5.25 5.25 0 0 1-4.598-2.202 1.234 1.234 0 0 0-2.138 1.452l2.23 4.866a1.234 1.234 0 0 0 2.14 0l2.23-4.866a1.234 1.234 0 0 0-2.138-1.452Z" />
+                    </svg>
+                </button>
+                <span class="option-letter font-bold text-lg">${option.letter})</span> 
+                <span class="option-text flex-1">${option.text}</span>
             </div>
         `;
     });
@@ -196,15 +212,27 @@ function renderCurrentQuestion() {
         const optionElements = questionElement.querySelectorAll('.option');
         const resolverBtn = document.getElementById('resolver-btn');
 
-        optionElements.forEach(el => el.addEventListener('click', () => {
-            optionElements.forEach(opt => opt.classList.remove('ring-2', 'ring-[var(--primary-color)]'));
-            el.classList.add('ring-2', 'ring-[var(--primary-color)]');
-            
-            tempSelectedAnswer = el.dataset.optionLetter;
-            resolverBtn.disabled = false;
-            resolverBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
-            resolverBtn.classList.add('bg-[var(--primary-color)]', 'hover:bg-[var(--primary-hover-color)]');
-        }));
+        optionElements.forEach(el => {
+            el.addEventListener('click', () => {
+                if (el.classList.contains('eliminated')) return;
+                optionElements.forEach(opt => opt.classList.remove('ring-2', 'ring-[var(--primary-color)]'));
+                el.classList.add('ring-2', 'ring-[var(--primary-color)]');
+                tempSelectedAnswer = el.dataset.optionLetter;
+                resolverBtn.disabled = false;
+                resolverBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                resolverBtn.classList.add('bg-[var(--primary-color)]', 'hover:bg-[var(--primary-hover-color)]');
+            });
+
+            const eliminateBtn = el.querySelector('.eliminate-btn');
+            eliminateBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleEliminate(el.dataset.optionLetter);
+            });
+
+            let touchStartX = 0;
+            el.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
+            el.addEventListener('touchend', (e) => { handleSwipe(el.dataset.optionLetter, touchStartX, e.changedTouches[0].screenX); });
+        });
 
         resolverBtn.addEventListener('click', () => {
             if (tempSelectedAnswer) {
@@ -223,6 +251,25 @@ function renderCurrentQuestion() {
         }
     }
     updateNavigationButtons();
+}
+
+function toggleEliminate(letter) {
+    const eliminatedList = eliminatedAnswers[currentQuestionIndex];
+    const index = eliminatedList.indexOf(letter);
+    if (index > -1) {
+        eliminatedList.splice(index, 1);
+    } else {
+        eliminatedList.push(letter);
+    }
+    renderCurrentQuestion();
+}
+
+function handleSwipe(letter, startX, endX) {
+    const swipeDistance = endX - startX;
+    const swipeThreshold = 50;
+    if (Math.abs(swipeDistance) > swipeThreshold) {
+        toggleEliminate(letter);
+    }
 }
 
 function updateNavigationButtons() {
@@ -244,7 +291,7 @@ function setupQuestionNavigation() {
             currentQuestionIndex = qNum - 1;
             renderCurrentQuestion();
             goToQuestionInput.classList.remove('error');
-            goToQuestionInput.value = ''; // Limpa o input após o uso
+            goToQuestionInput.value = '';
             goToQuestionInput.placeholder = `Ir para questão`;
         } else {
             goToQuestionInput.classList.add('error');
@@ -256,14 +303,9 @@ function setupQuestionNavigation() {
             }, 2000);
         }
     };
-
-    // --- CORREÇÃO: Removido o listener de 'change' que causava a navegação instantânea ---
-    // goToQuestionInput.addEventListener('change', (e) => validateAndNavigate(e.target.value));
-
-    // MANTIDO: O listener de 'keypress' para navegar apenas ao pressionar Enter.
+    
     goToQuestionInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
-            // Só navega se houver um valor no input
             if (e.target.value) {
                 validateAndNavigate(e.target.value);
             }
@@ -279,16 +321,11 @@ document.addEventListener('DOMContentLoaded', () => {
     applyInitialTheme();
     popularFiltros();
 });
-
 materiaSelect.addEventListener('change', () => {
     popularAssuntos();
     startBtn.disabled = !materiaSelect.value;
 });
-
-assuntoSelect.addEventListener('change', () => {
-    // A lógica principal está no listener da matéria.
-});
-
+assuntoSelect.addEventListener('change', () => {});
 startBtn.addEventListener('click', fetchQuestions);
 
 prevBtn.addEventListener('click', () => {
