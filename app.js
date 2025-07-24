@@ -37,7 +37,7 @@ let tempSelectedAnswer = null;
 let eliminatedAnswers = [];
 
 // =================================================================
-// LÓGICA DE SWIPE (MOBILE) - APRIMORADA
+// LÓGICA DE SWIPE (MOBILE) - CORRIGIDA E REFINADA
 // =================================================================
 let touchStartX = 0;
 let touchStartY = 0;
@@ -48,7 +48,8 @@ const swipeThreshold = 80; // Distância em pixels para acionar a eliminação
 
 function handleTouchStart(e) {
     const target = e.target.closest('.option-content');
-    if (!target) return;
+    // Não inicia o swipe se a questão já foi respondida
+    if (!target || userAnswers[currentQuestionIndex] !== null) return;
     
     swipedElement = target;
     touchStartX = e.touches[0].clientX;
@@ -63,9 +64,8 @@ function handleTouchMove(e) {
     const deltaX = e.touches[0].clientX - touchStartX;
     const deltaY = e.touches[0].clientY - touchStartY;
 
-    // Determina a direção do gesto no primeiro movimento
     if (swipeDirection === undefined) {
-        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (Math.abs(deltaX) > Math.abs(deltaY) + 5) { // Dá prioridade ao scroll vertical
             swipeDirection = 'horizontal';
             swipedElement.classList.add('swiping');
             const revealElement = swipedElement.previousElementSibling;
@@ -75,12 +75,9 @@ function handleTouchMove(e) {
         }
     }
 
-    // Só executa o arraste se a direção for horizontal
     if (swipeDirection === 'horizontal') {
-        // Impede que o scroll da página aconteça durante o swipe
         e.preventDefault(); 
         let newX = deltaX;
-        // Permite arrastar apenas para a direita
         if (newX < 0) newX = 0; 
         swipedElement.style.transform = `translateX(${newX}px)`;
         currentX = e.touches[0].clientX;
@@ -89,25 +86,24 @@ function handleTouchMove(e) {
 
 function handleTouchEnd() {
     if (!swipedElement || swipeDirection !== 'horizontal') {
-        // Se não houve swipe ou foi um scroll vertical, reseta tudo
         if(swipedElement) {
             swipedElement.classList.remove('swiping');
+            swipedElement.style.transform = 'translateX(0px)';
             const revealElement = swipedElement.previousElementSibling;
             if (revealElement) revealElement.style.opacity = '0';
-            swipedElement.style.transform = 'translateX(0px)';
         }
         swipedElement = null;
         return;
     };
 
-    swipedElement.classList.remove('swiping');
     const deltaX = currentX - touchStartX;
 
     if (deltaX > swipeThreshold) {
         const letter = swipedElement.querySelector('.option').dataset.optionLetter;
-        toggleEliminate(letter, true); // Passa true para indicar que é via swipe
+        toggleEliminate(letter);
+        renderCurrentQuestion(); // **CHAVE DA CORREÇÃO**: Redesenha a tela com o estado atualizado
     } else {
-        // Anima o retorno à posição original se não eliminou
+        swipedElement.classList.remove('swiping');
         swipedElement.style.transform = 'translateX(0px)';
         const revealElement = swipedElement.previousElementSibling;
         if(revealElement) revealElement.style.opacity = '0';
@@ -116,7 +112,6 @@ function handleTouchEnd() {
     swipedElement = null;
 }
 
-// Adiciona os listeners de toque na área das questões
 questionsArea.addEventListener('touchstart', handleTouchStart, { passive: false });
 questionsArea.addEventListener('touchmove', handleTouchMove, { passive: false });
 questionsArea.addEventListener('touchend', handleTouchEnd);
@@ -244,7 +239,6 @@ function renderCurrentQuestion() {
             else if (option.letter === userAnswerLetter) optionClass += ' incorrect';
         }
         
-        // REQUEST: Changed swipe icon to scissors
         optionsHTML += `
             <div class="option-container">
                 <div class="swipe-reveal">
@@ -305,6 +299,7 @@ function renderCurrentQuestion() {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 toggleEliminate(btn.dataset.eliminateLetter);
+                renderCurrentQuestion(); // Redesenha após o clique no desktop
             });
         });
 
@@ -327,7 +322,8 @@ function renderCurrentQuestion() {
     updateNavigationButtons();
 }
 
-function toggleEliminate(letter, isSwipe = false) {
+// Função unificada para alterar o estado de eliminação
+function toggleEliminate(letter) {
     const eliminatedList = eliminatedAnswers[currentQuestionIndex];
     const index = eliminatedList.indexOf(letter);
     if (index > -1) {
@@ -336,11 +332,6 @@ function toggleEliminate(letter, isSwipe = false) {
         if (letter !== tempSelectedAnswer) {
              eliminatedList.push(letter);
         }
-    }
-    // Apenas re-renderiza se a ação não veio de um swipe,
-    // pois o swipe já cuida disso no touchend.
-    if (!isSwipe) {
-        renderCurrentQuestion();
     }
 }
 
