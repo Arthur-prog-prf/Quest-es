@@ -2,7 +2,8 @@
 // CONFIGURAÇÃO DO SUPABASE
 // =================================================================
 const SUPABASE_URL = 'https://dibhqftndeggtrxbxjsn.supabase.co'; 
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpYmhxZnRuZGVnZ3RyeGJ4anNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNDg5NTAsImV4cCI6MjA2NzkyNDk1MH0.WV-UK5Au_Hhqp8R6D2mjwiRBtICrmISXoMgSCmx4ZgQ'; 
+// CORREÇÃO: A chave anterior tinha um erro. Por favor, cole a sua chave 'anon' 'public' correta abaixo.
+const SUPABASE_ANON_KEY = 'COLE_AQUI_A_SUA_CHAVE_ANON_PUBLIC_CORRETA'; 
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
