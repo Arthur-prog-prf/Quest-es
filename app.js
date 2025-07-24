@@ -34,10 +34,74 @@ let currentQuestionIndex = 0;
 let materiasEAssuntos = [];
 let fontSize = 16;
 let tempSelectedAnswer = null;
-let eliminatedAnswers = []; // Guarda as alternativas eliminadas
+let eliminatedAnswers = [];
 
 // =================================================================
-// FUNÇÕES PRINCIPAIS
+// LÓGICA DE SWIPE (MOBILE)
+// =================================================================
+let touchStartX = 0;
+let currentX = 0;
+let isSwiping = false;
+let swipedElement = null;
+const swipeThreshold = 80; // Distância em pixels para acionar a eliminação
+
+function handleTouchStart(e) {
+    const target = e.target.closest('.option-content');
+    if (!target || target.closest('.option').classList.contains('eliminated')) return;
+    
+    swipedElement = target;
+    touchStartX = e.touches[0].clientX;
+    swipedElement.classList.add('swiping');
+    
+    // Mostra o ícone de lixeira no fundo
+    const revealElement = swipedElement.previousElementSibling;
+    if(revealElement) revealElement.style.opacity = '1';
+}
+
+function handleTouchMove(e) {
+    if (!swipedElement) return;
+    
+    currentX = e.touches[0].clientX;
+    let deltaX = currentX - touchStartX;
+
+    // Permite arrastar apenas para a direita
+    if (deltaX < 0) deltaX = 0; 
+
+    swipedElement.style.transform = `translateX(${deltaX}px)`;
+}
+
+function handleTouchEnd() {
+    if (!swipedElement) return;
+
+    swipedElement.classList.remove('swiping');
+    const deltaX = currentX - touchStartX;
+
+    if (deltaX > swipeThreshold) {
+        const letter = swipedElement.querySelector('.option').dataset.optionLetter;
+        toggleEliminate(letter);
+    } else {
+        // Anima o retorno à posição original se não eliminou
+        swipedElement.style.transform = 'translateX(0px)';
+    }
+    
+    // Esconde o ícone de lixeira no fundo
+    const revealElement = swipedElement.previousElementSibling;
+    if(revealElement) revealElement.style.opacity = '0';
+
+    // Reseta as variáveis
+    touchStartX = 0;
+    currentX = 0;
+    swipedElement = null;
+}
+
+// Adiciona os listeners de toque na área das questões
+questionsArea.addEventListener('touchstart', handleTouchStart, { passive: true });
+questionsArea.addEventListener('touchmove', handleTouchMove, { passive: true });
+questionsArea.addEventListener('touchend', handleTouchEnd);
+
+
+// =================================================================
+// FUNÇÕES PRINCIPAIS DO QUIZ
 // =================================================================
 
 async function popularFiltros() {
@@ -92,22 +156,14 @@ async function fetchQuestions() {
     startBtn.disabled = true;
 
     try {
-        let query = supabase
-            .from('questoes')
-            .select('*')
-            .eq('materia', materia);
-
+        let query = supabase.from('questoes').select('*').eq('materia', materia);
         if (assunto && assunto !== 'todos') {
             query = query.eq('assunto', assunto);
         }
-
         const { data, error } = await query;
-
         if (error) throw error;
-
         allQuestions = data;
         startQuiz();
-
     } catch (error) {
         alert('Erro ao carregar as questões: ' + error.message);
     } finally {
@@ -158,52 +214,38 @@ function renderCurrentQuestion() {
     let optionsHTML = '';
     options.forEach(option => {
         const isEliminated = currentEliminated.includes(option.letter);
-        
         let optionClass = 'option flex-1 flex items-center space-x-4 p-4 border-2 border-[var(--border-color)] rounded-lg transition-all duration-200';
-        
-        if (!isAnswered) {
-             optionClass += ' cursor-pointer';
-        }
-
-        if (isEliminated) {
-            optionClass += ' eliminated';
-        }
-        
+        if (!isAnswered) optionClass += ' cursor-pointer';
+        if (isEliminated) optionClass += ' eliminated';
         if (isAnswered) {
             if (option.letter === question.gabarito) optionClass += ' correct';
             else if (option.letter === userAnswerLetter) optionClass += ' incorrect';
         }
         
-        // REQUEST 1, 2, 3, 4: New structure with wrapper and new SVG icon
         optionsHTML += `
-            <div class="option-wrapper flex items-center space-x-3">
-                <button class="eliminate-btn p-2 rounded-full transition-all ${isEliminated ? 'active' : ''}" data-eliminate-letter="${option.letter}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-500 dark:text-gray-400">
-                        <circle cx="6" cy="6" r="3"></circle>
-                        <circle cx="6" cy="18" r="3"></circle>
-                        <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
-                        <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
-                        <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
-                    </svg>
-                </button>
-                <div class="${optionClass}" data-option-letter="${option.letter}">
-                    <span class="option-letter font-bold text-lg">${option.letter})</span> 
-                    <span class="option-text flex-1">${option.text}</span>
+            <div class="option-container">
+                <div class="swipe-reveal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                </div>
+                <div class="option-content flex items-center space-x-3">
+                    <button class="eliminate-btn p-2 rounded-full transition-all ${isEliminated ? 'active' : ''}" data-eliminate-letter="${option.letter}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-500 dark:text-gray-400">
+                            <circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+                        </svg>
+                    </button>
+                    <div class="${optionClass}" data-option-letter="${option.letter}">
+                        <span class="option-letter font-bold text-lg">${option.letter})</span> 
+                        <span class="option-text flex-1">${option.text}</span>
+                    </div>
                 </div>
             </div>
         `;
     });
 
-    const resolverBtnHTML = !isAnswered ? `
-        <button id="resolver-btn" disabled class="mt-6 w-full text-white bg-gray-400 font-bold py-3 px-4 rounded-lg transition-all duration-300 cursor-not-allowed">
-            Resolver
-        </button>
-    ` : '';
+    const resolverBtnHTML = !isAnswered ? `<button id="resolver-btn" disabled class="mt-6 w-full text-white bg-gray-400 font-bold py-3 px-4 rounded-lg transition-all duration-300 cursor-not-allowed">Resolver</button>` : '';
 
     questionElement.innerHTML = `
-        <div class="question text-xl font-semibold mb-6 pb-4 border-b border-[var(--border-color)]">
-            ${question.pergunta}
-        </div>
+        <div class="question text-xl font-semibold mb-6 pb-4 border-b border-[var(--border-color)]">${question.pergunta}</div>
         <div class="options space-y-4">${optionsHTML}</div>
         ${resolverBtnHTML}
         ${isAnswered ? `
@@ -221,7 +263,6 @@ function renderCurrentQuestion() {
         const optionElements = questionElement.querySelectorAll('.option');
         const resolverBtn = document.getElementById('resolver-btn');
 
-        // Attach listeners to options for selection
         optionElements.forEach(el => {
             el.addEventListener('click', () => {
                 if (el.classList.contains('eliminated')) return;
@@ -232,14 +273,8 @@ function renderCurrentQuestion() {
                 resolverBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
                 resolverBtn.classList.add('bg-[var(--primary-color)]', 'hover:bg-[var(--primary-hover-color)]');
             });
-
-            // Attach listeners for swipe-to-eliminate
-            let touchStartX = 0;
-            el.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
-            el.addEventListener('touchend', (e) => { handleSwipe(el.dataset.optionLetter, touchStartX, e.changedTouches[0].screenX); });
         });
         
-        // Attach listeners to new eliminate buttons
         const eliminateBtns = questionElement.querySelectorAll('.eliminate-btn');
         eliminateBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -273,20 +308,13 @@ function toggleEliminate(letter) {
     if (index > -1) {
         eliminatedList.splice(index, 1);
     } else {
-        // Prevent eliminating the selected answer if one is temporarily selected
         if (letter !== tempSelectedAnswer) {
              eliminatedList.push(letter);
         }
     }
+    // A re-renderização agora vai acontecer de qualquer forma no touchend,
+    // mas chamamos aqui para o caso do clique no desktop
     renderCurrentQuestion();
-}
-
-function handleSwipe(letter, startX, endX) {
-    const swipeDistance = endX - startX;
-    const swipeThreshold = 50;
-    if (Math.abs(swipeDistance) > swipeThreshold) {
-        toggleEliminate(letter);
-    }
 }
 
 function updateNavigationButtons() {
@@ -322,16 +350,14 @@ function setupQuestionNavigation() {
     };
     
     goToQuestionInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            if (e.target.value) {
-                validateAndNavigate(e.target.value);
-            }
+        if (e.key === 'Enter' && e.target.value) {
+            validateAndNavigate(e.target.value);
         }
     });
 }
 
 // =================================================================
-// EVENT LISTENERS
+// EVENT LISTENERS GERAIS
 // =================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -384,13 +410,8 @@ function applyInitialTheme() {
 
 function toggleTheme() {
     document.body.classList.toggle('dark-mode');
-    let newTheme = 'light';
-    if (document.body.classList.contains('dark-mode')) {
-        newTheme = 'dark';
-        themeToggleBtn.textContent = 'Modo Claro';
-    } else {
-        themeToggleBtn.textContent = 'Modo Escuro';
-    }
+    let newTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+    themeToggleBtn.textContent = newTheme === 'dark' ? 'Modo Claro' : 'Modo Escuro';
     localStorage.setItem('theme', newTheme);
 }
 
