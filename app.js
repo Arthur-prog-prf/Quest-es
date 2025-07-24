@@ -123,7 +123,6 @@ questionsArea.addEventListener('touchend', handleTouchEnd);
 
 async function popularFiltros() {
     try {
-        // CORREÇÃO: Removida a busca por metadados desnecessários
         const { data, error } = await supabase.from('questoes').select('materia, assunto');
         if (error) throw error;
         materiasEAssuntos = data;
@@ -248,9 +247,9 @@ function renderCurrentQuestion() {
             else if (option.letter === userAnswerLetter) optionClass += ' incorrect';
         }
         
-        // CORREÇÃO: Cor de fundo alterada para bg-gray-200 e cores de texto definidas explicitamente
+        // Usando variáveis CSS para garantir consistência de cor
         const letterCircle = `
-            <div class="option-letter-circle flex-shrink-0 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 rounded-full h-8 w-8 flex items-center justify-center font-bold transition-colors">
+            <div class="option-letter-circle flex-shrink-0 rounded-full h-8 w-8 flex items-center justify-center font-bold transition-colors" style="background-color: var(--option-circle-bg); color: var(--option-circle-text);">
                 ${option.letter}
             </div>
         `;
