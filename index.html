@@ -213,7 +213,8 @@
 
     <!-- CONTEÚDO PRINCIPAL -->
     <main class="pt-24 pb-24">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- CORREÇÃO: Padding horizontal reduzido de px-4 para px-2 em telas pequenas -->
+        <div class="max-w-3xl mx-auto px-2 sm:px-6 lg:px-8">
             
             <!-- ÁREA DE SELEÇÃO INICIAL -->
             <div id="selection-area" class="bg-[var(--card-bg-color)] p-8 rounded-xl shadow-lg space-y-6">
@@ -280,7 +281,6 @@
             
             <input type="number" id="go-to-question" placeholder="Ir para questão" min="1" max="1" class="flex-1 sm:flex-none sm:w-48 text-center p-2 border-[var(--border-color)] rounded-lg bg-transparent focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition shadow-sm">
             
-            <!-- CORREÇÃO: Adicionada a classe "disabled:opacity-50" para o efeito visual -->
             <button id="next-btn" class="nav-btn flex items-center justify-center space-x-1.5 px-2 sm:px-3 py-2 rounded-lg font-semibold transition disabled:opacity-50 flex-shrink-0">
                 <span>Próxima</span>
                 <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
