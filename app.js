@@ -157,13 +157,15 @@ function renderCurrentQuestion() {
     
     let optionsHTML = '';
     options.forEach(option => {
-        let optionClass = 'option relative flex items-center space-x-4 p-4 border-2 border-[var(--border-color)] rounded-lg transition-all duration-200';
+        const isEliminated = currentEliminated.includes(option.letter);
+        
+        let optionClass = 'option flex-1 flex items-center space-x-4 p-4 border-2 border-[var(--border-color)] rounded-lg transition-all duration-200';
         
         if (!isAnswered) {
              optionClass += ' cursor-pointer';
         }
 
-        if (currentEliminated.includes(option.letter)) {
+        if (isEliminated) {
             optionClass += ' eliminated';
         }
         
@@ -172,15 +174,22 @@ function renderCurrentQuestion() {
             else if (option.letter === userAnswerLetter) optionClass += ' incorrect';
         }
         
+        // REQUEST 1, 2, 3, 4: New structure with wrapper and new SVG icon
         optionsHTML += `
-            <div class="${optionClass}" data-option-letter="${option.letter}">
-                <button class="eliminate-btn absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 bg-[var(--card-bg-color)] p-2 rounded-full shadow-md border border-[var(--border-color)] z-10">
-                    <svg class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.848 8.473 7.5 12h9l.348-3.527a1.234 1.234 0 0 0-2.42-1.023L12 9.5l-2.428-2.05a1.234 1.234 0 0 0-2.42 1.023Zm-2.27 4.782.348-3.527m2.27 3.527a5.25 5.25 0 0 1-4.598-2.202 1.234 1.234 0 0 0-2.138 1.452l2.23 4.866a1.234 1.234 0 0 0 2.14 0l2.23-4.866a1.234 1.234 0 0 0-2.138-1.452 5.25 5.25 0 0 1-4.598 2.202Zm13.596-2.202a5.25 5.25 0 0 1-4.598-2.202 1.234 1.234 0 0 0-2.138 1.452l2.23 4.866a1.234 1.234 0 0 0 2.14 0l2.23-4.866a1.234 1.234 0 0 0-2.138-1.452Z" />
+            <div class="option-wrapper flex items-center space-x-3">
+                <button class="eliminate-btn p-2 rounded-full transition-all ${isEliminated ? 'active' : ''}" data-eliminate-letter="${option.letter}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-500 dark:text-gray-400">
+                        <circle cx="6" cy="6" r="3"></circle>
+                        <circle cx="6" cy="18" r="3"></circle>
+                        <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+                        <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+                        <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
                     </svg>
                 </button>
-                <span class="option-letter font-bold text-lg">${option.letter})</span> 
-                <span class="option-text flex-1">${option.text}</span>
+                <div class="${optionClass}" data-option-letter="${option.letter}">
+                    <span class="option-letter font-bold text-lg">${option.letter})</span> 
+                    <span class="option-text flex-1">${option.text}</span>
+                </div>
             </div>
         `;
     });
@@ -212,6 +221,7 @@ function renderCurrentQuestion() {
         const optionElements = questionElement.querySelectorAll('.option');
         const resolverBtn = document.getElementById('resolver-btn');
 
+        // Attach listeners to options for selection
         optionElements.forEach(el => {
             el.addEventListener('click', () => {
                 if (el.classList.contains('eliminated')) return;
@@ -223,15 +233,19 @@ function renderCurrentQuestion() {
                 resolverBtn.classList.add('bg-[var(--primary-color)]', 'hover:bg-[var(--primary-hover-color)]');
             });
 
-            const eliminateBtn = el.querySelector('.eliminate-btn');
-            eliminateBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleEliminate(el.dataset.optionLetter);
-            });
-
+            // Attach listeners for swipe-to-eliminate
             let touchStartX = 0;
             el.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
             el.addEventListener('touchend', (e) => { handleSwipe(el.dataset.optionLetter, touchStartX, e.changedTouches[0].screenX); });
+        });
+        
+        // Attach listeners to new eliminate buttons
+        const eliminateBtns = questionElement.querySelectorAll('.eliminate-btn');
+        eliminateBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleEliminate(btn.dataset.eliminateLetter);
+            });
         });
 
         resolverBtn.addEventListener('click', () => {
@@ -259,7 +273,10 @@ function toggleEliminate(letter) {
     if (index > -1) {
         eliminatedList.splice(index, 1);
     } else {
-        eliminatedList.push(letter);
+        // Prevent eliminating the selected answer if one is temporarily selected
+        if (letter !== tempSelectedAnswer) {
+             eliminatedList.push(letter);
+        }
     }
     renderCurrentQuestion();
 }
