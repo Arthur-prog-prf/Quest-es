@@ -37,64 +37,75 @@ let tempSelectedAnswer = null;
 let eliminatedAnswers = [];
 
 // =================================================================
-// LÓGICA DE SWIPE (MOBILE) - CORRIGIDA
+// LÓGICA DE SWIPE (MOBILE) - APRIMORADA
 // =================================================================
 let touchStartX = 0;
+let touchStartY = 0;
 let currentX = 0;
 let swipedElement = null;
+let swipeDirection; // Pode ser 'horizontal', 'vertical' ou undefined
 const swipeThreshold = 80; // Distância em pixels para acionar a eliminação
 
 function handleTouchStart(e) {
     const target = e.target.closest('.option-content');
-    // Verificação corrigida: procura o .option DENTRO do target
-    if (!target || target.querySelector('.option').classList.contains('eliminated')) {
-        swipedElement = null; // Garante que o swipe não continue
-        return;
-    }
+    if (!target) return;
     
     swipedElement = target;
     touchStartX = e.touches[0].clientX;
-    currentX = e.touches[0].clientX; // Inicia o currentX
-    swipedElement.classList.add('swiping');
-    
-    const revealElement = swipedElement.previousElementSibling;
-    if(revealElement) revealElement.style.opacity = '1';
+    touchStartY = e.touches[0].clientY;
+    currentX = touchStartX;
+    swipeDirection = undefined; // Reseta a direção a cada novo toque
 }
 
 function handleTouchMove(e) {
     if (!swipedElement) return;
-    
-    currentX = e.touches[0].clientX;
-    let deltaX = currentX - touchStartX;
 
-    // Permite arrastar apenas para a direita
-    if (deltaX < 0) deltaX = 0; 
+    const deltaX = e.touches[0].clientX - touchStartX;
+    const deltaY = e.touches[0].clientY - touchStartY;
 
-    swipedElement.style.transform = `translateX(${deltaX}px)`;
+    // Determina a direção do gesto no primeiro movimento
+    if (swipeDirection === undefined) {
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            swipeDirection = 'horizontal';
+            swipedElement.classList.add('swiping');
+            const revealElement = swipedElement.previousElementSibling;
+            if (revealElement) revealElement.style.opacity = '1';
+        } else {
+            swipeDirection = 'vertical';
+        }
+    }
+
+    // Só executa o arraste se a direção for horizontal
+    if (swipeDirection === 'horizontal') {
+        // Impede que o scroll da página aconteça durante o swipe
+        e.preventDefault(); 
+        let newX = deltaX;
+        // Permite arrastar apenas para a direita
+        if (newX < 0) newX = 0; 
+        swipedElement.style.transform = `translateX(${newX}px)`;
+        currentX = e.touches[0].clientX;
+    }
 }
 
 function handleTouchEnd() {
-    if (!swipedElement) return;
+    if (!swipedElement || swipeDirection !== 'horizontal') {
+        // Se não houve swipe ou foi um scroll vertical, reseta tudo
+        if(swipedElement) {
+            swipedElement.classList.remove('swiping');
+            const revealElement = swipedElement.previousElementSibling;
+            if (revealElement) revealElement.style.opacity = '0';
+            swipedElement.style.transform = 'translateX(0px)';
+        }
+        swipedElement = null;
+        return;
+    };
 
     swipedElement.classList.remove('swiping');
     const deltaX = currentX - touchStartX;
 
     if (deltaX > swipeThreshold) {
         const letter = swipedElement.querySelector('.option').dataset.optionLetter;
-        
-        // Atualiza o estado diretamente e renderiza novamente
-        const eliminatedList = eliminatedAnswers[currentQuestionIndex];
-        const index = eliminatedList.indexOf(letter);
-        if (index > -1) {
-            // Se já estava eliminada, remove da lista (permite reativar)
-            eliminatedList.splice(index, 1);
-        } else {
-            // Se não estava, adiciona à lista
-            if (letter !== tempSelectedAnswer) {
-                 eliminatedList.push(letter);
-            }
-        }
-        renderCurrentQuestion(); // Renderiza a UI com o estado atualizado
+        toggleEliminate(letter, true); // Passa true para indicar que é via swipe
     } else {
         // Anima o retorno à posição original se não eliminou
         swipedElement.style.transform = 'translateX(0px)';
@@ -102,15 +113,12 @@ function handleTouchEnd() {
         if(revealElement) revealElement.style.opacity = '0';
     }
     
-    // Reseta as variáveis
-    touchStartX = 0;
-    currentX = 0;
     swipedElement = null;
 }
 
 // Adiciona os listeners de toque na área das questões
-questionsArea.addEventListener('touchstart', handleTouchStart, { passive: true });
-questionsArea.addEventListener('touchmove', handleTouchMove, { passive: true });
+questionsArea.addEventListener('touchstart', handleTouchStart, { passive: false });
+questionsArea.addEventListener('touchmove', handleTouchMove, { passive: false });
 questionsArea.addEventListener('touchend', handleTouchEnd);
 
 
@@ -236,10 +244,13 @@ function renderCurrentQuestion() {
             else if (option.letter === userAnswerLetter) optionClass += ' incorrect';
         }
         
+        // REQUEST: Changed swipe icon to scissors
         optionsHTML += `
             <div class="option-container">
                 <div class="swipe-reveal">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+                        <circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+                    </svg>
                 </div>
                 <div class="option-content flex items-center space-x-3">
                     <button class="eliminate-btn p-2 rounded-full transition-all ${isEliminated ? 'active' : ''}" data-eliminate-letter="${option.letter}">
@@ -289,7 +300,6 @@ function renderCurrentQuestion() {
             });
         });
         
-        // Listener para o botão de eliminar do DESKTOP
         const eliminateBtns = questionElement.querySelectorAll('.eliminate-btn');
         eliminateBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -317,8 +327,7 @@ function renderCurrentQuestion() {
     updateNavigationButtons();
 }
 
-// Função chamada APENAS pelo clique no botão do desktop
-function toggleEliminate(letter) {
+function toggleEliminate(letter, isSwipe = false) {
     const eliminatedList = eliminatedAnswers[currentQuestionIndex];
     const index = eliminatedList.indexOf(letter);
     if (index > -1) {
@@ -328,7 +337,11 @@ function toggleEliminate(letter) {
              eliminatedList.push(letter);
         }
     }
-    renderCurrentQuestion();
+    // Apenas re-renderiza se a ação não veio de um swipe,
+    // pois o swipe já cuida disso no touchend.
+    if (!isSwipe) {
+        renderCurrentQuestion();
+    }
 }
 
 function updateNavigationButtons() {
