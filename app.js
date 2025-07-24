@@ -37,23 +37,26 @@ let tempSelectedAnswer = null;
 let eliminatedAnswers = [];
 
 // =================================================================
-// LÓGICA DE SWIPE (MOBILE)
+// LÓGICA DE SWIPE (MOBILE) - CORRIGIDA
 // =================================================================
 let touchStartX = 0;
 let currentX = 0;
-let isSwiping = false;
 let swipedElement = null;
 const swipeThreshold = 80; // Distância em pixels para acionar a eliminação
 
 function handleTouchStart(e) {
     const target = e.target.closest('.option-content');
-    if (!target || target.closest('.option').classList.contains('eliminated')) return;
+    // Verificação corrigida: procura o .option DENTRO do target
+    if (!target || target.querySelector('.option').classList.contains('eliminated')) {
+        swipedElement = null; // Garante que o swipe não continue
+        return;
+    }
     
     swipedElement = target;
     touchStartX = e.touches[0].clientX;
+    currentX = e.touches[0].clientX; // Inicia o currentX
     swipedElement.classList.add('swiping');
     
-    // Mostra o ícone de lixeira no fundo
     const revealElement = swipedElement.previousElementSibling;
     if(revealElement) revealElement.style.opacity = '1';
 }
@@ -78,16 +81,27 @@ function handleTouchEnd() {
 
     if (deltaX > swipeThreshold) {
         const letter = swipedElement.querySelector('.option').dataset.optionLetter;
-        toggleEliminate(letter);
+        
+        // Atualiza o estado diretamente e renderiza novamente
+        const eliminatedList = eliminatedAnswers[currentQuestionIndex];
+        const index = eliminatedList.indexOf(letter);
+        if (index > -1) {
+            // Se já estava eliminada, remove da lista (permite reativar)
+            eliminatedList.splice(index, 1);
+        } else {
+            // Se não estava, adiciona à lista
+            if (letter !== tempSelectedAnswer) {
+                 eliminatedList.push(letter);
+            }
+        }
+        renderCurrentQuestion(); // Renderiza a UI com o estado atualizado
     } else {
         // Anima o retorno à posição original se não eliminou
         swipedElement.style.transform = 'translateX(0px)';
+        const revealElement = swipedElement.previousElementSibling;
+        if(revealElement) revealElement.style.opacity = '0';
     }
     
-    // Esconde o ícone de lixeira no fundo
-    const revealElement = swipedElement.previousElementSibling;
-    if(revealElement) revealElement.style.opacity = '0';
-
     // Reseta as variáveis
     touchStartX = 0;
     currentX = 0;
@@ -275,6 +289,7 @@ function renderCurrentQuestion() {
             });
         });
         
+        // Listener para o botão de eliminar do DESKTOP
         const eliminateBtns = questionElement.querySelectorAll('.eliminate-btn');
         eliminateBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -302,6 +317,7 @@ function renderCurrentQuestion() {
     updateNavigationButtons();
 }
 
+// Função chamada APENAS pelo clique no botão do desktop
 function toggleEliminate(letter) {
     const eliminatedList = eliminatedAnswers[currentQuestionIndex];
     const index = eliminatedList.indexOf(letter);
@@ -312,8 +328,6 @@ function toggleEliminate(letter) {
              eliminatedList.push(letter);
         }
     }
-    // A re-renderização agora vai acontecer de qualquer forma no touchend,
-    // mas chamamos aqui para o caso do clique no desktop
     renderCurrentQuestion();
 }
 
