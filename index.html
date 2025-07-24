@@ -37,7 +37,6 @@
             --fundamentacao-text: #374151;
             --header-btn-active-bg: #e5e7eb; /* gray-200 */
             --option-active-bg: #dbeafe; /* blue-100 */
-            /* --- NOVAS VARIÁVEIS --- */
             --eliminated-text-color: #9ca3af; /* gray-400 */
             --eliminated-bg-color: #f9fafb; /* gray-50 */
         }
@@ -60,7 +59,6 @@
             --fundamentacao-text: #d1d5db;
             --header-btn-active-bg: #374151; /* gray-700 */
             --option-active-bg: #1e40af; /* blue-800 */
-            /* --- NOVAS VARIÁVEIS --- */
             --eliminated-text-color: #4b5563; /* gray-600 */
             --eliminated-bg-color: #1f2937; /* gray-800 */
         }
@@ -86,7 +84,7 @@
             background-color: var(--option-active-bg) !important;
         }
 
-        /* --- NOVOS ESTILOS PARA A FUNCIONALIDADE DE ELIMINAR --- */
+        /* Estilos para a alternativa eliminada */
         .option.eliminated {
             background-color: var(--eliminated-bg-color);
             border-style: dashed;
@@ -125,6 +123,22 @@
             color: #fecaca;
         }
 
+        /* Estilos para o botão de eliminar */
+        .eliminate-btn {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+            flex-shrink: 0; /* Impede que o botão seja espremido */
+            cursor: pointer;
+        }
+        .eliminate-btn.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .eliminate-btn.active svg {
+            color: var(--primary-color);
+        }
+
         /* Aplica os estilos de HOVER apenas em dispositivos com rato */
         @media (hover: hover) and (pointer: fine) {
             .header-btn:hover, .nav-btn:hover {
@@ -135,16 +149,10 @@
                 box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
                 transform: translateY(-2px);
             }
-            /* Esconde o ícone de tesoura por padrão */
-            .eliminate-btn {
-                opacity: 0;
-                transform: translateX(-10px);
-                transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-            }
-            /* Mostra o ícone de tesoura quando o rato passa por cima da alternativa */
-            .option:not(.eliminated):not(.correct):not(.incorrect):hover .eliminate-btn {
+            /* Mostra o botão de eliminar ao passar o mouse no wrapper da opção */
+            .option-wrapper:hover .eliminate-btn {
                 opacity: 1;
-                transform: translateX(0);
+                visibility: visible;
             }
         }
     </style>
