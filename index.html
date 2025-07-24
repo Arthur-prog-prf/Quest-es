@@ -40,6 +40,10 @@
             --eliminated-text-color: #9ca3af; /* gray-400 */
             --eliminated-bg-color: #f9fafb; /* gray-50 */
             --swipe-reveal-bg: #3b82f6; /* blue-500 */
+            
+            /* CORREÇÃO: Novas variáveis para o círculo da alternativa */
+            --option-circle-bg: #e5e7eb; /* gray-200 */
+            --option-circle-text: #374151; /* gray-700 */
         }
 
         .dark-mode {
@@ -63,6 +67,10 @@
             --eliminated-text-color: #4b5563; /* gray-600 */
             --eliminated-bg-color: #1f2937; /* gray-800 */
             --swipe-reveal-bg: #2563eb; /* blue-600 */
+
+            /* CORREÇÃO: Novas variáveis para o círculo da alternativa */
+            --option-circle-bg: #374151; /* gray-700 */
+            --option-circle-text: #d1d5db; /* gray-300 */
         }
 
         body {
@@ -125,7 +133,8 @@
             font-style: italic;
             color: var(--eliminated-text-color);
         }
-        .option.eliminated .option-letter {
+        .option.eliminated .option-letter-circle {
+            background-color: transparent !important;
             color: var(--eliminated-text-color);
         }
 
@@ -213,8 +222,8 @@
 
     <!-- CONTEÚDO PRINCIPAL -->
     <main class="pt-24 pb-24">
-        <!-- CORREÇÃO: Padding horizontal reduzido de px-4 para px-2 em telas pequenas -->
-        <div class="max-w-3xl mx-auto px-2 sm:px-6 lg:px-8">
+        <!-- Removido padding horizontal em telas pequenas para layout full-width -->
+        <div class="max-w-3xl mx-auto px-0 sm:px-6 lg:px-8">
             
             <!-- ÁREA DE SELEÇÃO INICIAL -->
             <div id="selection-area" class="bg-[var(--card-bg-color)] p-8 rounded-xl shadow-lg space-y-6">
@@ -257,7 +266,7 @@
 
             <!-- ÁREA DO QUIZ -->
             <div id="quiz-area" class="hidden">
-                <div class="progress text-center mb-6 font-semibold text-lg">
+                <div class="progress text-center mb-4 font-semibold text-lg px-4 sm:px-0">
                     Questão <span id="current-question">1</span> de <span id="total-questions">0</span>
                 </div>
                 <div id="questions-area" class="space-y-4">
