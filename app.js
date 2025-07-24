@@ -195,7 +195,7 @@ function startQuiz() {
     }
     currentQuestionIndex = 0;
     userAnswers = new Array(allQuestions.length).fill(null);
-    eliminatedAnswers = Array.from({ length: allQuestions.length }, () => []); // <-- CORREÇÃO APLICADA
+    eliminatedAnswers = Array.from({ length: allQuestions.length }, () => []);
 
     selectionArea.classList.add('hidden');
     quizArea.classList.remove('hidden');
@@ -226,12 +226,14 @@ function renderCurrentQuestion() {
     ];
 
     const questionElement = document.createElement('div');
-    questionElement.className = 'bg-[var(--card-bg-color)] p-6 sm:p-8 rounded-xl shadow-lg';
+    // CORREÇÃO: Padding do card reduzido de p-6 para p-4 em telas pequenas
+    questionElement.className = 'bg-[var(--card-bg-color)] p-4 sm:p-8 rounded-xl shadow-lg';
     
     let optionsHTML = '';
     options.forEach(option => {
         const isEliminated = currentEliminated.includes(option.letter);
-        let optionClass = 'option flex-1 flex items-center space-x-4 p-4 border-2 border-[var(--border-color)] rounded-lg transition-all duration-200';
+        // CORREÇÃO: Padding da alternativa reduzido de p-4 para p-3 e espaçamento de space-x-4 para space-x-3
+        let optionClass = 'option flex-1 flex items-center space-x-3 p-3 border-2 border-[var(--border-color)] rounded-lg transition-all duration-200';
         if (!isAnswered) optionClass += ' cursor-pointer';
         if (isEliminated) optionClass += ' eliminated';
         if (isAnswered) {
