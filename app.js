@@ -195,8 +195,8 @@ function startQuiz() {
     }
     currentQuestionIndex = 0;
     userAnswers = new Array(allQuestions.length).fill(null);
-    eliminatedAnswers = new Array(allQuestions.length).fill([]);
-    
+    eliminatedAnswers = Array.from({ length: allQuestions.length }, () => []); // <-- CORREÇÃO APLICADA
+
     selectionArea.classList.add('hidden');
     quizArea.classList.remove('hidden');
     navigationDiv.classList.remove('hidden');
