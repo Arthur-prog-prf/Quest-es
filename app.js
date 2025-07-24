@@ -123,6 +123,7 @@ questionsArea.addEventListener('touchend', handleTouchEnd);
 
 async function popularFiltros() {
     try {
+        // CORREÇÃO: Removida a busca por metadados desnecessários
         const { data, error } = await supabase.from('questoes').select('materia, assunto');
         if (error) throw error;
         materiasEAssuntos = data;
@@ -226,21 +227,33 @@ function renderCurrentQuestion() {
     ];
 
     const questionElement = document.createElement('div');
-    // CORREÇÃO: Padding do card reduzido de p-6 para p-4 em telas pequenas
-    questionElement.className = 'bg-[var(--card-bg-color)] p-4 sm:p-8 rounded-xl shadow-lg';
+    questionElement.className = 'bg-[var(--card-bg-color)] sm:rounded-xl shadow-lg';
     
+    // Pergunta
+    const questionTextHTML = `
+        <div class="question text-xl font-semibold p-4">${question.pergunta}</div>
+    `;
+
+    // Alternativas
     let optionsHTML = '';
     options.forEach(option => {
         const isEliminated = currentEliminated.includes(option.letter);
-        // CORREÇÃO: Padding da alternativa reduzido de p-4 para p-3 e espaçamento de space-x-4 para space-x-3
-        let optionClass = 'option flex-1 flex items-center space-x-3 p-3 border-2 border-[var(--border-color)] rounded-lg transition-all duration-200';
+        
+        let optionClass = 'option flex items-center space-x-4 p-4 border-t border-[var(--border-color)] transition-all duration-200';
         if (!isAnswered) optionClass += ' cursor-pointer';
+        
         if (isEliminated) optionClass += ' eliminated';
         if (isAnswered) {
             if (option.letter === question.gabarito) optionClass += ' correct';
             else if (option.letter === userAnswerLetter) optionClass += ' incorrect';
         }
         
+        const letterCircle = `
+            <div class="option-letter-circle flex-shrink-0 bg-gray-100 dark:bg-gray-700 rounded-full h-8 w-8 flex items-center justify-center font-bold transition-colors">
+                ${option.letter}
+            </div>
+        `;
+
         optionsHTML += `
             <div class="option-container">
                 <div class="swipe-reveal">
@@ -248,36 +261,37 @@ function renderCurrentQuestion() {
                         <circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line>
                     </svg>
                 </div>
-                <div class="option-content flex items-center space-x-3">
-                    <button class="eliminate-btn p-2 rounded-full transition-all ${isEliminated ? 'active' : ''}" data-eliminate-letter="${option.letter}">
+                <div class="option-content flex items-center">
+                    <button class="eliminate-btn p-3 rounded-full transition-all ${isEliminated ? 'active' : ''}" data-eliminate-letter="${option.letter}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-500 dark:text-gray-400">
                             <circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line>
                         </svg>
                     </button>
                     <div class="${optionClass}" data-option-letter="${option.letter}">
-                        <span class="option-letter font-bold text-lg">${option.letter})</span> 
+                        ${letterCircle}
                         <span class="option-text flex-1">${option.text}</span>
                     </div>
                 </div>
             </div>
         `;
     });
-
-    const resolverBtnHTML = !isAnswered ? `<button id="resolver-btn" disabled class="mt-6 w-full text-white bg-gray-400 font-bold py-3 px-4 rounded-lg transition-all duration-300 cursor-not-allowed">Resolver</button>` : '';
-
-    questionElement.innerHTML = `
-        <div class="question text-xl font-semibold mb-6 pb-4 border-b border-[var(--border-color)]">${question.pergunta}</div>
-        <div class="options space-y-4">${optionsHTML}</div>
-        ${resolverBtnHTML}
-        ${isAnswered ? `
-            <div class="feedback mt-6 text-lg font-semibold ${userAnswerLetter === question.gabarito ? 'correct-feedback' : 'incorrect-feedback'}">
-                ${userAnswerLetter === question.gabarito ? '✓ Resposta Correta!' : '✗ Resposta Incorreta!'}
-            </div>
-            <button class="fundamentacao-btn mt-4 w-full text-white bg-[var(--primary-color)] hover:bg-[var(--primary-hover-color)] font-bold py-3 px-4 rounded-lg transition">ℹ️ Ver Fundamentação</button>
-            <div class="fundamentacao mt-4 p-4 rounded-lg border-l-4 border-[var(--primary-color)]" style="background-color: var(--fundamentacao-bg); color: var(--fundamentacao-text); display: none;">${question.fundamentacao}</div>
-        ` : ''}
+    
+    // Botões e Feedback
+    const actionsHTML = `
+        <div class="p-4">
+            ${!isAnswered ? `<button id="resolver-btn" disabled class="w-full text-white bg-gray-400 font-bold py-3 px-4 rounded-lg transition-all duration-300 cursor-not-allowed">Resolver</button>` : ''}
+            ${isAnswered ? `
+                <div class="feedback mb-4 text-lg font-semibold ${userAnswerLetter === question.gabarito ? 'correct-feedback' : 'incorrect-feedback'}">
+                    ${userAnswerLetter === question.gabarito ? '✓ Resposta Correta!' : '✗ Resposta Incorreta!'}
+                </div>
+                <button class="fundamentacao-btn w-full text-white bg-[var(--primary-color)] hover:bg-[var(--primary-hover-color)] font-bold py-3 px-4 rounded-lg transition">ℹ️ Ver Fundamentação</button>
+                <div class="fundamentacao mt-4 p-4 rounded-lg border-l-4 border-[var(--primary-color)]" style="background-color: var(--fundamentacao-bg); color: var(--fundamentacao-text); display: none;">${question.fundamentacao}</div>
+            ` : ''}
+        </div>
     `;
 
+    // CORREÇÃO: Removido o 'metadataHTML' da renderização
+    questionElement.innerHTML = questionTextHTML + `<div class="options">${optionsHTML}</div>` + actionsHTML;
     questionsArea.appendChild(questionElement);
 
     if (!isAnswered) {
@@ -287,8 +301,9 @@ function renderCurrentQuestion() {
         optionElements.forEach(el => {
             el.addEventListener('click', () => {
                 if (el.classList.contains('eliminated')) return;
-                optionElements.forEach(opt => opt.classList.remove('ring-2', 'ring-[var(--primary-color)]'));
-                el.classList.add('ring-2', 'ring-[var(--primary-color)]');
+                document.querySelectorAll('.option-letter-circle').forEach(c => c.classList.remove('ring-2', 'ring-[var(--primary-color)]'));
+                el.querySelector('.option-letter-circle').classList.add('ring-2', 'ring-[var(--primary-color)]');
+                
                 tempSelectedAnswer = el.dataset.optionLetter;
                 resolverBtn.disabled = false;
                 resolverBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
@@ -301,7 +316,7 @@ function renderCurrentQuestion() {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 toggleEliminate(btn.dataset.eliminateLetter);
-                renderCurrentQuestion(); // Redesenha após o clique no desktop
+                renderCurrentQuestion();
             });
         });
 
