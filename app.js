@@ -248,8 +248,9 @@ function renderCurrentQuestion() {
             else if (option.letter === userAnswerLetter) optionClass += ' incorrect';
         }
         
+        // CORREÇÃO: Cor de fundo alterada para bg-gray-200 e cores de texto definidas explicitamente
         const letterCircle = `
-            <div class="option-letter-circle flex-shrink-0 bg-gray-100 dark:bg-gray-700 rounded-full h-8 w-8 flex items-center justify-center font-bold transition-colors">
+            <div class="option-letter-circle flex-shrink-0 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 rounded-full h-8 w-8 flex items-center justify-center font-bold transition-colors">
                 ${option.letter}
             </div>
         `;
@@ -290,7 +291,6 @@ function renderCurrentQuestion() {
         </div>
     `;
 
-    // CORREÇÃO: Removido o 'metadataHTML' da renderização
     questionElement.innerHTML = questionTextHTML + `<div class="options">${optionsHTML}</div>` + actionsHTML;
     questionsArea.appendChild(questionElement);
 
