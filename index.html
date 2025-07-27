@@ -80,12 +80,10 @@
             overflow-x: hidden; /* Prevenir scroll horizontal */
         }
 
-        /* MELHORIA: Adiciona borda no cabeçalho no modo escuro para separação */
         .dark-mode header {
             border-bottom: 1px solid var(--border-color);
         }
 
-        /* Remove o realce de toque padrão em navegadores móveis */
         .header-btn, .option, .nav-btn {
             -webkit-tap-highlight-color: transparent !important;
         }
@@ -100,94 +98,106 @@
         .option-container {
             position: relative;
             overflow: hidden;
-            border-radius: 0.5rem; /* 8px */
+            border-radius: 0.5rem;
         }
         .swipe-reveal {
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            display: flex;
-            align-items: center;
-            padding: 0 1.25rem; /* 20px */
-            background-color: var(--swipe-reveal-bg);
-            color: white;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            position: absolute; left: 0; top: 0; bottom: 0; display: flex; align-items: center; padding: 0 1.25rem;
+            background-color: var(--swipe-reveal-bg); color: white; opacity: 0; transition: opacity 0.3s ease;
         }
         .option-content.swiping {
-             transition: none; /* Remove a transição durante o arraste */
+             transition: none;
         }
         .option-content {
-            position: relative;
-            background-color: var(--card-bg-color);
-            transition: transform 0.2s ease, background-color 0.2s ease;
-            width: 100%;
+            position: relative; background-color: var(--card-bg-color);
+            transition: transform 0.2s ease, background-color 0.2s ease; width: 100%;
         }
         
         .option-content.is-selected {
             background-color: var(--option-active-bg);
         }
 
-        /* MELHORIA: Destaca o círculo da letra na alternativa selecionada */
         .option-content.is-selected .option-letter-circle {
-            background-color: var(--primary-color) !important;
-            color: #ffffff !important;
+            background-color: var(--primary-color) !important; color: #ffffff !important;
         }
         .dark-mode .option-content.is-selected .option-letter-circle {
              color: var(--card-bg-color) !important;
         }
 
-
         .option.eliminated {
-            background-color: var(--eliminated-bg-color);
-            border-style: dashed;
+            background-color: var(--eliminated-bg-color); border-style: dashed;
         }
         .option.eliminated .option-text {
-            text-decoration: line-through;
-            font-style: italic;
-            color: var(--eliminated-text-color);
+            text-decoration: line-through; font-style: italic; color: var(--eliminated-text-color);
         }
         .option.eliminated .option-letter-circle {
-            background-color: transparent !important;
-            color: var(--eliminated-text-color);
+            background-color: transparent !important; color: var(--eliminated-text-color);
         }
 
         .option.correct {
-            background-color: var(--correct-bg) !important;
-            border-color: var(--correct-border) !important;
+            background-color: var(--correct-bg) !important; border-color: var(--correct-border) !important;
             color: var(--correct-text) !important;
         }
         .option.incorrect {
-            background-color: var(--incorrect-bg) !important;
-            border-color: var(--incorrect-border) !important;
+            background-color: var(--incorrect-bg) !important; border-color: var(--incorrect-border) !important;
             color: var(--incorrect-text) !important;
         }
         .correct-feedback { color: var(--correct-border); }
         .incorrect-feedback { color: var(--incorrect-border); }
 
         #go-to-question.error {
-            border-color: #ef4444;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
-            color: #b91c1c;
+            border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3); color: #b91c1c;
         }
         .dark-mode #go-to-question.error {
-            border-color: #f87171;
-            color: #fecaca;
+            border-color: #f87171; color: #fecaca;
         }
 
         .eliminate-btn {
-            display: none; /* Escondido por padrão */
-            flex-shrink: 0;
-            cursor: pointer;
+            display: none; flex-shrink: 0; cursor: pointer;
         }
         .eliminate-btn.active {
-            opacity: 1;
-            visibility: visible;
+            opacity: 1; visibility: visible;
         }
         .eliminate-btn.active svg {
             color: var(--primary-color);
         }
+
+        /* --- NOVAS ANIMAÇÕES --- */
+        @keyframes flash-correct {
+            50% { background-color: var(--card-bg-color); }
+        }
+        @keyframes flash-incorrect {
+            50% { background-color: var(--card-bg-color); }
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px -1px var(--primary-color), 0 0 12px -2px var(--primary-color); }
+            50% { box-shadow: 0 0 10px 0px var(--primary-color), 0 0 20px 0px var(--primary-color); }
+        }
+        @keyframes slide-in-from-right {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slide-out-to-left {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(-50px); opacity: 0; }
+        }
+        @keyframes slide-in-from-left {
+            from { transform: translateX(-50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slide-out-to-right {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(50px); opacity: 0; }
+        }
+
+        /* Classes para aplicar animações */
+        .option.flash-correct { animation: flash-correct 0.5s 2; }
+        .option.flash-incorrect { animation: flash-incorrect 0.5s 2; }
+        #resolver-btn.pulse-glow { animation: pulse-glow 1.5s infinite; }
+        
+        #quiz-area.slide-out-left { animation: slide-out-to-left 0.25s ease-in forwards; }
+        #quiz-area.slide-in-right { animation: slide-in-from-right 0.25s ease-out forwards; }
+        #quiz-area.slide-out-right { animation: slide-out-to-right 0.25s ease-in forwards; }
+        #quiz-area.slide-in-left { animation: slide-in-from-left 0.25s ease-out forwards; }
 
         @media (hover: hover) and (pointer: fine) {
             .header-btn:hover, .nav-btn:hover {
@@ -200,19 +210,15 @@
             }
             
             .option-container:not(.is-answered) .option-content:not(.is-selected):hover {
-                transform: scale(1.01);
-                z-index: 10;
+                transform: scale(1.01); z-index: 10;
             }
 
             .eliminate-btn {
-                display: block; /* Mostra o botão no desktop */
-                opacity: 0;
-                visibility: hidden;
+                display: block; opacity: 0; visibility: hidden;
                 transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
             }
             .option-content:hover .eliminate-btn {
-                opacity: 1;
-                visibility: visible;
+                opacity: 1; visibility: visible;
             }
         }
     </style>
@@ -240,7 +246,6 @@
 
     <!-- CONTEÚDO PRINCIPAL -->
     <main class="pt-24 pb-24">
-        <!-- Removido padding horizontal em telas pequenas para layout full-width -->
         <div class="max-w-3xl mx-auto px-0 sm:px-6 lg:px-8">
             
             <!-- ÁREA DE SELEÇÃO INICIAL -->
