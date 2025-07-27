@@ -96,7 +96,7 @@
         }
 
         .option-container { position: relative; overflow: hidden; border-radius: 0.5rem; }
-        .swipe-reveal { position: absolute; left: 0; top: 0; bottom: 0; display: flex; align-items: center; padding: 0 1.25rem; background-color: var(--swipe-reveal-bg); color: white; opacity: 0; transition: opacity 0.3s ease; }
+        
         .option-content.swiping { transition: none; }
         .option-content { position: relative; background-color: var(--card-bg-color); transition: transform 0.2s ease, background-color 0.2s ease; width: 100%; }
         .option-content.is-selected { background-color: var(--option-active-bg); }
@@ -116,24 +116,53 @@
         .progress-dot.incorrect { background-color: var(--incorrect-border); }
         .progress-dot.current { box-shadow: 0 0 0 2px var(--card-bg-color), 0 0 0 4px var(--primary-color); }
 
-        /* --- NOVOS ESTILOS PARA QUALIDADE DE VIDA --- */
+        /* --- ALTERAÇÃO: ESTILOS PARA SEPARAR MOBILE E DESKTOP --- */
+        /* Por padrão (mobile), esconde o botão de desktop */
+        .eliminate-btn {
+            display: none;
+        }
+        /* A área de swipe existe mas fica invisível até ser ativada pelo JS */
+        .swipe-reveal {
+            position: absolute; left: 0; top: 0; bottom: 0;
+            display: flex;
+            align-items: center; padding: 0 1.25rem;
+            background-color: var(--swipe-reveal-bg); color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none; /* Não interfere com cliques */
+        }
+        
         #toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; }
         .toast { padding: 1rem; border-radius: 0.5rem; color: white; font-weight: 600; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); animation: toast-in 0.3s ease-out forwards; }
         .toast.error { background-color: #ef4444; }
         .toast.success { background-color: #22c55e; }
         @keyframes toast-in { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
         #skeleton-loader .skeleton-box { background-color: var(--border-color); border-radius: 0.25rem; animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 50% { opacity: .5; } }
-
         .modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 50; display: flex; align-items: center; justify-content: center; }
 
+        /* Media query para DESKTOP (dispositivos com rato e hover) */
         @media (hover: hover) and (pointer: fine) {
+            /* Em desktop, esconde a área de swipe e mostra o botão de eliminar no hover */
+            .swipe-reveal {
+                display: none;
+            }
+            .eliminate-btn {
+                display: block;
+                flex-shrink: 0;
+                cursor: pointer;
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+            }
+            .option-content:hover .eliminate-btn {
+                opacity: 1;
+                visibility: visible;
+            }
+
             .header-btn:hover, .nav-btn:hover { background-color: var(--header-btn-active-bg); }
             #start-btn:hover:not(:disabled), .results-btn:hover, .modal-btn:hover { background-color: var(--primary-hover-color); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); transform: translateY(-2px); }
             .option-container:not(.is-answered) .option-content:not(.is-selected):hover { transform: scale(1.01); z-index: 10; }
-            .eliminate-btn { display: block; opacity: 0; visibility: hidden; transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out; }
-            .option-content:hover .eliminate-btn { opacity: 1; visibility: visible; }
         }
     </style>
 </head>
@@ -198,11 +227,9 @@
                 </div>
             </div>
 
-            <!-- NOVO: SKELETON LOADER -->
+            <!-- SKELETON LOADER -->
             <div id="skeleton-loader" class="hidden bg-[var(--card-bg-color)] p-4 sm:rounded-xl shadow-lg space-y-4">
-                <div class="skeleton-box h-8 w-3/4"></div>
-                <div class="skeleton-box h-4 w-1/2"></div>
-                <div class="border-t border-[var(--border-color)] my-4"></div>
+                <div class="skeleton-box h-8 w-3/4"></div><div class="skeleton-box h-4 w-1/2"></div><div class="border-t border-[var(--border-color)] my-4"></div>
                 <div class="space-y-3">
                     <div class="flex items-center space-x-4"><div class="skeleton-box h-8 w-8 rounded-full"></div><div class="skeleton-box h-6 flex-1"></div></div>
                     <div class="flex items-center space-x-4"><div class="skeleton-box h-8 w-8 rounded-full"></div><div class="skeleton-box h-6 flex-1"></div></div>
@@ -223,10 +250,10 @@
         </div>
     </div>
 
-    <!-- NOVO: CONTAINER DE NOTIFICAÇÕES (TOAST) -->
+    <!-- CONTAINER DE NOTIFICAÇÕES (TOAST) -->
     <div id="toast-container"></div>
     
-    <!-- NOVO: MODAL PARA RETOMAR PROGRESSO -->
+    <!-- MODAL PARA RETOMAR PROGRESSO -->
     <div id="resume-modal" class="hidden modal-overlay">
         <div class="bg-[var(--card-bg-color)] p-8 rounded-xl shadow-lg text-center max-w-sm w-full mx-4">
             <h2 class="text-2xl font-bold mb-4">Quiz em Andamento</h2>
