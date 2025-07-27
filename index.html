@@ -21,204 +21,222 @@
         :root {
             --font-size: 16px;
             /* Cores para o modo claro (padrão) */
-            --bg-color: #f3f4f6;
-            --text-color: #1f2937;
+            --bg-color: #f3f4f6; /* gray-100 */
+            --text-color: #1f2937; /* gray-800 */
             --card-bg-color: #ffffff;
-            --border-color: #d1d5db;
-            --primary-color: #3b82f6;
-            --primary-hover-color: #2563eb;
-            --primary-text-color: #ffffff;
-            --secondary-text-color: #4b5563;
-            --correct-bg: #dcfce7;
-            --correct-border: #22c55e;
-            --correct-text: #15803d;
-            --incorrect-bg: #fee2e2;
-            --incorrect-border: #ef4444;
-            --incorrect-text: #b91c1c;
-            --fundamentacao-bg: #f9fafb;
-            --fundamentacao-text: #374151;
-            --header-btn-active-bg: #e5e7eb;
-            --option-active-bg: #eff6ff;
-            --eliminated-text-color: #9ca3af;
-            --eliminated-bg-color: #f9fafb;
-            --swipe-reveal-bg: #3b82f6;
-            --option-circle-bg: #e5e7eb;
-            --option-circle-text: #374151;
+            --border-color: #d1d5db; /* gray-300 */
+            --primary-color: #3b82f6; /* blue-500 */
+            --primary-hover-color: #2563eb; /* blue-600 */
+            --correct-bg: #dcfce7; /* green-100 */
+            --correct-border: #86efac; /* green-300 */
+            --incorrect-bg: #fee2e2; /* red-100 */
+            --incorrect-border: #fca5a5; /* red-300 */
+            --selected-bg: #e0e7ff; /* indigo-100 */
+            --selected-border: #a5b4fc; /* indigo-300 */
+            --btn-bg-color: #e5e7eb; /* gray-200 */
+            --btn-text-color: #374151; /* gray-700 */
+            --btn-hover-bg-color: #d1d5db; /* gray-300 */
         }
 
         .dark-mode {
             /* Cores para o modo escuro */
-            --bg-color: #111827;
-            --text-color: #f9fafb;
-            --card-bg-color: #1f2937;
-            --border-color: #4b5563;
-            --primary-color: #60a5fa;
-            --primary-hover-color: #3b82f6;
-            --primary-text-color: #111827;
-            --secondary-text-color: #9ca3af;
-            --correct-bg: #166534;
-            --correct-border: #4ade80;
-            --correct-text: #ecfdf5;
-            --incorrect-bg: #991b1b;
-            --incorrect-border: #f87171;
-            --incorrect-text: #fef2f2;
-            --fundamentacao-bg: #374151;
-            --fundamentacao-text: #d1d5db;
-            --header-btn-active-bg: #374151;
-            --option-active-bg: #374151;
-            --eliminated-text-color: #4b5563;
-            --eliminated-bg-color: #1f2937;
-            --swipe-reveal-bg: #2563eb;
-            --option-circle-bg: #374151;
-            --option-circle-text: #d1d5db;
+            --bg-color: #111827; /* gray-900 */
+            --text-color: #f9fafb; /* gray-50 */
+            --card-bg-color: #1f2937; /* gray-800 */
+            --border-color: #4b5563; /* gray-600 */
+            --primary-color: #60a5fa; /* blue-400 */
+            --primary-hover-color: #3b82f6; /* blue-500 */
+            --correct-bg: #14532d; /* green-900 */
+            --correct-border: #22c55e; /* green-500 */
+            --incorrect-bg: #7f1d1d; /* red-900 */
+            --incorrect-border: #ef4444; /* red-500 */
+            --selected-bg: #3730a3; /* indigo-900 */
+            --selected-border: #6366f1; /* indigo-500 */
+            --btn-bg-color: #374151; /* gray-700 */
+            --btn-text-color: #d1d5db; /* gray-300 */
+            --btn-hover-bg-color: #4b5563; /* gray-600 */
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            font-size: var(--font-size);
             background-color: var(--bg-color);
             color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            font-size: var(--font-size);
             transition: background-color 0.3s, color 0.3s;
-            overflow-x: hidden;
+        }
+        
+        /* Estilos para os botões de navegação */
+        .nav-btn {
+            background-color: var(--btn-bg-color);
+            color: var(--btn-text-color);
+            border: 1px solid var(--border-color);
+        }
+        .nav-btn:hover:not(:disabled) {
+            background-color: var(--btn-hover-bg-color);
         }
 
-        .dark-mode header { border-bottom: 1px solid var(--border-color); }
-        .header-btn, .option, .nav-btn { -webkit-tap-highlight-color: transparent !important; }
-        .header-btn:active, .nav-btn:active { background-color: var(--header-btn-active-bg) !important; }
-        .option:not(.eliminated):active { background-color: var(--option-active-bg) !important; }
-
-        /* --- ESTILOS REFINADOS --- */
-        .question-container { background-color: var(--card-bg-color); }
-        .dark-mode .question-container { background-color: #161e2b; } /* Fundo mais escuro para a pergunta */
-        
-        .option-content.is-selected { background-color: var(--option-active-bg); }
-        .option-content.is-selected .option-letter-circle { background-color: var(--primary-color) !important; color: var(--primary-text-color) !important; }
-        
-        .option.correct { background-color: var(--correct-bg) !important; border-color: var(--correct-border) !important; color: var(--correct-text) !important; }
-        .option.incorrect { background-color: var(--incorrect-bg) !important; border-color: var(--incorrect-border) !important; color: var(--incorrect-text) !important; }
-
-        /* Barra de Progresso de Preenchimento */
-        .progress-bar-container { width: 100%; background-color: var(--border-color); border-radius: 8px; overflow: hidden; margin-bottom: 0.5rem; padding: 0; }
-        .progress-bar-fill { display: flex; height: 8px; }
-        .progress-segment { height: 100%; transition: background-color 0.3s ease; }
-        .progress-segment.correct { background-color: var(--correct-border); }
-        .progress-segment.incorrect { background-color: var(--incorrect-border); }
-
-        /* Botões de Ação com Hierarquia */
-        .btn-primary { background-color: var(--primary-color); color: var(--primary-text-color); font-weight: bold; padding: 0.75rem 1rem; border-radius: 0.5rem; transition: all 0.2s ease; }
-        .btn-primary:hover:not(:disabled) { background-color: var(--primary-hover-color); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); transform: translateY(-2px); }
-        .btn-secondary { background-color: transparent; color: var(--text-color); font-weight: bold; padding: 0.75rem 1rem; border-radius: 0.5rem; transition: all 0.2s ease; border: 2px solid var(--border-color); }
-        .btn-secondary:hover:not(:disabled) { background-color: var(--header-btn-active-bg); border-color: var(--secondary-text-color); }
-        .btn-tertiary { color: var(--secondary-text-color); font-weight: bold; transition: color 0.2s ease; }
-        .btn-tertiary:hover { color: var(--primary-color); }
-
-        /* Navegação Inferior com Sombra Suave */
-        .navigation { box-shadow: 0 -5px 20px -5px rgba(0,0,0,0.1); }
-        .dark-mode .navigation { box-shadow: 0 -5px 20px -5px rgba(0,0,0,0.3); }
-
-        /* Estilos de swipe e outros omitidos para brevidade, mas mantidos do código anterior */
-        .option-container { position: relative; overflow: hidden; border-radius: 0.5rem; }
-        .option-content.swiping { transition: none; }
-        .option-content { position: relative; background-color: var(--card-bg-color); transition: transform 0.2s ease, background-color 0.2s ease; width: 100%; }
-        .swipe-reveal { position: absolute; left: 0; top: 0; bottom: 0; display: flex; align-items: center; padding: 0 1.25rem; background-color: var(--swipe-reveal-bg); color: white; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
-        .eliminate-btn { display: none; }
-        #toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; }
-        .toast { padding: 1rem; border-radius: 0.5rem; color: white; font-weight: 600; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); animation: toast-in 0.3s ease-out forwards; }
-        .toast.error { background-color: #ef4444; }
-        @keyframes toast-in { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        #skeleton-loader .skeleton-box { background-color: var(--border-color); border-radius: 0.25rem; animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse { 50% { opacity: .5; } }
-        .modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 50; display: flex; align-items: center; justify-content: center; }
-
-        @media (hover: hover) and (pointer: fine) {
-            .swipe-reveal { display: none; }
-            .eliminate-btn { display: block; flex-shrink: 0; cursor: pointer; opacity: 0; visibility: hidden; transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out; }
-            .option-content:hover .eliminate-btn { opacity: 1; visibility: visible; }
-            .header-btn:hover, .nav-btn:hover { background-color: var(--header-btn-active-bg); }
-            .option-container:not(.is-answered) .option-content:not(.is-selected):hover { transform: scale(1.01); z-index: 10; }
+        /* Estilos para o modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
         }
+
+        /* Estilo para Toast (Notificações) */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast-success { background-color: #22c55e; }
+        .toast-error { background-color: #ef4444; }
+        .toast-info { background-color: #3b82f6; }
+
     </style>
 </head>
-<body class="antialiased">
+<body class="min-h-screen">
 
-    <!-- CABEÇALHO FIXO -->
-    <header class="bg-[var(--card-bg-color)] shadow-md fixed top-0 left-0 right-0 z-20">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                    <svg class="h-8 w-8 text-[var(--primary-color)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18-3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
-                    <span class="ml-3 text-xl font-bold">Quiz Jurídico</span>
-                </div>
-                <div class="flex items-center space-x-2 sm:space-x-4">
-                    <!-- BOTÕES ATUALIZADOS COM ÍCONES -->
-                    <button id="decrease-font" class="header-btn p-2 rounded-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clip-rule="evenodd" /></svg>
-                    </button>
-                    <button id="increase-font" class="header-btn p-2 rounded-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" /></svg>
-                    </button>
-                    <button id="theme-toggle" class="header-btn p-2 rounded-full">
-                        <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>
-                        <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 14.95a1 1 0 010-1.414l.707-.707a1 1 0 011.414 1.414l-.707.707a1 1 0 01-1.414 0zM3 11a1 1 0 100-2H2a1 1 0 100 2h1z" clip-rule="evenodd" /></svg>
-                    </button>
+    <!-- NOVO CABEÇALHO SUPERIOR -->
+    <header class="bg-[var(--card-bg-color)] shadow-md px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <!-- Logo -->
+            <div class="flex-shrink-0">
+                <a href="#" class="text-2xl font-bold text-[var(--text-color)]">LOGO</a>
+            </div>
+
+            <!-- Título Central -->
+            <div class="flex-1 flex justify-center px-4">
+                 <h1 class="text-xl font-semibold text-[var(--text-color)] hidden sm:block">Plataforma de Questões</h1>
+            </div>
+
+            <!-- Ações e Perfil do Usuário -->
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-[var(--bg-color)] transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v11.494m-9-5.747h18" />
+                    </svg>
+                    <span class="hidden md:inline font-medium">Cadernos</span>
+                </button>
+                 <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-[var(--bg-color)] transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    <span class="hidden md:inline font-medium">Filtros</span>
+                </button>
+                 <button class="flex items-center space-x-2 p-2 rounded-lg hover:bg-[var(--bg-color)] transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span class="hidden md:inline font-medium">Configurações</span>
+                </button>
+
+                <div class="flex items-center space-x-3 border-l border-[var(--border-color)] pl-2 sm:pl-4">
+                    <img class="h-10 w-10 rounded-full object-cover" src="https://placehold.co/40x40/60a5fa/FFFFFF?text=H" alt="Avatar do usuário">
+                    <div class="hidden lg:block">
+                        <p class="text-sm font-medium">Olá, Hélio</p>
+                    </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- CONTEÚDO PRINCIPAL -->
-    <main class="pt-24 pb-24">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <!-- ÁREA DE SELEÇÃO INICIAL -->
-            <div id="selection-area" class="bg-[var(--card-bg-color)] p-8 rounded-xl shadow-lg space-y-8">
-                <div class="text-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-[var(--primary-color)] opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h10a2 2 0 002-2v-1a2 2 0 012-2h1.945M7.707 4.293a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L13 2.414V11h-2V2.414l-1.293 1.293a1 1 0 01-1.414 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2 4.5 2-4.5 2 4.5 2-4.5 2 4.5 2-4.5 2 4.5 2-4.5" /></svg>
-                    <h1 class="text-3xl font-bold tracking-tight mt-4">Bem-vindo à Plataforma</h1>
-                    <p class="mt-2 text-lg text-[var(--secondary-text-color)]">Selecione a matéria e o assunto para começar.</p>
-                </div>
-                <div class="space-y-4">
-                    <div><label for="materia-select" class="block text-sm font-medium mb-1">Matéria</label><div class="relative"><select id="materia-select" class="w-full p-3 border border-[var(--border-color)] rounded-lg bg-[var(--card-bg-color)] appearance-none focus:border-[var(--primary-color)] focus:ring-2 focus:ring-[var(--primary-color)] transition-all duration-200"><option value="">-- Carregando Matérias... --</option></select><div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[var(--secondary-text-color)]"><svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg></div></div></div>
-                    <div><label for="assunto-select" class="block text-sm font-medium mb-1">Assunto</label><div class="relative"><select id="assunto-select" disabled class="w-full p-3 border border-[var(--border-color)] rounded-lg bg-[var(--card-bg-color)] appearance-none focus:border-[var(--primary-color)] focus:ring-2 focus:ring-[var(--primary-color)] transition-all duration-200 disabled:opacity-50"><option value="">-- Escolha um Assunto --</option></select><div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[var(--secondary-text-color)]"><svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg></div></div></div>
-                </div>
-                <div class="pt-4"><button id="start-btn" disabled class="w-full btn-primary disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none">Iniciar Exercício</button></div>
+    <main class="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+        <!-- ÁREA DE SELEÇÃO DO QUIZ -->
+        <div id="selection-area" class="bg-[var(--card-bg-color)] p-6 sm:p-8 rounded-xl shadow-md space-y-6">
+            <div class="text-center">
+                <h2 class="text-2xl sm:text-3xl font-bold">Comece seu Exercício</h2>
+                <p class="text-gray-600 dark:text-gray-400 mt-2">Selecione a matéria e o assunto para iniciar.</p>
             </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="materia-select" class="block text-sm font-semibold mb-2">Matéria</label>
+                    <select id="materia-select" class="w-full p-3 rounded-lg border bg-[var(--bg-color)] border-[var(--border-color)] focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition"></select>
+                </div>
+                <div>
+                    <label for="assunto-select" class="block text-sm font-semibold mb-2">Assunto</label>
+                    <select id="assunto-select" class="w-full p-3 rounded-lg border bg-[var(--bg-color)] border-[var(--border-color)] focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition"></select>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                 <button id="start-btn" class="w-full sm:w-auto text-white bg-[var(--primary-color)] hover:bg-[var(--primary-hover-color)] font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800">
+                    Iniciar Quiz
+                </button>
+                <div id="loading" class="hidden text-center">
+                    <svg class="animate-spin h-8 w-8 text-[var(--primary-color)] mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="mt-2 font-semibold">Carregando questões...</p>
+                </div>
+            </div>
+        </div>
 
-            <!-- ÁREA DO QUIZ -->
-            <div id="quiz-area" class="hidden">
-                <div id="progress-bar-container" class="progress-bar-container"><div id="progress-bar-fill" class="progress-bar-fill"></div></div>
-                <div id="question-counter-text" class="text-center text-sm text-[var(--secondary-text-color)] mb-4"></div>
-                <div id="questions-area" class="space-y-4"></div>
-            </div>
-            
-            <!-- ÁREA DE RESULTADOS -->
-            <div id="results-area" class="hidden bg-[var(--card-bg-color)] p-8 rounded-xl shadow-lg text-center">
-                <h2 class="text-3xl font-bold tracking-tight">Seu Desempenho</h2>
-                <div class="relative my-6 flex items-center justify-center">
-                    <canvas id="results-chart" width="160" height="160"></canvas>
-                    <p id="score-percentage" class="absolute text-4xl font-bold text-[var(--primary-color)]">100%</p>
-                </div>
-                <p id="score-text" class="text-lg text-[var(--secondary-text-color)] mb-8">Você acertou 10 de 10 questões.</p>
-                <div class="space-y-4">
-                    <button id="review-errors-btn" class="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed">Revisar Questões Erradas</button>
-                    <button id="restart-quiz-btn" class="w-full btn-secondary">Refazer o Quiz Completo</button>
-                    <button id="new-quiz-btn" class="w-full btn-tertiary pt-4">Escolher Novo Quiz</button>
-                </div>
-            </div>
+        <!-- ÁREA DO QUIZ -->
+        <div id="quiz-area" class="hidden mt-6">
+            <div id="questions-area"></div>
+        </div>
 
-            <!-- SKELETON LOADER -->
-            <div id="skeleton-loader" class="hidden bg-[var(--card-bg-color)] p-4 sm:rounded-xl shadow-lg space-y-4">
-                <div class="skeleton-box h-8 w-3/4"></div><div class="skeleton-box h-4 w-1/2"></div><div class="border-t border-[var(--border-color)] my-4"></div>
-                <div class="space-y-3"><div class="flex items-center space-x-4"><div class="skeleton-box h-8 w-8 rounded-full"></div><div class="skeleton-box h-6 flex-1"></div></div><div class="flex items-center space-x-4"><div class="skeleton-box h-8 w-8 rounded-full"></div><div class="skeleton-box h-6 flex-1"></div></div><div class="flex items-center space-x-4"><div class="skeleton-box h-8 w-8 rounded-full"></div><div class="skeleton-box h-6 flex-1"></div></div><div class="flex items-center space-x-4"><div class="skeleton-box h-8 w-8 rounded-full"></div><div class="skeleton-box h-6 flex-1"></div></div></div>
+        <!-- ÁREA DE RESULTADOS -->
+        <div id="results-area" class="hidden mt-6 bg-[var(--card-bg-color)] p-6 sm:p-8 rounded-xl shadow-md text-center">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-4">Resultados do Quiz</h2>
+            <div id="results-summary" class="text-lg mb-6"></div>
+            <div id="results-chart-container" class="max-w-md mx-auto mb-6 h-64">
+                <canvas id="results-chart"></canvas>
             </div>
+            <div class="flex flex-wrap justify-center gap-3 sm:gap-4">
+                <button id="restart-btn" class="modal-btn bg-blue-500 hover:bg-blue-600">Refazer Quiz</button>
+                <button id="review-errors-btn" class="modal-btn bg-red-500 hover:bg-red-600">Revisar Erros</button>
+                <button id="new-quiz-btn" class="modal-btn bg-gray-600 hover:bg-gray-700">Novo Quiz</button>
+            </div>
+        </div>
+        
+        <!-- CONTROLES FLUTUANTES -->
+        <div id="floating-controls" class="fixed bottom-5 right-5 space-y-3 z-50">
+            <button id="theme-toggle-btn" class="control-btn">Modo Escuro</button>
+            <button id="decrease-font-btn" class="control-btn">-A</button>
+            <button id="increase-font-btn" class="control-btn">+A</button>
         </div>
     </main>
 
-    <!-- NAVEGAÇÃO FIXA INFERIOR -->
-    <div class="navigation hidden fixed bottom-0 left-0 right-0 bg-[var(--card-bg-color)]/80 backdrop-blur-sm border-t border-[var(--border-color)]">
-        <div class="max-w-3xl mx-auto px-2 sm:px-6 lg:px-8 flex items-center justify-between h-16 gap-2 sm:gap-4">
-            <button id="prev-btn" disabled class="nav-btn flex items-center justify-center space-x-1.5 px-2 sm:px-3 py-2 rounded-lg font-semibold transition disabled:opacity-50 flex-shrink-0"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg><span>Anterior</span></button>
-            <input type="number" id="go-to-question" placeholder="Ir para..." min="1" max="1" class="flex-1 sm:flex-none sm:w-32 text-center p-2 border-[var(--border-color)] rounded-lg bg-transparent focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition shadow-sm">
+    <!-- BARRA DE NAVEGAÇÃO INFERIOR (visível durante o quiz) -->
+    <div id="bottom-navigation" class="hidden sticky bottom-0 left-0 right-0 bg-[var(--card-bg-color)]/80 backdrop-blur-sm border-t border-[var(--border-color)] p-3 shadow-lg">
+        <div class="max-w-3xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+            <button id="prev-btn" class="nav-btn flex items-center justify-center space-x-1.5 px-2 sm:px-3 py-2 rounded-lg font-semibold transition disabled:opacity-50 flex-shrink-0"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg><span>Anterior</span></button>
+            
+            <div class="navigation flex-grow flex items-center justify-center text-sm font-medium">
+                <span class="whitespace-nowrap">Questão:</span>
+                <input type="number" id="go-to-question" class="w-16 mx-2 text-center rounded-md border border-[var(--border-color)] bg-transparent py-1.5 focus:ring-1 focus:ring-[var(--primary-color)]">
+                <span id="total-questions-span">de X</span>
+            </div>
+
             <button id="next-btn" class="nav-btn flex items-center justify-center space-x-1.5 px-2 sm:px-3 py-2 rounded-lg font-semibold transition disabled:opacity-50 flex-shrink-0"><span>Próxima</span><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg></button>
         </div>
     </div>
@@ -230,14 +248,16 @@
     <div id="resume-modal" class="hidden modal-overlay">
         <div class="bg-[var(--card-bg-color)] p-8 rounded-xl shadow-lg text-center max-w-sm w-full mx-4">
             <h2 class="text-2xl font-bold mb-4">Quiz em Andamento</h2>
-            <p class="text-[var(--secondary-text-color)] mb-6">Encontrámos um exercício que não foi finalizado. Deseja continuar de onde parou?</p>
+            <p class="text-gray-600 dark:text-gray-300 mb-6">Encontrámos um exercício que não foi finalizado. Deseja continuar de onde parou?</p>
             <div class="space-y-3">
-                <button id="resume-btn" class="w-full btn-primary">Sim, continuar</button>
-                <button id="start-new-btn" class="w-full btn-secondary">Não, começar um novo</button>
+                <button id="resume-btn" class="modal-btn w-full text-white bg-[var(--primary-color)] font-bold py-3 px-4 rounded-lg transition transform hover:scale-105">Continuar Exercício</button>
+                <button id="discard-btn" class="modal-btn w-full bg-transparent text-[var(--text-color)] hover:bg-[var(--btn-bg-color)] font-bold py-3 px-4 rounded-lg transition">Começar um Novo</button>
             </div>
         </div>
     </div>
 
+    <!-- Incluindo a biblioteca Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
