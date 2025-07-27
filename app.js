@@ -101,7 +101,8 @@ function handleTouchEnd() {
     if (deltaX > swipeThreshold) {
         const letter = swipedElement.querySelector('.option').dataset.optionLetter;
         toggleEliminate(letter);
-        renderCurrentQuestion(); // **CHAVE DA CORREÇÃO**: Redesenha a tela com o estado atualizado
+        // ALTERAÇÃO: Passa 'true' para preservar a seleção ao redesenhar
+        renderCurrentQuestion(true); 
     } else {
         swipedElement.classList.remove('swiping');
         swipedElement.style.transform = 'translateX(0px)';
@@ -208,10 +209,15 @@ function startQuiz() {
     setupQuestionNavigation();
 }
 
-function renderCurrentQuestion() {
+// ALTERAÇÃO: A função agora aceita um parâmetro para saber se deve preservar a seleção
+function renderCurrentQuestion(preserveSelection = false) {
     questionsArea.innerHTML = '';
     updateProgress();
-    tempSelectedAnswer = null;
+    
+    // ALTERAÇÃO: A seleção temporária só é limpa se não for para preservá-la
+    if (!preserveSelection) {
+        tempSelectedAnswer = null;
+    }
 
     const question = allQuestions[currentQuestionIndex];
     const isAnswered = userAnswers[currentQuestionIndex] !== null;
@@ -228,19 +234,14 @@ function renderCurrentQuestion() {
     const questionElement = document.createElement('div');
     questionElement.className = 'bg-[var(--card-bg-color)] sm:rounded-xl shadow-lg';
     
-    // Pergunta
     const questionTextHTML = `
         <div class="question text-xl font-semibold p-4">${question.pergunta}</div>
     `;
 
-    // Alternativas
     let optionsHTML = '';
     options.forEach(option => {
         const isEliminated = currentEliminated.includes(option.letter);
-        
-        // Adiciona uma classe ao container se a questão já foi respondida, para controlar o efeito hover via CSS
         const containerClass = isAnswered ? 'option-container is-answered' : 'option-container';
-
         let optionClass = 'option flex flex-1 items-center space-x-4 p-4 border-t border-[var(--border-color)] transition-all duration-200';
         if (!isAnswered) optionClass += ' cursor-pointer';
         
@@ -250,8 +251,9 @@ function renderCurrentQuestion() {
             else if (option.letter === userAnswerLetter) optionClass += ' incorrect';
         }
         
+        // ALTERAÇÃO: Adiciona a classe de anel de seleção se a alternativa corresponder à seleção temporária
         const letterCircle = `
-            <div class="option-letter-circle flex-shrink-0 rounded-full h-8 w-8 flex items-center justify-center font-bold transition-colors" style="background-color: var(--option-circle-bg); color: var(--option-circle-text);">
+            <div class="option-letter-circle flex-shrink-0 rounded-full h-8 w-8 flex items-center justify-center font-bold transition-colors ${tempSelectedAnswer === option.letter ? 'ring-2 ring-[var(--primary-color)]' : ''}" style="background-color: var(--option-circle-bg); color: var(--option-circle-text);">
                 ${option.letter}
             </div>
         `;
@@ -278,10 +280,11 @@ function renderCurrentQuestion() {
         `;
     });
     
-    // Botões e Feedback
+    // ALTERAÇÃO: O estado do botão "Resolver" agora depende diretamente de `tempSelectedAnswer`
+    const resolverBtnEnabled = tempSelectedAnswer !== null;
     const actionsHTML = `
         <div class="p-4">
-            ${!isAnswered ? `<button id="resolver-btn" disabled class="w-full text-white bg-gray-400 font-bold py-3 px-4 rounded-lg transition-all duration-300 cursor-not-allowed">Resolver</button>` : ''}
+            ${!isAnswered ? `<button id="resolver-btn" ${!resolverBtnEnabled ? 'disabled' : ''} class="w-full text-white ${resolverBtnEnabled ? 'bg-[var(--primary-color)] hover:bg-[var(--primary-hover-color)]' : 'bg-gray-400 cursor-not-allowed'} font-bold py-3 px-4 rounded-lg transition-all duration-300">Resolver</button>` : ''}
             ${isAnswered ? `
                 <div class="feedback mb-4 text-lg font-semibold ${userAnswerLetter === question.gabarito ? 'correct-feedback' : 'incorrect-feedback'}">
                     ${userAnswerLetter === question.gabarito ? '✓ Resposta Correta!' : '✗ Resposta Incorreta!'}
@@ -317,7 +320,8 @@ function renderCurrentQuestion() {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 toggleEliminate(btn.dataset.eliminateLetter);
-                renderCurrentQuestion();
+                // ALTERAÇÃO: Passa 'true' para preservar a seleção ao redesenhar
+                renderCurrentQuestion(true);
             });
         });
 
