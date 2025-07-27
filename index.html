@@ -41,7 +41,6 @@
             --eliminated-bg-color: #f9fafb; /* gray-50 */
             --swipe-reveal-bg: #3b82f6; /* blue-500 */
             
-            /* CORREÇÃO: Novas variáveis para o círculo da alternativa */
             --option-circle-bg: #e5e7eb; /* gray-200 */
             --option-circle-text: #374151; /* gray-700 */
         }
@@ -63,12 +62,11 @@
             --fundamentacao-bg: #374151;
             --fundamentacao-text: #d1d5db;
             --header-btn-active-bg: #374151; /* gray-700 */
-            --option-active-bg: #1f2937; /* Mesma cor do card, mas o scale vai diferenciar */
+            --option-active-bg: #374151; /* gray-700 */
             --eliminated-text-color: #4b5563; /* gray-600 */
             --eliminated-bg-color: #1f2937; /* gray-800 */
             --swipe-reveal-bg: #2563eb; /* blue-600 */
 
-            /* CORREÇÃO: Novas variáveis para o círculo da alternativa */
             --option-circle-bg: #374151; /* gray-700 */
             --option-circle-text: #d1d5db; /* gray-300 */
         }
@@ -119,9 +117,13 @@
         .option-content {
             position: relative;
             background-color: var(--card-bg-color);
-            /* ALTERAÇÃO: Adicionada transição para background-color e transform */
             transition: transform 0.2s ease, background-color 0.2s ease;
             width: 100%;
+        }
+        
+        /* Estilo que define a cor de fundo para a alternativa selecionada */
+        .option-content.is-selected {
+            background-color: var(--option-active-bg);
         }
 
         /* Estilos para a alternativa eliminada */
@@ -188,9 +190,8 @@
                 transform: translateY(-2px);
             }
             
-            /* NOVO EFEITO HOVER PARA AS ALTERNATIVAS */
-            .option-container:not(.is-answered) .option-content:hover {
-                background-color: var(--option-active-bg);
+            /* Efeito Hover para as alternativas (não selecionadas) */
+            .option-container:not(.is-answered) .option-content:not(.is-selected):hover {
                 transform: scale(1.01);
                 z-index: 10;
             }
