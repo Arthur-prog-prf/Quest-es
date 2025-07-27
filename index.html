@@ -161,7 +161,7 @@
         
         /* ESTILOS PARA BARRA DE PROGRESSO */
         .progress-bar {
-            display: flex; gap: 4px; margin-bottom: 1rem; padding: 0 4px;
+            display: flex; gap: 4px; margin-bottom: 0.5rem; /* Reduzido o espaçamento */ padding: 0 4px;
         }
         .progress-dot {
             flex-grow: 1; height: 8px; background-color: var(--border-color);
@@ -256,12 +256,14 @@
             <!-- ÁREA DO QUIZ -->
             <div id="quiz-area" class="hidden">
                 <div id="progress-bar" class="progress-bar"></div>
+                <!-- NOVO ELEMENTO PARA O TEXTO DO CONTADOR -->
+                <div id="question-counter-text" class="text-center text-sm text-gray-500 dark:text-gray-400 mb-4"></div>
                 <div id="questions-area" class="space-y-4">
                     <!-- As questões serão renderizadas aqui pelo app.js -->
                 </div>
             </div>
             
-            <!-- NOVA ÁREA DE RESULTADOS -->
+            <!-- ÁREA DE RESULTADOS -->
             <div id="results-area" class="hidden bg-[var(--card-bg-color)] p-8 rounded-xl shadow-lg text-center">
                 <h2 class="text-3xl font-bold tracking-tight">Seu Desempenho</h2>
                 <p id="score-percentage" class="text-5xl font-bold my-4 text-[var(--primary-color)]">100%</p>
