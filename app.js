@@ -85,7 +85,6 @@ function loadProgress() {
     const savedProgress = localStorage.getItem('quizProgress');
     if (savedProgress) {
         const progress = JSON.parse(savedProgress);
-        // Se o progresso tiver mais de 24 horas, ignora
         const oneDay = 24 * 60 * 60 * 1000;
         if (new Date().getTime() - progress.timestamp > oneDay) {
             clearProgress();
@@ -117,7 +116,6 @@ function loadProgress() {
             clearProgress();
             resumeModal.classList.add('hidden');
         };
-
     }
 }
 
@@ -126,20 +124,111 @@ function loadProgress() {
 // =================================================================
 let touchStartX = 0, touchStartY = 0, currentX = 0, swipedElement = null, swipeDirection;
 const swipeThreshold = 80;
-function handleTouchStart(e) { /* ... */ }
-function handleTouchMove(e) { /* ... */ }
-function handleTouchEnd() { /* ... */ }
+
+function handleTouchStart(e) {
+    const target = e.target.closest('.option-content');
+    if (!target || userAnswers[currentQuestionIndex] !== null) return;
+    swipedElement = target;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    currentX = touchStartX;
+    swipeDirection = undefined;
+}
+
+function handleTouchMove(e) {
+    if (!swipedElement) return;
+    const deltaX = e.touches[0].clientX - touchStartX;
+    const deltaY = e.touches[0].clientY - touchStartY;
+    if (swipeDirection === undefined) {
+        if (Math.abs(deltaX) > Math.abs(deltaY) + 5) {
+            swipeDirection = 'horizontal';
+            swipedElement.classList.add('swiping');
+            const revealElement = swipedElement.previousElementSibling;
+            if (revealElement) revealElement.style.opacity = '1';
+        } else {
+            swipeDirection = 'vertical';
+        }
+    }
+    if (swipeDirection === 'horizontal') {
+        e.preventDefault();
+        let newX = deltaX;
+        if (newX < 0) newX = 0;
+        swipedElement.style.transform = `translateX(${newX}px)`;
+        currentX = e.touches[0].clientX;
+    }
+}
+
+function handleTouchEnd() {
+    if (!swipedElement || swipeDirection !== 'horizontal') {
+        if (swipedElement) {
+            swipedElement.classList.remove('swiping');
+            swipedElement.style.transform = 'translateX(0px)';
+            const revealElement = swipedElement.previousElementSibling;
+            if (revealElement) revealElement.style.opacity = '0';
+        }
+        swipedElement = null;
+        return;
+    };
+    const deltaX = currentX - touchStartX;
+    if (deltaX > swipeThreshold) {
+        const letter = swipedElement.querySelector('.option').dataset.optionLetter;
+        toggleEliminate(letter);
+        renderCurrentQuestion(true);
+    } else {
+        swipedElement.classList.remove('swiping');
+        swipedElement.style.transform = 'translateX(0px)';
+        const revealElement = swipedElement.previousElementSibling;
+        if (revealElement) revealElement.style.opacity = '0';
+    }
+    swipedElement = null;
+}
+
 questionsArea.addEventListener('touchstart', handleTouchStart, { passive: false });
 questionsArea.addEventListener('touchmove', handleTouchMove, { passive: false });
 questionsArea.addEventListener('touchend', handleTouchEnd);
-
 
 // =================================================================
 // FUNÇÕES PRINCIPAIS DO QUIZ
 // =================================================================
 
-async function popularFiltros() { /* ... */ }
-function popularAssuntos() { /* ... */ }
+async function popularFiltros() {
+    try {
+        const { data, error } = await supabase.from('questoes').select('materia, assunto');
+        if (error) throw error;
+        materiasEAssuntos = data;
+        const materiasUnicas = [...new Set(data.map(item => item.materia))];
+        materiaSelect.innerHTML = '<option value="">-- Selecione a Matéria --</option>';
+        materiasUnicas.forEach(materia => {
+            const option = document.createElement('option');
+            option.value = materia;
+            option.textContent = materia;
+            materiaSelect.appendChild(option);
+        });
+    } catch (error) {
+        showToast('Não foi possível carregar as matérias: ' + error.message);
+        materiaSelect.innerHTML = '<option value="">-- Erro ao carregar --</option>';
+    }
+}
+
+function popularAssuntos() {
+    const materiaSelecionada = materiaSelect.value;
+    assuntoSelect.innerHTML = '<option value="todos">-- Todos os Assuntos --</option>';
+    assuntoSelect.disabled = true;
+    
+    if (materiaSelecionada) {
+        const assuntosDaMateria = [...new Set(materiasEAssuntos
+            .filter(item => item.materia === materiaSelecionada)
+            .map(item => item.assunto)
+        )];
+        assuntosDaMateria.forEach(assunto => {
+            const option = document.createElement('option');
+            option.value = assunto;
+            option.textContent = assunto;
+            assuntoSelect.appendChild(option);
+        });
+        assuntoSelect.disabled = false;
+    }
+}
 
 async function fetchQuestions() {
     const materia = materiaSelect.value;
@@ -273,9 +362,43 @@ function renderCurrentQuestion(preserveSelection = false) {
     updateNavigationButtons();
 }
 
-function toggleEliminate(letter) { /* ... */ }
-function renderProgressBar() { /* ... */ }
-function updateProgressBar() { /* ... */ }
+function toggleEliminate(letter) {
+    const eliminatedList = eliminatedAnswers[currentQuestionIndex];
+    const index = eliminatedList.indexOf(letter);
+    if (index > -1) {
+        eliminatedList.splice(index, 1);
+    } else {
+        eliminatedList.push(letter);
+        if (tempSelectedAnswer === letter) {
+            tempSelectedAnswer = null;
+        }
+    }
+}
+
+function renderProgressBar() {
+    progressBar.innerHTML = '';
+    allQuestions.forEach((_, index) => {
+        const dot = document.createElement('div');
+        dot.className = 'progress-dot';
+        dot.dataset.index = index;
+        progressBar.appendChild(dot);
+    });
+    updateProgressBar();
+}
+
+function updateProgressBar() {
+    const dots = progressBar.querySelectorAll('.progress-dot');
+    dots.forEach((dot, index) => {
+        dot.classList.remove('current', 'correct', 'incorrect');
+        if (userAnswers[index] !== null) {
+            const question = allQuestions[index];
+            dot.classList.add(userAnswers[index] === question.gabarito ? 'correct' : 'incorrect');
+        }
+        if (index === currentQuestionIndex) {
+            dot.classList.add('current');
+        }
+    });
+}
 
 function updateNavigationButtons() {
     prevBtn.disabled = currentQuestionIndex === 0;
@@ -309,7 +432,28 @@ function showResults() {
     reviewErrorsBtn.classList.toggle('cursor-not-allowed', incorrectQuestions.length === 0);
 }
 
-function setupQuestionNavigation() { /* ... */ }
+function setupQuestionNavigation() {
+    const validateAndNavigate = (value) => {
+        const qNum = parseInt(value, 10);
+        if (qNum >= 1 && qNum <= allQuestions.length) {
+            currentQuestionIndex = qNum - 1;
+            renderCurrentQuestion();
+        } else {
+            goToQuestionInput.classList.add('error');
+            goToQuestionInput.value = '';
+            goToQuestionInput.placeholder = `Inválido`;
+            setTimeout(() => {
+                goToQuestionInput.classList.remove('error');
+                goToQuestionInput.placeholder = `Ir para questão`;
+            }, 2000);
+        }
+    };
+    goToQuestionInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && e.target.value) {
+            validateAndNavigate(e.target.value);
+        }
+    });
+}
 
 // =================================================================
 // EVENT LISTENERS GERAIS
@@ -325,20 +469,16 @@ document.addEventListener('keydown', (e) => {
     if (quizArea.classList.contains('hidden')) return;
 
     switch(e.key) {
-        case '1':
-        case 'a':
+        case '1': case 'a':
             document.querySelector('.option[data-option-letter="A"]')?.click();
             break;
-        case '2':
-        case 'b':
+        case '2': case 'b':
             document.querySelector('.option[data-option-letter="B"]')?.click();
             break;
-        case '3':
-        case 'c':
+        case '3': case 'c':
             document.querySelector('.option[data-option-letter="C"]')?.click();
             break;
-        case '4':
-        case 'd':
+        case '4': case 'd':
             document.querySelector('.option[data-option-letter="D"]')?.click();
             break;
         case 'Enter':
@@ -363,15 +503,22 @@ reviewErrorsBtn.addEventListener('click', () => { const incorrectQuestions = ori
 newQuizBtn.addEventListener('click', () => { resultsArea.classList.add('hidden'); selectionArea.classList.remove('hidden'); });
 decreaseFontBtn.addEventListener('click', () => { if (fontSize > 12) { fontSize -= 2; document.documentElement.style.setProperty('--font-size', `${fontSize}px`); } });
 increaseFontBtn.addEventListener('click', () => { if (fontSize < 24) { fontSize += 2; document.documentElement.style.setProperty('--font-size', `${fontSize}px`); } });
-function applyInitialTheme() { /* ... */ }
-function toggleTheme() { /* ... */ }
-themeToggleBtn.addEventListener('click', toggleTheme);
 
-// Funções de swipe omitidas para brevidade, mas devem ser mantidas
-handleTouchStart = function(e) { const target = e.target.closest('.option-content'); if (!target || userAnswers[currentQuestionIndex] !== null) return; swipedElement = target; touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; currentX = touchStartX; swipeDirection = undefined; }
-handleTouchMove = function(e) { if (!swipedElement) return; const deltaX = e.touches[0].clientX - touchStartX; const deltaY = e.touches[0].clientY - touchStartY; if (swipeDirection === undefined) { if (Math.abs(deltaX) > Math.abs(deltaY) + 5) { swipeDirection = 'horizontal'; swipedElement.classList.add('swiping'); const revealElement = swipedElement.previousElementSibling; if (revealElement) revealElement.style.opacity = '1'; } else { swipeDirection = 'vertical'; } } if (swipeDirection === 'horizontal') { e.preventDefault(); let newX = deltaX; if (newX < 0) newX = 0; swipedElement.style.transform = `translateX(${newX}px)`; currentX = e.touches[0].clientX; } }
-handleTouchEnd = function() { if (!swipedElement || swipeDirection !== 'horizontal') { if(swipedElement) { swipedElement.classList.remove('swiping'); swipedElement.style.transform = 'translateX(0px)'; const revealElement = swipedElement.previousElementSibling; if (revealElement) revealElement.style.opacity = '0'; } swipedElement = null; return; }; const deltaX = currentX - touchStartX; if (deltaX > swipeThreshold) { const letter = swipedElement.querySelector('.option').dataset.optionLetter; toggleEliminate(letter); renderCurrentQuestion(true); } else { swipedElement.classList.remove('swiping'); swipedElement.style.transform = 'translateX(0px)'; const revealElement = swipedElement.previousElementSibling; if(revealElement) revealElement.style.opacity = '0'; } swipedElement = null; }
-toggleEliminate = function(letter) { const eliminatedList = eliminatedAnswers[currentQuestionIndex]; const index = eliminatedList.indexOf(letter); if (index > -1) { eliminatedList.splice(index, 1); } else { eliminatedList.push(letter); if (tempSelectedAnswer === letter) { tempSelectedAnswer = null; } } }
-setupQuestionNavigation = function() { const validateAndNavigate = (value) => { const qNum = parseInt(value, 10); if (qNum >= 1 && qNum <= allQuestions.length) { currentQuestionIndex = qNum - 1; renderCurrentQuestion(); } else { goToQuestionInput.classList.add('error'); goToQuestionInput.value = ''; goToQuestionInput.placeholder = `Inválido`; setTimeout(() => { goToQuestionInput.classList.remove('error'); goToQuestionInput.placeholder = `Ir para questão`; }, 2000); } }; goToQuestionInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && e.target.value) { validateAndNavigate(e.target.value); } }); }
-applyInitialTheme = function() { const savedTheme = localStorage.getItem('theme'); if (savedTheme === 'dark') { document.body.classList.add('dark-mode'); themeToggleBtn.textContent = 'Modo Claro'; } else { document.body.classList.remove('dark-mode'); themeToggleBtn.textContent = 'Modo Escuro'; } }
-toggleTheme = function() { document.body.classList.toggle('dark-mode'); let newTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light'; themeToggleBtn.textContent = newTheme === 'dark' ? 'Modo Claro' : 'Modo Escuro'; localStorage.setItem('theme', newTheme); }
+function applyInitialTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        themeToggleBtn.textContent = 'Modo Claro';
+    } else {
+        document.body.classList.remove('dark-mode');
+        themeToggleBtn.textContent = 'Modo Escuro';
+    }
+}
+
+function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    let newTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+    themeToggleBtn.textContent = newTheme === 'dark' ? 'Modo Claro' : 'Modo Escuro';
+    localStorage.setItem('theme', newTheme);
+}
+themeToggleBtn.addEventListener('click', toggleTheme);
