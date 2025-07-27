@@ -286,7 +286,6 @@ function renderCurrentQuestion(preserveSelection = false) {
             if (tempSelectedAnswer) {
                 userAnswers[currentQuestionIndex] = tempSelectedAnswer;
                 
-                // Atualiza as respostas do quiz original também, se for o caso
                 const originalIndex = originalQuestions.findIndex(q => q.id === allQuestions[currentQuestionIndex].id);
                 if (originalIndex !== -1) {
                     originalUserAnswers[originalIndex] = tempSelectedAnswer;
@@ -346,16 +345,24 @@ function updateProgressBar() {
     });
 }
 
-
+// =================================================================
+// ALTERAÇÃO PRINCIPAL NESTA FUNÇÃO
+// =================================================================
 function updateNavigationButtons() {
     prevBtn.disabled = currentQuestionIndex === 0;
-    nextBtn.disabled = currentQuestionIndex >= allQuestions.length - 1 && userAnswers[currentQuestionIndex] === null;
-    
-    if (currentQuestionIndex === allQuestions.length - 1 && userAnswers[currentQuestionIndex] !== null) {
+
+    // Verifica se todas as questões do quiz ATUAL foram respondidas
+    const allCurrentQuestionsAnswered = !userAnswers.includes(null);
+
+    if (allCurrentQuestionsAnswered) {
+        // Se todas foram respondidas, o botão é "Finalizar" e está sempre ativo
         nextBtn.querySelector('span').textContent = 'Finalizar';
         nextBtn.disabled = false;
     } else {
+        // Caso contrário, o botão é "Próxima"
         nextBtn.querySelector('span').textContent = 'Próxima';
+        // E fica desativado apenas se o utilizador estiver na última questão
+        nextBtn.disabled = currentQuestionIndex >= allQuestions.length - 1;
     }
 
     goToQuestionInput.max = allQuestions.length;
