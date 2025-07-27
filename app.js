@@ -238,7 +238,11 @@ function renderCurrentQuestion() {
     options.forEach(option => {
         const isEliminated = currentEliminated.includes(option.letter);
         
-        let optionClass = 'option flex items-center space-x-4 p-4 border-t border-[var(--border-color)] transition-all duration-200';
+        // =================================================================
+        // ALTERAÇÃO APLICADA AQUI: Adicionado 'flex-1'
+        // Esta classe faz com que a alternativa se expanda horizontalmente.
+        // =================================================================
+        let optionClass = 'option flex flex-1 items-center space-x-4 p-4 border-t border-[var(--border-color)] transition-all duration-200';
         if (!isAnswered) optionClass += ' cursor-pointer';
         
         if (isEliminated) optionClass += ' eliminated';
