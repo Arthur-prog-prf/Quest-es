@@ -80,6 +80,11 @@
             overflow-x: hidden; /* Prevenir scroll horizontal */
         }
 
+        /* MELHORIA: Adiciona borda no cabeçalho no modo escuro para separação */
+        .dark-mode header {
+            border-bottom: 1px solid var(--border-color);
+        }
+
         /* Remove o realce de toque padrão em navegadores móveis */
         .header-btn, .option, .nav-btn {
             -webkit-tap-highlight-color: transparent !important;
@@ -92,7 +97,6 @@
             background-color: var(--option-active-bg) !important;
         }
 
-        /* --- NOVOS ESTILOS PARA SWIPE-TO-REVEAL --- */
         .option-container {
             position: relative;
             overflow: hidden;
@@ -121,12 +125,20 @@
             width: 100%;
         }
         
-        /* Estilo que define a cor de fundo para a alternativa selecionada */
         .option-content.is-selected {
             background-color: var(--option-active-bg);
         }
 
-        /* Estilos para a alternativa eliminada */
+        /* MELHORIA: Destaca o círculo da letra na alternativa selecionada */
+        .option-content.is-selected .option-letter-circle {
+            background-color: var(--primary-color) !important;
+            color: #ffffff !important;
+        }
+        .dark-mode .option-content.is-selected .option-letter-circle {
+             color: var(--card-bg-color) !important;
+        }
+
+
         .option.eliminated {
             background-color: var(--eliminated-bg-color);
             border-style: dashed;
@@ -141,7 +153,6 @@
             color: var(--eliminated-text-color);
         }
 
-        /* Classes customizadas para aplicar as variáveis de cor */
         .option.correct {
             background-color: var(--correct-bg) !important;
             border-color: var(--correct-border) !important;
@@ -165,7 +176,6 @@
             color: #fecaca;
         }
 
-        /* Estilos para o botão de eliminar do DESKTOP */
         .eliminate-btn {
             display: none; /* Escondido por padrão */
             flex-shrink: 0;
@@ -179,7 +189,6 @@
             color: var(--primary-color);
         }
 
-        /* Media query para DESKTOP (dispositivos com mouse e hover) */
         @media (hover: hover) and (pointer: fine) {
             .header-btn:hover, .nav-btn:hover {
                 background-color: var(--header-btn-active-bg);
@@ -190,7 +199,6 @@
                 transform: translateY(-2px);
             }
             
-            /* Efeito Hover para as alternativas (não selecionadas) */
             .option-container:not(.is-answered) .option-content:not(.is-selected):hover {
                 transform: scale(1.01);
                 z-index: 10;
