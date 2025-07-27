@@ -176,21 +176,26 @@ async function fetchQuestions() {
         }
         const { data, error } = await query;
         if (error) throw error;
+        
+        if (data.length === 0) {
+            // Lança um erro customizado se não houver questões
+            throw new Error("Nenhuma questão encontrada para a seleção atual.");
+        }
+        
         originalQuestions = data; // Armazena as questões originais
         startQuiz(originalQuestions);
     } catch (error) {
         alert('Erro ao carregar as questões: ' + error.message);
     } finally {
-        startBtn.textContent = 'Iniciar Exercício';
-        startBtn.disabled = false;
+        // CORREÇÃO: Garante que o botão só será modificado se ele ainda existir.
+        if (startBtn) {
+            startBtn.textContent = 'Iniciar Exercício';
+            startBtn.disabled = false;
+        }
     }
 }
 
 function startQuiz(questions) {
-    if (questions.length === 0) {
-        alert('Nenhuma questão encontrada para esta seleção.');
-        return;
-    }
     allQuestions = [...questions]; // Usa as questões passadas como argumento
     currentQuestionIndex = 0;
     userAnswers = new Array(allQuestions.length).fill(null);
@@ -330,7 +335,9 @@ function updateProgressBar(answeredIndex = -1, isCorrect = false) {
 
 function updateNavigationButtons() {
     prevBtn.disabled = currentQuestionIndex === 0;
-    nextBtn.disabled = currentQuestionIndex >= allQuestions.length - 1 && userAnswers[currentQuestionIndex] !== null;
+    
+    // O botão 'Próxima' só é desativado se for a última questão E ela ainda não foi respondida
+    nextBtn.disabled = currentQuestionIndex >= allQuestions.length - 1 && userAnswers[currentQuestionIndex] === null;
     
     // Altera o botão para "Finalizar" na última questão, após respondida
     if (currentQuestionIndex === allQuestions.length - 1 && userAnswers[currentQuestionIndex] !== null) {
@@ -424,7 +431,11 @@ restartQuizBtn.addEventListener('click', () => {
 });
 
 reviewErrorsBtn.addEventListener('click', () => {
-    const incorrectQuestions = originalQuestions.filter((_, index) => userAnswers[index] !== originalQuestions[index].gabarito);
+    const incorrectQuestions = originalQuestions.filter((q, index) => {
+        // Encontra a resposta do usuário para a questão original
+        const originalIndex = originalQuestions.findIndex(oq => oq.id === q.id);
+        return userAnswers[originalIndex] !== q.gabarito;
+    });
     if (incorrectQuestions.length > 0) {
         startQuiz(incorrectQuestions);
     }
