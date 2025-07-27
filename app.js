@@ -419,7 +419,7 @@ function drawDonutChart(percentage) {
 
     function animate() {
         if (currentAngle >= endAngle) {
-            currentAngle = endAngle; // Garante que termina no sítio certo
+            currentAngle = endAngle;
         }
         
         ctx.clearRect(0, 0, size, size);
