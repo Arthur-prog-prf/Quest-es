@@ -23,6 +23,7 @@
             /* Cores para o modo claro (padrão) */
             --bg-color: #f3f4f6;
             --text-color: #1f2937;
+            --text-secondary-color: #6b7280; /* gray-500 */
             --card-bg-color: #ffffff;
             --border-color: #d1d5db;
             --primary-color: #3b82f6;
@@ -49,6 +50,7 @@
             /* Cores para o modo escuro */
             --bg-color: #111827;
             --text-color: #f9fafb;
+            --text-secondary-color: #d1d5db; /* gray-300 - COR MAIS CLARA PARA CONTRASTE */
             --card-bg-color: #1f2937;
             --border-color: #4b5563;
             --primary-color: #60a5fa;
@@ -78,6 +80,11 @@
             color: var(--text-color);
             transition: background-color 0.3s, color 0.3s;
             overflow-x: hidden;
+        }
+        
+        /* Classe para texto secundário */
+        .text-secondary {
+            color: var(--text-secondary-color);
         }
 
         .dark-mode header {
@@ -210,7 +217,7 @@
                 <div class="text-center">
                     <h1 id="quiz-title" class="text-3xl font-bold tracking-tight">Bem-vindo à Plataforma</h1>
                     <!-- CONTRASTE AJUSTADO AQUI -->
-                    <p id="quiz-description" class="mt-2 text-lg text-gray-600 dark:text-gray-200">Selecione a matéria e o assunto para começar seus estudos.</p>
+                    <p id="quiz-description" class="mt-2 text-lg text-secondary">Selecione a matéria e o assunto para começar seus estudos.</p>
                 </div>
                 <div class="space-y-4">
                     <div class="control-group">
@@ -229,7 +236,7 @@
             <div id="quiz-area" class="hidden">
                 <div id="progress-bar" class="progress-bar"></div>
                 <!-- CONTRASTE AJUSTADO AQUI -->
-                <div id="question-counter-text" class="text-center text-sm text-gray-500 dark:text-gray-200 mb-4"></div>
+                <div id="question-counter-text" class="text-center text-sm text-secondary mb-4"></div>
                 <div id="questions-area" class="space-y-4"></div>
             </div>
             
