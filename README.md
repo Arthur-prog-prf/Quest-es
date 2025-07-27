@@ -1,3 +1,3 @@
-Melhor versão no momento  (data 24/07/2025)
+Melhor versão no momento  (data 27/07/2025)
 
 https://questoesdedireitouniplan.netlify.app/
