@@ -35,27 +35,27 @@ let materiasEAssuntos = [];
 let fontSize = 16;
 let tempSelectedAnswer = null;
 let eliminatedAnswers = [];
-let isNavigating = false; // Flag para prevenir cliques durante a animação de navegação
 
 // =================================================================
-// LÓGICA DE SWIPE (MOBILE)
+// LÓGICA DE SWIPE (MOBILE) - CORRIGIDA E REFINADA
 // =================================================================
 let touchStartX = 0;
 let touchStartY = 0;
 let currentX = 0;
 let swipedElement = null;
-let swipeDirection;
-const swipeThreshold = 80;
+let swipeDirection; // Pode ser 'horizontal', 'vertical' ou undefined
+const swipeThreshold = 80; // Distância em pixels para acionar a eliminação
 
 function handleTouchStart(e) {
     const target = e.target.closest('.option-content');
+    // Não inicia o swipe se a questão já foi respondida
     if (!target || userAnswers[currentQuestionIndex] !== null) return;
     
     swipedElement = target;
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
     currentX = touchStartX;
-    swipeDirection = undefined;
+    swipeDirection = undefined; // Reseta a direção a cada novo toque
 }
 
 function handleTouchMove(e) {
@@ -65,7 +65,7 @@ function handleTouchMove(e) {
     const deltaY = e.touches[0].clientY - touchStartY;
 
     if (swipeDirection === undefined) {
-        if (Math.abs(deltaX) > Math.abs(deltaY) + 5) {
+        if (Math.abs(deltaX) > Math.abs(deltaY) + 5) { // Dá prioridade ao scroll vertical
             swipeDirection = 'horizontal';
             swipedElement.classList.add('swiping');
             const revealElement = swipedElement.previousElementSibling;
@@ -136,7 +136,6 @@ async function popularFiltros() {
         });
     } catch (error) {
         materiaSelect.innerHTML = '<option value="">-- Erro ao carregar --</option>';
-        // Futuramente, substituir alert por um toast/modal
         alert('Não foi possível carregar as matérias: ' + error.message);
     }
 }
@@ -209,7 +208,7 @@ function startQuiz() {
     setupQuestionNavigation();
 }
 
-function renderCurrentQuestion(preserveSelection = false, justAnswered = false) {
+function renderCurrentQuestion(preserveSelection = false) {
     questionsArea.innerHTML = '';
     updateProgress();
     
@@ -232,24 +231,32 @@ function renderCurrentQuestion(preserveSelection = false, justAnswered = false) 
     const questionElement = document.createElement('div');
     questionElement.className = 'bg-[var(--card-bg-color)] sm:rounded-xl shadow-lg';
     
-    const questionTextHTML = `<div class="question text-xl font-semibold p-4">${question.pergunta}</div>`;
+    const questionTextHTML = `
+        <div class="question text-xl font-semibold p-4">${question.pergunta}</div>
+    `;
 
     let optionsHTML = '';
     options.forEach(option => {
         const isEliminated = currentEliminated.includes(option.letter);
         const containerClass = isAnswered ? 'option-container is-answered' : 'option-container';
+        
         const isSelected = tempSelectedAnswer === option.letter;
         const contentClass = `option-content flex items-center ${isSelected ? 'is-selected' : ''}`;
 
         let optionClass = 'option flex flex-1 items-center space-x-4 p-4 border-t border-[var(--border-color)] transition-all duration-200';
         if (!isAnswered) optionClass += ' cursor-pointer';
+        
         if (isEliminated) optionClass += ' eliminated';
         if (isAnswered) {
             if (option.letter === question.gabarito) optionClass += ' correct';
             else if (option.letter === userAnswerLetter) optionClass += ' incorrect';
         }
         
-        const letterCircle = `<div class="option-letter-circle flex-shrink-0 rounded-full h-8 w-8 flex items-center justify-center font-bold transition-colors" style="background-color: var(--option-circle-bg); color: var(--option-circle-text);">${option.letter}</div>`;
+        const letterCircle = `
+            <div class="option-letter-circle flex-shrink-0 rounded-full h-8 w-8 flex items-center justify-center font-bold transition-colors" style="background-color: var(--option-circle-bg); color: var(--option-circle-text);">
+                ${option.letter}
+            </div>
+        `;
 
         optionsHTML += `
             <div class="${containerClass}">
@@ -269,7 +276,8 @@ function renderCurrentQuestion(preserveSelection = false, justAnswered = false) 
                         <span class="option-text flex-1">${option.text}</span>
                     </div>
                 </div>
-            </div>`;
+            </div>
+        `;
     });
     
     const resolverBtnEnabled = tempSelectedAnswer !== null;
@@ -283,26 +291,27 @@ function renderCurrentQuestion(preserveSelection = false, justAnswered = false) 
                 <button class="fundamentacao-btn w-full text-white bg-[var(--primary-color)] hover:bg-[var(--primary-hover-color)] font-bold py-3 px-4 rounded-lg transition">ℹ️ Ver Fundamentação</button>
                 <div class="fundamentacao mt-4 p-4 rounded-lg border-l-4 border-[var(--primary-color)]" style="background-color: var(--fundamentacao-bg); color: var(--fundamentacao-text); display: none;">${question.fundamentacao}</div>
             ` : ''}
-        </div>`;
+        </div>
+    `;
 
     questionElement.innerHTML = questionTextHTML + `<div class="options">${optionsHTML}</div>` + actionsHTML;
     questionsArea.appendChild(questionElement);
 
-    const resolverBtn = document.getElementById('resolver-btn');
-    if (resolverBtnEnabled && !isAnswered) {
-        resolverBtn.classList.add('pulse-glow');
-    }
-
     if (!isAnswered) {
-        questionElement.querySelectorAll('.option').forEach(el => {
+        const optionElements = questionElement.querySelectorAll('.option');
+        const resolverBtn = document.getElementById('resolver-btn');
+
+        optionElements.forEach(el => {
             el.addEventListener('click', () => {
                 if (el.classList.contains('eliminated')) return;
+                
                 tempSelectedAnswer = el.dataset.optionLetter;
                 renderCurrentQuestion(true);
             });
         });
         
-        questionElement.querySelectorAll('.eliminate-btn').forEach(btn => {
+        const eliminateBtns = questionElement.querySelectorAll('.eliminate-btn');
+        eliminateBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 toggleEliminate(btn.dataset.eliminateLetter);
@@ -313,22 +322,11 @@ function renderCurrentQuestion(preserveSelection = false, justAnswered = false) 
         resolverBtn.addEventListener('click', () => {
             if (tempSelectedAnswer) {
                 userAnswers[currentQuestionIndex] = tempSelectedAnswer;
-                renderCurrentQuestion(false, true); // Passa 'justAnswered' como true
+                renderCurrentQuestion();
             }
         });
 
     } else {
-        // Aplica animação de flash se a questão acabou de ser respondida
-        if (justAnswered) {
-            const correctOptionEl = questionElement.querySelector(`.option[data-option-letter="${question.gabarito}"]`);
-            correctOptionEl?.classList.add('flash-correct');
-
-            if (userAnswerLetter !== question.gabarito) {
-                const incorrectOptionEl = questionElement.querySelector(`.option[data-option-letter="${userAnswerLetter}"]`);
-                incorrectOptionEl?.classList.add('flash-incorrect');
-            }
-        }
-
         const fundBtn = questionElement.querySelector('.fundamentacao-btn');
         if (fundBtn) {
             fundBtn.addEventListener('click', () => {
@@ -340,14 +338,20 @@ function renderCurrentQuestion(preserveSelection = false, justAnswered = false) 
     updateNavigationButtons();
 }
 
+// Função unificada para alterar o estado de eliminação
 function toggleEliminate(letter) {
     const eliminatedList = eliminatedAnswers[currentQuestionIndex];
     const index = eliminatedList.indexOf(letter);
 
     if (index > -1) {
+        // Se já estiver eliminada, remove da lista (desfaz a eliminação)
         eliminatedList.splice(index, 1);
     } else {
+        // Se não estiver eliminada, adiciona à lista
         eliminatedList.push(letter);
+        
+        // ALTERAÇÃO: Se a alternativa que acabamos de eliminar era a que estava selecionada,
+        // limpamos a seleção temporária para que ela seja "desmarcada".
         if (tempSelectedAnswer === letter) {
             tempSelectedAnswer = null;
         }
@@ -366,50 +370,7 @@ function updateProgress() {
     currentQuestionSpan.textContent = currentQuestionIndex + 1;
 }
 
-function navigateWithAnimation(direction) {
-    if (isNavigating) return; // Previne cliques duplos
-    isNavigating = true;
-
-    const outClass = direction === 'next' ? 'slide-out-left' : 'slide-out-right';
-    const inClass = direction === 'next' ? 'slide-in-right' : 'slide-in-left';
-
-    quizArea.classList.add(outClass);
-
-    // Espera a animação de saída terminar
-    setTimeout(() => {
-        quizArea.classList.remove(outClass);
-
-        if (direction === 'next') {
-            currentQuestionIndex++;
-        } else {
-            currentQuestionIndex--;
-        }
-        
-        renderCurrentQuestion();
-        quizArea.classList.add(inClass);
-
-        // Limpa a classe de entrada após a animação
-        setTimeout(() => {
-            quizArea.classList.remove(inClass);
-            isNavigating = false; // Libera a navegação
-        }, 250); // Deve ser igual à duração da animação
-
-    }, 250); // Deve ser igual à duração da animação
-}
-
 function setupQuestionNavigation() {
-    // Substitui os listeners antigos para usar a função com animação
-    prevBtn.onclick = () => {
-        if (currentQuestionIndex > 0) {
-            navigateWithAnimation('prev');
-        }
-    };
-    nextBtn.onclick = () => {
-        if (currentQuestionIndex < allQuestions.length - 1) {
-            navigateWithAnimation('next');
-        }
-    };
-    
     const validateAndNavigate = (value) => {
         const qNum = parseInt(value, 10);
         if (qNum >= 1 && qNum <= allQuestions.length) {
@@ -451,7 +412,18 @@ materiaSelect.addEventListener('change', () => {
 assuntoSelect.addEventListener('change', () => {});
 startBtn.addEventListener('click', fetchQuestions);
 
-// Os listeners de prev/next foram movidos para setupQuestionNavigation
+prevBtn.addEventListener('click', () => {
+    if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        renderCurrentQuestion();
+    }
+});
+nextBtn.addEventListener('click', () => {
+    if (currentQuestionIndex < allQuestions.length - 1) {
+        currentQuestionIndex++;
+        renderCurrentQuestion();
+    }
+});
 
 decreaseFontBtn.addEventListener('click', () => {
     if (fontSize > 12) {
