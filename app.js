@@ -29,6 +29,7 @@ const scoreText = document.getElementById('score-text');
 const reviewErrorsBtn = document.getElementById('review-errors-btn');
 const restartQuizBtn = document.getElementById('restart-quiz-btn');
 const newQuizBtn = document.getElementById('new-quiz-btn');
+const questionCounterText = document.getElementById('question-counter-text');
 
 
 // =================================================================
@@ -36,7 +37,8 @@ const newQuizBtn = document.getElementById('new-quiz-btn');
 // =================================================================
 let originalQuestions = []; // Guarda as questões originais da seleção
 let allQuestions = []; // Questões do quiz atual (pode ser um subconjunto)
-let userAnswers = [];
+let userAnswers = []; // Respostas para o quiz atual
+let originalUserAnswers = []; // Respostas para o quiz original
 let currentQuestionIndex = 0;
 let materiasEAssuntos = [];
 let fontSize = 16;
@@ -178,16 +180,14 @@ async function fetchQuestions() {
         if (error) throw error;
         
         if (data.length === 0) {
-            // Lança um erro customizado se não houver questões
             throw new Error("Nenhuma questão encontrada para a seleção atual.");
         }
         
-        originalQuestions = data; // Armazena as questões originais
-        startQuiz(originalQuestions);
+        originalQuestions = data; 
+        startQuiz(originalQuestions, true); // O primeiro quiz é sempre o original
     } catch (error) {
         alert('Erro ao carregar as questões: ' + error.message);
     } finally {
-        // CORREÇÃO: Garante que o botão só será modificado se ele ainda existir.
         if (startBtn) {
             startBtn.textContent = 'Iniciar Exercício';
             startBtn.disabled = false;
@@ -195,11 +195,16 @@ async function fetchQuestions() {
     }
 }
 
-function startQuiz(questions) {
-    allQuestions = [...questions]; // Usa as questões passadas como argumento
+function startQuiz(questions, isOriginalQuiz = false) {
+    allQuestions = [...questions]; 
     currentQuestionIndex = 0;
     userAnswers = new Array(allQuestions.length).fill(null);
     eliminatedAnswers = Array.from({ length: allQuestions.length }, () => []);
+
+    // Se for o quiz original, reinicia as respostas originais também
+    if (isOriginalQuiz) {
+        originalUserAnswers = new Array(originalQuestions.length).fill(null);
+    }
 
     selectionArea.classList.add('hidden');
     resultsArea.classList.add('hidden');
@@ -216,6 +221,8 @@ function startQuiz(questions) {
 function renderCurrentQuestion(preserveSelection = false) {
     questionsArea.innerHTML = '';
     updateProgressBar();
+    questionCounterText.innerHTML = `Questão <strong>${currentQuestionIndex + 1}</strong> de <strong>${allQuestions.length}</strong>`;
+
     if (!preserveSelection) {
         tempSelectedAnswer = null;
     }
@@ -278,7 +285,14 @@ function renderCurrentQuestion(preserveSelection = false) {
         resolverBtn.addEventListener('click', () => {
             if (tempSelectedAnswer) {
                 userAnswers[currentQuestionIndex] = tempSelectedAnswer;
-                updateProgressBar(currentQuestionIndex, allQuestions[currentQuestionIndex].gabarito === tempSelectedAnswer);
+                
+                // Atualiza as respostas do quiz original também, se for o caso
+                const originalIndex = originalQuestions.findIndex(q => q.id === allQuestions[currentQuestionIndex].id);
+                if (originalIndex !== -1) {
+                    originalUserAnswers[originalIndex] = tempSelectedAnswer;
+                }
+
+                updateProgressBar();
                 renderCurrentQuestion();
             }
         });
@@ -318,7 +332,7 @@ function renderProgressBar() {
     updateProgressBar();
 }
 
-function updateProgressBar(answeredIndex = -1, isCorrect = false) {
+function updateProgressBar() {
     const dots = progressBar.querySelectorAll('.progress-dot');
     dots.forEach((dot, index) => {
         dot.classList.remove('current', 'correct', 'incorrect');
@@ -335,11 +349,8 @@ function updateProgressBar(answeredIndex = -1, isCorrect = false) {
 
 function updateNavigationButtons() {
     prevBtn.disabled = currentQuestionIndex === 0;
-    
-    // O botão 'Próxima' só é desativado se for a última questão E ela ainda não foi respondida
     nextBtn.disabled = currentQuestionIndex >= allQuestions.length - 1 && userAnswers[currentQuestionIndex] === null;
     
-    // Altera o botão para "Finalizar" na última questão, após respondida
     if (currentQuestionIndex === allQuestions.length - 1 && userAnswers[currentQuestionIndex] !== null) {
         nextBtn.querySelector('span').textContent = 'Finalizar';
         nextBtn.disabled = false;
@@ -357,14 +368,15 @@ function showResults() {
     navigationDiv.classList.add('hidden');
     resultsArea.classList.remove('hidden');
 
-    const correctAnswers = userAnswers.filter((answer, index) => answer === allQuestions[index].gabarito).length;
-    const total = allQuestions.length;
+    // Usa as respostas do quiz original para calcular o resultado final
+    const correctAnswers = originalUserAnswers.filter((answer, index) => answer === originalQuestions[index].gabarito).length;
+    const total = originalQuestions.length;
     const percentage = total > 0 ? Math.round((correctAnswers / total) * 100) : 0;
 
     scorePercentage.textContent = `${percentage}%`;
     scoreText.textContent = `Você acertou ${correctAnswers} de ${total} questões.`;
 
-    const incorrectQuestions = allQuestions.filter((_, index) => userAnswers[index] !== allQuestions[index].gabarito);
+    const incorrectQuestions = originalQuestions.filter((_, index) => originalUserAnswers[index] !== null && originalUserAnswers[index] !== originalQuestions[index].gabarito);
     reviewErrorsBtn.disabled = incorrectQuestions.length === 0;
     if (reviewErrorsBtn.disabled) {
         reviewErrorsBtn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -427,17 +439,13 @@ nextBtn.addEventListener('click', () => {
 });
 
 restartQuizBtn.addEventListener('click', () => {
-    startQuiz(originalQuestions);
+    startQuiz(originalQuestions, true);
 });
 
 reviewErrorsBtn.addEventListener('click', () => {
-    const incorrectQuestions = originalQuestions.filter((q, index) => {
-        // Encontra a resposta do usuário para a questão original
-        const originalIndex = originalQuestions.findIndex(oq => oq.id === q.id);
-        return userAnswers[originalIndex] !== q.gabarito;
-    });
+    const incorrectQuestions = originalQuestions.filter((q, index) => originalUserAnswers[index] !== null && originalUserAnswers[index] !== q.gabarito);
     if (incorrectQuestions.length > 0) {
-        startQuiz(incorrectQuestions);
+        startQuiz(incorrectQuestions, false); // Não é o quiz original
     }
 });
 
