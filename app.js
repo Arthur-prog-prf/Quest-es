@@ -240,7 +240,6 @@ function renderCurrentQuestion(preserveSelection = false) {
         const isEliminated = currentEliminated.includes(option.letter);
         const containerClass = isAnswered ? 'option-container is-answered' : 'option-container';
         
-        // ALTERAÇÃO: Adiciona a classe 'is-selected' ao container principal se a alternativa estiver selecionada
         const isSelected = tempSelectedAnswer === option.letter;
         const contentClass = `option-content flex items-center ${isSelected ? 'is-selected' : ''}`;
 
@@ -306,7 +305,6 @@ function renderCurrentQuestion(preserveSelection = false) {
             el.addEventListener('click', () => {
                 if (el.classList.contains('eliminated')) return;
                 
-                // ALTERAÇÃO: Define a seleção e redesenha a questão para aplicar o novo estilo de box
                 tempSelectedAnswer = el.dataset.optionLetter;
                 renderCurrentQuestion(true);
             });
@@ -344,11 +342,18 @@ function renderCurrentQuestion(preserveSelection = false) {
 function toggleEliminate(letter) {
     const eliminatedList = eliminatedAnswers[currentQuestionIndex];
     const index = eliminatedList.indexOf(letter);
+
     if (index > -1) {
+        // Se já estiver eliminada, remove da lista (desfaz a eliminação)
         eliminatedList.splice(index, 1);
     } else {
-        if (letter !== tempSelectedAnswer) {
-             eliminatedList.push(letter);
+        // Se não estiver eliminada, adiciona à lista
+        eliminatedList.push(letter);
+        
+        // ALTERAÇÃO: Se a alternativa que acabamos de eliminar era a que estava selecionada,
+        // limpamos a seleção temporária para que ela seja "desmarcada".
+        if (tempSelectedAnswer === letter) {
+            tempSelectedAnswer = null;
         }
     }
 }
