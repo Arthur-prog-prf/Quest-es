@@ -101,7 +101,6 @@ function handleTouchEnd() {
     if (deltaX > swipeThreshold) {
         const letter = swipedElement.querySelector('.option').dataset.optionLetter;
         toggleEliminate(letter);
-        // ALTERAÇÃO: Passa 'true' para preservar a seleção ao redesenhar
         renderCurrentQuestion(true); 
     } else {
         swipedElement.classList.remove('swiping');
@@ -209,12 +208,10 @@ function startQuiz() {
     setupQuestionNavigation();
 }
 
-// ALTERAÇÃO: A função agora aceita um parâmetro para saber se deve preservar a seleção
 function renderCurrentQuestion(preserveSelection = false) {
     questionsArea.innerHTML = '';
     updateProgress();
     
-    // ALTERAÇÃO: A seleção temporária só é limpa se não for para preservá-la
     if (!preserveSelection) {
         tempSelectedAnswer = null;
     }
@@ -242,6 +239,11 @@ function renderCurrentQuestion(preserveSelection = false) {
     options.forEach(option => {
         const isEliminated = currentEliminated.includes(option.letter);
         const containerClass = isAnswered ? 'option-container is-answered' : 'option-container';
+        
+        // ALTERAÇÃO: Adiciona a classe 'is-selected' ao container principal se a alternativa estiver selecionada
+        const isSelected = tempSelectedAnswer === option.letter;
+        const contentClass = `option-content flex items-center ${isSelected ? 'is-selected' : ''}`;
+
         let optionClass = 'option flex flex-1 items-center space-x-4 p-4 border-t border-[var(--border-color)] transition-all duration-200';
         if (!isAnswered) optionClass += ' cursor-pointer';
         
@@ -251,9 +253,8 @@ function renderCurrentQuestion(preserveSelection = false) {
             else if (option.letter === userAnswerLetter) optionClass += ' incorrect';
         }
         
-        // ALTERAÇÃO: Adiciona a classe de anel de seleção se a alternativa corresponder à seleção temporária
         const letterCircle = `
-            <div class="option-letter-circle flex-shrink-0 rounded-full h-8 w-8 flex items-center justify-center font-bold transition-colors ${tempSelectedAnswer === option.letter ? 'ring-2 ring-[var(--primary-color)]' : ''}" style="background-color: var(--option-circle-bg); color: var(--option-circle-text);">
+            <div class="option-letter-circle flex-shrink-0 rounded-full h-8 w-8 flex items-center justify-center font-bold transition-colors" style="background-color: var(--option-circle-bg); color: var(--option-circle-text);">
                 ${option.letter}
             </div>
         `;
@@ -265,7 +266,7 @@ function renderCurrentQuestion(preserveSelection = false) {
                         <circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line>
                     </svg>
                 </div>
-                <div class="option-content flex items-center">
+                <div class="${contentClass}">
                     <button class="eliminate-btn p-3 rounded-full transition-all ${isEliminated ? 'active' : ''}" data-eliminate-letter="${option.letter}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-500 dark:text-gray-400">
                             <circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line>
@@ -280,7 +281,6 @@ function renderCurrentQuestion(preserveSelection = false) {
         `;
     });
     
-    // ALTERAÇÃO: O estado do botão "Resolver" agora depende diretamente de `tempSelectedAnswer`
     const resolverBtnEnabled = tempSelectedAnswer !== null;
     const actionsHTML = `
         <div class="p-4">
@@ -305,13 +305,10 @@ function renderCurrentQuestion(preserveSelection = false) {
         optionElements.forEach(el => {
             el.addEventListener('click', () => {
                 if (el.classList.contains('eliminated')) return;
-                document.querySelectorAll('.option-letter-circle').forEach(c => c.classList.remove('ring-2', 'ring-[var(--primary-color)]'));
-                el.querySelector('.option-letter-circle').classList.add('ring-2', 'ring-[var(--primary-color)]');
                 
+                // ALTERAÇÃO: Define a seleção e redesenha a questão para aplicar o novo estilo de box
                 tempSelectedAnswer = el.dataset.optionLetter;
-                resolverBtn.disabled = false;
-                resolverBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
-                resolverBtn.classList.add('bg-[var(--primary-color)]', 'hover:bg-[var(--primary-hover-color)]');
+                renderCurrentQuestion(true);
             });
         });
         
@@ -320,7 +317,6 @@ function renderCurrentQuestion(preserveSelection = false) {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 toggleEliminate(btn.dataset.eliminateLetter);
-                // ALTERAÇÃO: Passa 'true' para preservar a seleção ao redesenhar
                 renderCurrentQuestion(true);
             });
         });
