@@ -238,10 +238,9 @@ function renderCurrentQuestion() {
     options.forEach(option => {
         const isEliminated = currentEliminated.includes(option.letter);
         
-        // =================================================================
-        // ALTERAÇÃO APLICADA AQUI: Adicionado 'flex-1'
-        // Esta classe faz com que a alternativa se expanda horizontalmente.
-        // =================================================================
+        // Adiciona uma classe ao container se a questão já foi respondida, para controlar o efeito hover via CSS
+        const containerClass = isAnswered ? 'option-container is-answered' : 'option-container';
+
         let optionClass = 'option flex flex-1 items-center space-x-4 p-4 border-t border-[var(--border-color)] transition-all duration-200';
         if (!isAnswered) optionClass += ' cursor-pointer';
         
@@ -251,7 +250,6 @@ function renderCurrentQuestion() {
             else if (option.letter === userAnswerLetter) optionClass += ' incorrect';
         }
         
-        // Usando variáveis CSS para garantir consistência de cor
         const letterCircle = `
             <div class="option-letter-circle flex-shrink-0 rounded-full h-8 w-8 flex items-center justify-center font-bold transition-colors" style="background-color: var(--option-circle-bg); color: var(--option-circle-text);">
                 ${option.letter}
@@ -259,7 +257,7 @@ function renderCurrentQuestion() {
         `;
 
         optionsHTML += `
-            <div class="option-container">
+            <div class="${containerClass}">
                 <div class="swipe-reveal">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
                         <circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line>
