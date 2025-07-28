@@ -44,6 +44,9 @@
             
             --option-circle-bg: #e5e7eb; /* gray-200 */
             --option-circle-text: #374151; /* gray-700 */
+
+            /* CORREÇÃO: Variável de cor para o fundo do gráfico */
+            --chart-bg-stroke-color: #e5e7eb; /* gray-200 */
         }
 
         .dark-mode {
@@ -71,6 +74,9 @@
 
             --option-circle-bg: #374151; /* gray-700 */
             --option-circle-text: #d1d5db; /* gray-300 */
+
+            /* CORREÇÃO: Variável de cor para o fundo do gráfico no modo escuro */
+            --chart-bg-stroke-color: #374151; /* gray-700 */
         }
 
         body {
@@ -230,7 +236,7 @@
                 <div class="relative w-48 h-48 mx-auto my-6">
                     <svg class="w-full h-full" viewBox="0 0 100 100" style="transform: rotate(-90deg)">
                         <!-- Círculo de fundo -->
-                        <circle class="stroke-gray-200 dark:stroke-gray-700" stroke-width="10" fill="transparent" r="45" cx="50" cy="50"/>
+                        <circle stroke-width="10" fill="transparent" r="45" cx="50" cy="50" style="stroke: var(--chart-bg-stroke-color);"/>
                         <!-- Círculo de progresso -->
                         <circle id="score-circle" class="text-[var(--primary-color)]" stroke-width="10" stroke-linecap="round" stroke="currentColor" fill="transparent" r="45" cx="50" cy="50"/>
                     </svg>
