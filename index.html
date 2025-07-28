@@ -41,7 +41,6 @@
             --option-active-bg: #eef2ff; /* Indigo 50 */
             --eliminated-text-color: #adb5bd;
             --eliminated-bg-color: #f8f9fa;
-            --swipe-reveal-bg: #f43f5e; /* Rose 500 */
             --option-circle-bg: #e9ecef;
             --option-circle-text: #495057;
             --chart-bg-stroke-color: #e9ecef;
@@ -53,7 +52,7 @@
             --text-color: #e9ecef;
             --text-secondary-color: #adb5bd;
             --card-bg-color: #1e1e1e;
-            --border-color: #495057;
+            --border-color: #343a40;
             --primary-color: #818cf8; /* Indigo 400 */
             --primary-hover-color: #6366f1;
             --primary-gradient: linear-gradient(to right, #818cf8, #a5b4fc);
@@ -69,7 +68,6 @@
             --option-active-bg: #312e81; /* Indigo 900 */
             --eliminated-text-color: #6c757d;
             --eliminated-bg-color: #1e1e1e;
-            --swipe-reveal-bg: #e11d48; /* Rose 600 */
             --option-circle-bg: #343a40;
             --option-circle-text: #adb5bd;
             --chart-bg-stroke-color: #343a40;
@@ -86,26 +84,8 @@
         
         /* Melhorias Gerais */
         .text-secondary { color: var(--text-secondary-color); }
-        .header-btn, .option, .nav-btn { -webkit-tap-highlight-color: transparent !important; }
+        .header-btn, .nav-btn { -webkit-tap-highlight-color: transparent !important; }
         .header-btn:active, .nav-btn:active { background-color: var(--header-btn-active-bg) !important; }
-        .option-content.is-selected { background-color: var(--option-active-bg); }
-        .option-content.is-selected .option-letter-circle { background: var(--primary-gradient) !important; color: #ffffff !important; }
-        .dark-mode .option-content.is-selected .option-letter-circle { color: #ffffff !important; }
-        
-        /* Estilos das Opções */
-        .option.eliminated { background-color: var(--eliminated-bg-color); border-style: dashed; }
-        .option.eliminated .option-text { text-decoration: line-through; font-style: italic; color: var(--eliminated-text-color); }
-        .option.eliminated .option-letter-circle { background-color: transparent !important; color: var(--eliminated-text-color); }
-        .option.correct { background-color: var(--correct-bg) !important; border-color: var(--correct-border) !important; color: var(--correct-text) !important; font-weight: 500; }
-        .option.incorrect { background-color: var(--incorrect-bg) !important; border-color: var(--incorrect-border) !important; color: var(--incorrect-text) !important; font-weight: 500; }
-        .correct-feedback { color: var(--correct-border); }
-        .incorrect-feedback { color: var(--incorrect-border); }
-
-        /* Barra de Progresso */
-        .progress-dot.current { box-shadow: 0 0 0 2px var(--card-bg-color), 0 0 0 4px var(--primary-color); }
-        .progress-dot { flex-grow: 1; height: 8px; background-color: var(--border-color); border-radius: 4px; transition: all 0.4s ease; }
-        .progress-dot.correct { background-color: var(--correct-border); }
-        .progress-dot.incorrect { background-color: var(--incorrect-border); }
 
         /* Animações e Efeitos */
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -122,7 +102,7 @@
         
         .modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; }
 
-        /* Estilo do botão primário com gradiente */
+        /* Botão Primário */
         .btn-primary {
             background: var(--primary-gradient);
             color: white;
@@ -130,6 +110,7 @@
             padding: 0.85rem 1rem;
             border-radius: 0.5rem;
             transition: all 0.3s ease;
+            border: none;
             box-shadow: 0 4px 15px -3px rgba(79, 70, 229, 0.4);
         }
         .btn-primary:hover:not(:disabled) {
@@ -142,27 +123,77 @@
             box-shadow: none;
         }
 
-        /* CORREÇÃO: Estilo para o seletor de modo */
-        .mode-btn {
-            flex: 1;
-            padding: 0.5rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-            border-radius: 0.375rem;
-            transition: all 0.2s ease-in-out;
-            border: none;
-            background-color: transparent;
-            color: var(--text-secondary-color);
-        }
-        .mode-btn.active {
-            background-color: var(--card-bg-color);
-            color: var(--text-color);
-            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-        }
+        /* Seletor de Modo */
+        .mode-btn { flex: 1; padding: 0.5rem; font-size: 0.875rem; font-weight: 600; border-radius: 0.375rem; transition: all 0.2s ease-in-out; border: none; background-color: transparent; color: var(--text-secondary-color); }
+        .mode-btn.active { background-color: var(--card-bg-color); color: var(--text-color); box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); }
 
         /* Gráfico de Resultado */
         #score-circle { stroke-dasharray: var(--circumference); stroke-dashoffset: var(--circumference); }
         #score-circle.animate-circle { transition: stroke-dashoffset 1.2s cubic-bezier(0.45, 0, 0.55, 1); stroke-dashoffset: var(--offset); }
+        
+        /* ESTILOS DA TELA DE QUESTÕES */
+        .question-text { font-size: 1.125rem; line-height: 1.75rem; font-weight: 600; }
+        .option-card { -webkit-tap-highlight-color: transparent !important; }
+        .option-card:not(.eliminated):not(.correct):not(.incorrect):hover {
+            border-color: var(--primary-color);
+            background-color: var(--option-active-bg);
+        }
+        .option-card.selected {
+            border-color: var(--primary-color);
+            background-color: var(--option-active-bg);
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+        .option-card .option-letter-circle {
+            background-color: var(--option-circle-bg);
+            color: var(--option-circle-text);
+        }
+        .option-card.selected .option-letter-circle, .option-card.correct .option-letter-circle, .option-card.incorrect .option-letter-circle {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        .dark-mode .option-card.selected .option-letter-circle { color: white !important; }
+        
+        .option-card.correct {
+            border-color: var(--correct-border) !important;
+            background-color: var(--correct-bg) !important;
+            color: var(--correct-text) !important;
+            font-weight: 500;
+        }
+        .option-card.correct .option-letter-circle {
+            background: var(--correct-border) !important;
+        }
+
+        .option-card.incorrect {
+            border-color: var(--incorrect-border) !important;
+            background-color: var(--incorrect-bg) !important;
+            color: var(--incorrect-text) !important;
+            font-weight: 500;
+        }
+        .option-card.incorrect .option-letter-circle {
+            background: var(--incorrect-border) !important;
+        }
+
+        .option-card.eliminated {
+            background-color: var(--eliminated-bg-color) !important;
+            border-style: dashed !important;
+            opacity: 0.6;
+        }
+        .option-card.eliminated .option-text {
+            text-decoration: line-through;
+            color: var(--eliminated-text-color);
+        }
+        .eliminate-btn { color: var(--text-secondary-color); }
+        .eliminate-btn:hover { color: var(--primary-color); }
+
+        .correct-feedback { color: var(--correct-border); }
+        .incorrect-feedback { color: var(--incorrect-border); }
+
+        /* Barra de Progresso */
+        .progress-bar { display: flex; gap: 4px; margin-bottom: 1rem; padding: 0 4px; }
+        .progress-dot { flex-grow: 1; height: 8px; background-color: var(--border-color); border-radius: 4px; transition: all 0.4s ease; }
+        .progress-dot.correct { background-color: var(--correct-border); }
+        .progress-dot.incorrect { background-color: var(--incorrect-border); }
+        .progress-dot.current { box-shadow: 0 0 0 2px var(--card-bg-color), 0 0 0 4px var(--primary-color); }
 
         @media (hover: hover) and (pointer: fine) {
             .header-btn:hover, .nav-btn:hover { background-color: var(--header-btn-active-bg); }
@@ -275,7 +306,7 @@
     <div class="navigation hidden fixed bottom-0 left-0 right-0 bg-[var(--card-bg-color)]/80 backdrop-blur-sm border-t border-[var(--border-color)] shadow-t-lg">
         <div class="max-w-3xl mx-auto px-2 sm:px-6 lg:px-8 flex items-center justify-between h-16 gap-2 sm:gap-4">
             <button id="prev-btn" disabled class="nav-btn flex items-center justify-center space-x-1.5 px-2 sm:px-3 py-2 rounded-lg font-semibold transition disabled:opacity-50 flex-shrink-0"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg><span>Anterior</span></button>
-            <input type="number" id="go-to-question" placeholder="Ir para questão" min="1" max="1" class="flex-1 sm:flex-none sm:w-48 text-center p-2 border-[var(--border-color)] rounded-lg bg-transparent focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition shadow-sm">
+            <input type="number" id="go-to-question" placeholder="Ir para" min="1" max="1" class="flex-1 sm:flex-none sm:w-32 text-center p-2 border-[var(--border-color)] rounded-lg bg-transparent focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] transition shadow-sm">
             <button id="next-btn" class="nav-btn flex items-center justify-center space-x-1.5 px-2 sm:px-3 py-2 rounded-lg font-semibold transition disabled:opacity-50 flex-shrink-0"><span>Próxima</span><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg></button>
         </div>
     </div>
