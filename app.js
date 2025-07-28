@@ -35,10 +35,11 @@ const skeletonLoader = document.getElementById('skeleton-loader');
 const resumeModal = document.getElementById('resume-modal');
 const resumeBtn = document.getElementById('resume-btn');
 const startNewBtn = document.getElementById('start-new-btn');
-// NOVOS ELEMENTOS DOS ÍCONES DE TEMA
 const themeIconLight = document.getElementById('theme-icon-light');
 const themeIconDark = document.getElementById('theme-icon-dark');
-
+const modeSelector = document.getElementById('mode-selector');
+const finishListBtnContainer = document.getElementById('finish-list-btn-container');
+const finishListBtn = document.getElementById('finish-list-btn');
 
 // =================================================================
 // ESTADO DO QUIZ
@@ -52,6 +53,7 @@ let materiasEAssuntos = [];
 let fontSize = 16;
 let tempSelectedAnswer = null;
 let eliminatedAnswers = [];
+let quizMode = 'single'; // 'single' ou 'list'
 
 // =================================================================
 // FUNÇÕES DE QUALIDADE DE VIDA
@@ -68,6 +70,8 @@ function showToast(message, type = 'error', duration = 4000) {
 }
 
 function saveProgress() {
+    // Salva o progresso apenas para o modo 'single'
+    if (quizMode !== 'single') return;
     const progress = {
         originalQuestions,
         allQuestions,
@@ -89,6 +93,7 @@ function loadProgress() {
     if (savedProgress) {
         const progress = JSON.parse(savedProgress);
         const oneDay = 24 * 60 * 60 * 1000;
+        // Expira o progresso salvo após 1 dia
         if (new Date().getTime() - progress.timestamp > oneDay) {
             clearProgress();
             return;
@@ -104,14 +109,11 @@ function loadProgress() {
             currentQuestionIndex = progress.currentQuestionIndex;
             eliminatedAnswers = progress.eliminatedAnswers;
             
+            quizMode = 'single'; // Força o modo 'single' ao retomar
             selectionArea.classList.add('hidden');
             quizArea.classList.remove('hidden');
-            navigationDiv.classList.remove('hidden');
             
-            renderProgressBar();
-            renderCurrentQuestion();
-            setupQuestionNavigation();
-
+            startQuizUI();
             resumeModal.classList.add('hidden');
         };
 
@@ -129,6 +131,7 @@ let touchStartX = 0, touchStartY = 0, currentX = 0, swipedElement = null, swipeD
 const swipeThreshold = 80;
 
 function handleTouchStart(e) {
+    if (quizMode !== 'single') return;
     const target = e.target.closest('.option-content');
     if (!target || userAnswers[currentQuestionIndex] !== null) return;
     swipedElement = target;
@@ -199,7 +202,7 @@ async function popularFiltros() {
         const { data, error } = await supabase.from('questoes').select('materia, assunto');
         if (error) throw error;
         materiasEAssuntos = data;
-        const materiasUnicas = [...new Set(data.map(item => item.materia))];
+        const materiasUnicas = [...new Set(data.map(item => item.materia))].sort();
         materiaSelect.innerHTML = '<option value="">-- Selecione a Matéria --</option>';
         materiasUnicas.forEach(materia => {
             const option = document.createElement('option');
@@ -222,7 +225,7 @@ function popularAssuntos() {
         const assuntosDaMateria = [...new Set(materiasEAssuntos
             .filter(item => item.materia === materiaSelecionada)
             .map(item => item.assunto)
-        )];
+        )].sort();
         assuntosDaMateria.forEach(assunto => {
             const option = document.createElement('option');
             option.value = assunto;
@@ -277,13 +280,27 @@ function startQuiz(questions, isOriginalQuiz = false) {
     selectionArea.classList.add('hidden');
     resultsArea.classList.add('hidden');
     quizArea.classList.remove('hidden');
-    navigationDiv.classList.remove('hidden');
     
-    goToQuestionInput.placeholder = `Ir para questão`;
-    
-    renderProgressBar();
-    renderCurrentQuestion();
-    setupQuestionNavigation();
+    startQuizUI();
+}
+
+function startQuizUI() {
+    if (quizMode === 'single') {
+        navigationDiv.classList.remove('hidden');
+        progressBar.classList.remove('hidden');
+        questionCounterText.classList.remove('hidden');
+        finishListBtnContainer.classList.add('hidden');
+        goToQuestionInput.placeholder = `Ir para...`;
+        renderProgressBar();
+        renderCurrentQuestion();
+        setupQuestionNavigation();
+    } else { // 'list' mode
+        navigationDiv.classList.add('hidden');
+        progressBar.classList.add('hidden');
+        questionCounterText.classList.add('hidden');
+        finishListBtnContainer.classList.remove('hidden');
+        renderAllQuestions();
+    }
 }
 
 function renderCurrentQuestion(preserveSelection = false) {
@@ -294,9 +311,27 @@ function renderCurrentQuestion(preserveSelection = false) {
     if (!preserveSelection) tempSelectedAnswer = null;
 
     const question = allQuestions[currentQuestionIndex];
-    const isAnswered = userAnswers[currentQuestionIndex] !== null;
-    const userAnswerLetter = userAnswers[currentQuestionIndex];
-    const currentEliminated = eliminatedAnswers[currentQuestionIndex];
+    const questionHTML = createQuestionHTML(question, currentQuestionIndex, true);
+    questionsArea.innerHTML = questionHTML;
+
+    addQuestionEventListeners(questionsArea, currentQuestionIndex, true);
+    updateNavigationButtons();
+}
+
+function renderAllQuestions() {
+    questionsArea.innerHTML = '';
+    allQuestions.forEach((question, index) => {
+        const questionContainer = document.createElement('div');
+        questionContainer.innerHTML = createQuestionHTML(question, index, false);
+        questionsArea.appendChild(questionContainer);
+        addQuestionEventListeners(questionContainer, index, false);
+    });
+}
+
+function createQuestionHTML(question, index, isSingleMode) {
+    const isAnswered = isSingleMode && userAnswers[index] !== null;
+    const userAnswerLetter = userAnswers[index];
+    const currentEliminated = eliminatedAnswers[index] || [];
     
     const options = [
         { letter: 'A', text: question.alternativa_a },
@@ -305,64 +340,110 @@ function renderCurrentQuestion(preserveSelection = false) {
         { letter: 'D', text: question.alternativa_d }
     ];
 
-    const questionElement = document.createElement('div');
-    questionElement.className = 'bg-[var(--card-bg-color)] sm:rounded-xl shadow-lg';
+    const questionHeader = isSingleMode ? '' : `<div class="flex justify-between items-center p-4 border-b border-[var(--border-color)]"><h3 class="text-lg font-bold">Questão ${index + 1}</h3><span class="text-sm text-secondary">${question.assunto}</span></div>`;
     const questionTextHTML = `<div class="question text-xl font-semibold p-4">${question.pergunta}</div>`;
+    
     let optionsHTML = '';
     options.forEach(option => {
         const isEliminated = currentEliminated.includes(option.letter);
         const containerClass = isAnswered ? 'option-container is-answered' : 'option-container';
-        const isSelected = tempSelectedAnswer === option.letter;
+        
+        let isSelected = false;
+        if(isSingleMode) {
+            isSelected = tempSelectedAnswer === option.letter;
+        } else {
+            isSelected = userAnswers[index] === option.letter;
+        }
+
         const contentClass = `option-content flex items-center ${isSelected ? 'is-selected' : ''}`;
+        
         let optionClass = 'option flex flex-1 items-center space-x-4 p-4 border-t border-[var(--border-color)] transition-all duration-200';
         if (!isAnswered) optionClass += ' cursor-pointer';
         if (isEliminated) optionClass += ' eliminated';
+        
         if (isAnswered) {
             if (option.letter === question.gabarito) optionClass += ' correct';
             else if (option.letter === userAnswerLetter) optionClass += ' incorrect';
         }
+        
         const letterCircle = `<div class="option-letter-circle flex-shrink-0 rounded-full h-8 w-8 flex items-center justify-center font-bold transition-colors" style="background-color: var(--option-circle-bg); color: var(--option-circle-text);">${option.letter}</div>`;
-        optionsHTML += `<div class="${containerClass}"><div class="swipe-reveal"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg></div><div class="${contentClass}"><button class="eliminate-btn p-3 rounded-full transition-all ${isEliminated ? 'active' : ''}" data-eliminate-letter="${option.letter}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-500 dark:text-gray-400"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg></button><div class="${optionClass}" data-option-letter="${option.letter}">${letterCircle}<span class="option-text flex-1">${option.text}</span></div></div></div>`;
-    });
-    const resolverBtnEnabled = tempSelectedAnswer !== null;
-    const actionsHTML = `<div class="p-4">${!isAnswered ? `<button id="resolver-btn" ${!resolverBtnEnabled ? 'disabled' : ''} class="w-full text-white ${resolverBtnEnabled ? 'bg-[var(--primary-color)] hover:bg-[var(--primary-hover-color)]' : 'bg-gray-400 cursor-not-allowed'} font-bold py-3 px-4 rounded-lg transition-all duration-300">Resolver</button>` : `<div class="feedback mb-4 text-lg font-semibold ${userAnswerLetter === question.gabarito ? 'correct-feedback' : 'incorrect-feedback'}">${userAnswerLetter === question.gabarito ? '✓ Resposta Correta!' : '✗ Resposta Incorreta!'}</div><button class="fundamentacao-btn w-full text-white bg-[var(--primary-color)] hover:bg-[var(--primary-hover-color)] font-bold py-3 px-4 rounded-lg transition">ℹ️ Ver Fundamentação</button><div class="fundamentacao mt-4 p-4 rounded-lg border-l-4 border-[var(--primary-color)]" style="background-color: var(--fundamentacao-bg); color: var(--fundamentacao-text); display: none;">${question.fundamentacao}</div>`}</div>`;
-    questionElement.innerHTML = questionTextHTML + `<div class="options">${optionsHTML}</div>` + actionsHTML;
-    questionsArea.appendChild(questionElement);
+        
+        const eliminateButton = isSingleMode ? `<button class="eliminate-btn p-3 rounded-full transition-all ${isEliminated ? 'active' : ''}" data-eliminate-letter="${option.letter}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-500 dark:text-gray-400"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg></button>` : '';
+        const swipeRevealDiv = isSingleMode ? `<div class="swipe-reveal"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg></div>` : '';
 
-    if (!isAnswered) {
-        questionElement.querySelectorAll('.option').forEach(el => {
-            el.addEventListener('click', () => {
-                if (el.classList.contains('eliminated')) return;
-                tempSelectedAnswer = el.dataset.optionLetter;
-                renderCurrentQuestion(true);
+        optionsHTML += `<div class="${containerClass}">${swipeRevealDiv}<div class="${contentClass}">${eliminateButton}<div class="${optionClass}" data-option-letter="${option.letter}" data-question-index="${index}">${letterCircle}<span class="option-text flex-1">${option.text}</span></div></div></div>`;
+    });
+
+    const resolverBtnEnabled = tempSelectedAnswer !== null;
+    const actionsHTML = isSingleMode ? `<div class="p-4">${!isAnswered ? `<button id="resolver-btn" ${!resolverBtnEnabled ? 'disabled' : ''} class="w-full text-white ${resolverBtnEnabled ? 'bg-[var(--primary-color)] hover:bg-[var(--primary-hover-color)]' : 'bg-gray-400 cursor-not-allowed'} font-bold py-3 px-4 rounded-lg transition-all duration-300">Resolver</button>` : `<div class="feedback mb-4 text-lg font-semibold ${userAnswerLetter === question.gabarito ? 'correct-feedback' : 'incorrect-feedback'}">${userAnswerLetter === question.gabarito ? '✓ Resposta Correta!' : '✗ Resposta Incorreta!'}</div><button class="fundamentacao-btn w-full text-white bg-[var(--primary-color)] hover:bg-[var(--primary-hover-color)] font-bold py-3 px-4 rounded-lg transition">ℹ️ Ver Fundamentação</button><div class="fundamentacao mt-4 p-4 rounded-lg border-l-4 border-[var(--primary-color)]" style="background-color: var(--fundamentacao-bg); color: var(--fundamentacao-text); display: none;">${question.fundamentacao}</div>`}</div>` : '';
+    
+    return `<div class="bg-[var(--card-bg-color)] sm:rounded-xl shadow-lg">${questionHeader}${questionTextHTML}<div class="options">${optionsHTML}</div>${actionsHTML}</div>`;
+}
+
+
+function addQuestionEventListeners(element, index, isSingleMode) {
+    if (isSingleMode) {
+        // Modo Questão por Questão
+        const isAnswered = userAnswers[index] !== null;
+        if (!isAnswered) {
+            element.querySelectorAll('.option').forEach(el => {
+                el.addEventListener('click', () => {
+                    if (el.classList.contains('eliminated')) return;
+                    tempSelectedAnswer = el.dataset.optionLetter;
+                    renderCurrentQuestion(true);
+                });
             });
-        });
-        questionElement.querySelectorAll('.eliminate-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleEliminate(btn.dataset.eliminateLetter);
-                renderCurrentQuestion(true);
+            element.querySelectorAll('.eliminate-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleEliminate(btn.dataset.eliminateLetter);
+                    renderCurrentQuestion(true);
+                });
             });
-        });
-        const resolverBtn = document.getElementById('resolver-btn');
-        resolverBtn.addEventListener('click', () => {
-            if (tempSelectedAnswer) {
-                userAnswers[currentQuestionIndex] = tempSelectedAnswer;
-                const originalIndex = originalQuestions.findIndex(q => q.id === allQuestions[currentQuestionIndex].id);
-                if (originalIndex !== -1) originalUserAnswers[originalIndex] = tempSelectedAnswer;
-                saveProgress();
-                updateProgressBar();
-                renderCurrentQuestion();
+            const resolverBtn = element.querySelector('#resolver-btn');
+            if (resolverBtn) {
+                resolverBtn.addEventListener('click', () => {
+                    if (tempSelectedAnswer) {
+                        handleAnswer(index, tempSelectedAnswer);
+                        renderCurrentQuestion();
+                    }
+                });
             }
-        });
+        } else {
+            const fundBtn = element.querySelector('.fundamentacao-btn');
+            if (fundBtn) fundBtn.addEventListener('click', () => {
+                const fundBox = element.querySelector('.fundamentacao');
+                fundBox.style.display = (fundBox.style.display === 'none') ? 'block' : 'none';
+            });
+        }
     } else {
-        const fundBtn = questionElement.querySelector('.fundamentacao-btn');
-        if (fundBtn) fundBtn.addEventListener('click', () => {
-            const fundBox = questionElement.querySelector('.fundamentacao');
-            fundBox.style.display = (fundBox.style.display === 'none') ? 'block' : 'none';
+        // Modo Lista Completa
+        element.querySelectorAll('.option').forEach(el => {
+            el.addEventListener('click', () => {
+                const questionIndex = parseInt(el.dataset.questionIndex, 10);
+                const selectedLetter = el.dataset.optionLetter;
+                handleAnswer(questionIndex, selectedLetter);
+                // Re-render only the options for this question to show selection
+                const parentQuestion = el.closest('.bg-\\[var\\(--card-bg-color\\)\\]');
+                const optionsContainer = parentQuestion.querySelector('.options');
+                
+                optionsContainer.querySelectorAll('.option-content').forEach(opt => opt.classList.remove('is-selected'));
+                el.closest('.option-content').classList.add('is-selected');
+            });
         });
     }
-    updateNavigationButtons();
+}
+
+function handleAnswer(index, letter) {
+    userAnswers[index] = letter;
+    const originalIndex = originalQuestions.findIndex(q => q.id === allQuestions[index].id);
+    if (originalIndex !== -1) {
+        originalUserAnswers[originalIndex] = letter;
+    }
+    if (quizMode === 'single') {
+        saveProgress();
+        updateProgressBar();
+    }
 }
 
 function toggleEliminate(letter) {
@@ -390,6 +471,7 @@ function renderProgressBar() {
 }
 
 function updateProgressBar() {
+    if (quizMode !== 'single') return;
     const dots = progressBar.querySelectorAll('.progress-dot');
     dots.forEach((dot, index) => {
         dot.classList.remove('current', 'correct', 'incorrect');
@@ -404,6 +486,7 @@ function updateProgressBar() {
 }
 
 function updateNavigationButtons() {
+    if (quizMode !== 'single') return;
     prevBtn.disabled = currentQuestionIndex === 0;
     const allCurrentQuestionsAnswered = !userAnswers.includes(null);
     if (allCurrentQuestionsAnswered) {
@@ -442,12 +525,12 @@ function setupQuestionNavigation() {
             currentQuestionIndex = qNum - 1;
             renderCurrentQuestion();
         } else {
-            goToQuestionInput.classList.add('error');
+            goToQuestionInput.classList.add('border-red-500');
             goToQuestionInput.value = '';
             goToQuestionInput.placeholder = `Inválido`;
             setTimeout(() => {
-                goToQuestionInput.classList.remove('error');
-                goToQuestionInput.placeholder = `Ir para questão`;
+                goToQuestionInput.classList.remove('border-red-500');
+                goToQuestionInput.placeholder = `Ir para...`;
             }, 2000);
         }
     };
@@ -469,45 +552,44 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.addEventListener('keydown', (e) => {
-    if (quizArea.classList.contains('hidden')) return;
+    if (quizArea.classList.contains('hidden') || quizMode !== 'single') return;
+    const isAnswered = userAnswers[currentQuestionIndex] !== null;
+    if (isAnswered) {
+        if (e.key === 'ArrowRight' && !nextBtn.disabled) nextBtn.click();
+        if (e.key === 'ArrowLeft' && !prevBtn.disabled) prevBtn.click();
+        return;
+    }
 
-    switch(e.key) {
-        case '1': case 'a':
-            document.querySelector('.option[data-option-letter="A"]')?.click();
-            break;
-        case '2': case 'b':
-            document.querySelector('.option[data-option-letter="B"]')?.click();
-            break;
-        case '3': case 'c':
-            document.querySelector('.option[data-option-letter="C"]')?.click();
-            break;
-        case '4': case 'd':
-            document.querySelector('.option[data-option-letter="D"]')?.click();
-            break;
-        case 'Enter':
-            document.getElementById('resolver-btn')?.click();
-            break;
-        case 'ArrowRight':
-            if (!nextBtn.disabled) nextBtn.click();
-            break;
-        case 'ArrowLeft':
-            if (!prevBtn.disabled) prevBtn.click();
-            break;
+    switch(e.key.toLowerCase()) {
+        case 'a': document.querySelector('.option[data-option-letter="A"]')?.click(); break;
+        case 'b': document.querySelector('.option[data-option-letter="B"]')?.click(); break;
+        case 'c': document.querySelector('.option[data-option-letter="C"]')?.click(); break;
+        case 'd': document.querySelector('.option[data-option-letter="D"]')?.click(); break;
+        case 'enter': document.getElementById('resolver-btn')?.click(); break;
+        case 'arrowright': if (!nextBtn.disabled) nextBtn.click(); break;
+        case 'arrowleft': if (!prevBtn.disabled) prevBtn.click(); break;
+    }
+});
+
+modeSelector.addEventListener('click', (e) => {
+    if (e.target.tagName === 'BUTTON') {
+        quizMode = e.target.dataset.mode;
+        modeSelector.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
     }
 });
 
 materiaSelect.addEventListener('change', () => { popularAssuntos(); startBtn.disabled = !materiaSelect.value; });
-assuntoSelect.addEventListener('change', () => {});
 startBtn.addEventListener('click', fetchQuestions);
 prevBtn.addEventListener('click', () => { if (currentQuestionIndex > 0) { currentQuestionIndex--; renderCurrentQuestion(); } });
 nextBtn.addEventListener('click', () => { if (nextBtn.querySelector('span').textContent === 'Finalizar') { showResults(); } else if (currentQuestionIndex < allQuestions.length - 1) { currentQuestionIndex++; renderCurrentQuestion(); } });
+finishListBtn.addEventListener('click', showResults);
 restartQuizBtn.addEventListener('click', () => { startQuiz(originalQuestions, true); });
 reviewErrorsBtn.addEventListener('click', () => { const incorrectQuestions = originalQuestions.filter((q, index) => originalUserAnswers[index] !== null && originalUserAnswers[index] !== q.gabarito); if (incorrectQuestions.length > 0) startQuiz(incorrectQuestions, false); });
 newQuizBtn.addEventListener('click', () => { resultsArea.classList.add('hidden'); selectionArea.classList.remove('hidden'); });
 decreaseFontBtn.addEventListener('click', () => { if (fontSize > 12) { fontSize -= 2; document.documentElement.style.setProperty('--font-size', `${fontSize}px`); } });
 increaseFontBtn.addEventListener('click', () => { if (fontSize < 24) { fontSize += 2; document.documentElement.style.setProperty('--font-size', `${fontSize}px`); } });
 
-// FUNÇÕES DE TEMA ATUALIZADAS
 function applyInitialTheme() {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
