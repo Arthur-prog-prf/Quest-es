@@ -126,71 +126,8 @@ function loadProgress() {
 // =================================================================
 // LÓGICA DE SWIPE (MOBILE)
 // =================================================================
-let touchStartX = 0, touchStartY = 0, currentX = 0, swipedElement = null, swipeDirection;
-const swipeThreshold = 80;
-
-function handleTouchStart(e) {
-    if (quizMode !== 'single') return;
-    const target = e.target.closest('.option-content');
-    if (!target || userAnswers[currentQuestionIndex] !== null) return;
-    swipedElement = target;
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-    currentX = touchStartX;
-    swipeDirection = undefined;
-}
-
-function handleTouchMove(e) {
-    if (!swipedElement) return;
-    const deltaX = e.touches[0].clientX - touchStartX;
-    const deltaY = e.touches[0].clientY - touchStartY;
-    if (swipeDirection === undefined) {
-        if (Math.abs(deltaX) > Math.abs(deltaY) + 5) {
-            swipeDirection = 'horizontal';
-            swipedElement.classList.add('swiping');
-            const revealElement = swipedElement.previousElementSibling;
-            if (revealElement) revealElement.style.opacity = '1';
-        } else {
-            swipeDirection = 'vertical';
-        }
-    }
-    if (swipeDirection === 'horizontal') {
-        e.preventDefault();
-        let newX = deltaX;
-        if (newX < 0) newX = 0;
-        swipedElement.style.transform = `translateX(${newX}px)`;
-        currentX = e.touches[0].clientX;
-    }
-}
-
-function handleTouchEnd() {
-    if (!swipedElement || swipeDirection !== 'horizontal') {
-        if (swipedElement) {
-            swipedElement.classList.remove('swiping');
-            swipedElement.style.transform = 'translateX(0px)';
-            const revealElement = swipedElement.previousElementSibling;
-            if (revealElement) revealElement.style.opacity = '0';
-        }
-        swipedElement = null;
-        return;
-    };
-    const deltaX = currentX - touchStartX;
-    if (deltaX > swipeThreshold) {
-        const letter = swipedElement.querySelector('.option').dataset.optionLetter;
-        toggleEliminate(letter);
-        renderCurrentQuestion(true);
-    } else {
-        swipedElement.classList.remove('swiping');
-        swipedElement.style.transform = 'translateX(0px)';
-        const revealElement = swipedElement.previousElementSibling;
-        if (revealElement) revealElement.style.opacity = '0';
-    }
-    swipedElement = null;
-}
-
-questionsArea.addEventListener('touchstart', handleTouchStart, { passive: false });
-questionsArea.addEventListener('touchmove', handleTouchMove, { passive: false });
-questionsArea.addEventListener('touchend', handleTouchEnd);
+// A lógica de swipe foi removida pois o botão de eliminar agora é visível.
+// Se desejar reativar, o código original pode ser reinserido aqui.
 
 // =================================================================
 // FUNÇÕES PRINCIPAIS DO QUIZ
@@ -245,6 +182,8 @@ async function fetchQuestions() {
     
     selectionArea.classList.add('hidden');
     skeletonLoader.classList.remove('hidden');
+    quizArea.classList.add('hidden');
+
 
     try {
         let query = supabase.from('questoes').select('*').eq('materia', materia);
@@ -289,7 +228,7 @@ function startQuizUI() {
         progressBar.classList.remove('hidden');
         questionCounterText.classList.remove('hidden');
         finishListBtnContainer.classList.add('hidden');
-        goToQuestionInput.placeholder = `Ir para questão`;
+        goToQuestionInput.placeholder = `Ir para`;
         renderProgressBar();
         renderCurrentQuestion();
         setupQuestionNavigation();
@@ -312,7 +251,11 @@ function renderCurrentQuestion(preserveSelection = false) {
 
     const question = allQuestions[currentQuestionIndex];
     const questionHTML = createQuestionHTML(question, currentQuestionIndex, true);
-    questionsArea.innerHTML = questionHTML;
+    const questionContainer = document.createElement('div');
+    questionContainer.innerHTML = questionHTML;
+    questionContainer.className = 'fade-in';
+    questionsArea.appendChild(questionContainer);
+
 
     addQuestionEventListeners(questionsArea, currentQuestionIndex, true);
     updateNavigationButtons();
@@ -342,12 +285,11 @@ function createQuestionHTML(question, index, isSingleMode) {
     ];
 
     const questionHeader = isSingleMode ? '' : `<div class="flex justify-between items-center p-4 border-b border-[var(--border-color)]"><h3 class="text-lg font-bold">Questão ${index + 1}</h3><span class="text-sm text-secondary">${question.assunto}</span></div>`;
-    const questionTextHTML = `<div class="question text-xl font-semibold p-4">${question.pergunta}</div>`;
+    const questionTextHTML = `<div class="question-text p-5">${question.pergunta}</div>`;
     
-    let optionsHTML = '';
+    let optionsHTML = '<div class="options-grid p-5 space-y-3">';
     options.forEach(option => {
         const isEliminated = currentEliminated.includes(option.letter);
-        const containerClass = isAnswered ? 'option-container is-answered' : 'option-container';
         
         let isSelected = false;
         if(isSingleMode) {
@@ -356,29 +298,38 @@ function createQuestionHTML(question, index, isSingleMode) {
             isSelected = userAnswers[index] === option.letter;
         }
 
-        const contentClass = `option-content flex items-center ${isSelected ? 'is-selected' : ''}`;
-        
-        let optionClass = 'option flex flex-1 items-center space-x-4 p-4 border-t border-[var(--border-color)] transition-all duration-200';
+        let optionClass = 'option-card flex items-center p-4 rounded-lg border transition-all duration-200';
         if (!isAnswered) optionClass += ' cursor-pointer';
         if (isEliminated) optionClass += ' eliminated';
         
+        if (isSelected && !isAnswered) {
+            optionClass += ' selected';
+        }
+
         if (isAnswered) {
             if (option.letter === question.gabarito) optionClass += ' correct';
             else if (option.letter === userAnswerLetter) optionClass += ' incorrect';
+        } else {
+            optionClass += ' border-[var(--border-color)]';
         }
         
-        const letterCircle = `<div class="option-letter-circle flex-shrink-0 rounded-full h-8 w-8 flex items-center justify-center font-bold transition-colors" style="background-color: var(--option-circle-bg); color: var(--option-circle-text);">${option.letter}</div>`;
+        const letterCircle = `<div class="option-letter-circle flex-shrink-0 rounded-md h-8 w-8 flex items-center justify-center font-bold text-sm transition-colors">${option.letter}</div>`;
         
-        const eliminateButton = isSingleMode ? `<button class="eliminate-btn p-3 rounded-full transition-all ${isEliminated ? 'active' : ''}" data-eliminate-letter="${option.letter}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-500 dark:text-gray-400"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg></button>` : '';
-        const swipeRevealDiv = isSingleMode ? `<div class="swipe-reveal"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg></div>` : '';
+        const eliminateButton = (isSingleMode && !isAnswered) ? `<button class="eliminate-btn p-2 rounded-full" data-eliminate-letter="${option.letter}" title="Eliminar alternativa"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg></button>` : '';
 
-        optionsHTML += `<div class="${containerClass}">${swipeRevealDiv}<div class="${contentClass}">${eliminateButton}<div class="${optionClass}" data-option-letter="${option.letter}" data-question-index="${index}">${letterCircle}<span class="option-text flex-1">${option.text}</span></div></div></div>`;
+        optionsHTML += `
+            <div class="${optionClass}" data-option-letter="${option.letter}" data-question-index="${index}">
+                ${letterCircle}
+                <span class="option-text flex-1 mx-4">${option.text}</span>
+                ${eliminateButton}
+            </div>`;
     });
+    optionsHTML += '</div>';
 
     const resolverBtnEnabled = tempSelectedAnswer !== null;
-    const actionsHTML = isSingleMode ? `<div class="p-4">${!isAnswered ? `<button id="resolver-btn" ${!resolverBtnEnabled ? 'disabled' : ''} class="w-full text-white ${resolverBtnEnabled ? 'bg-[var(--primary-color)] hover:bg-[var(--primary-hover-color)]' : 'bg-gray-400 cursor-not-allowed'} font-bold py-3 px-4 rounded-lg transition-all duration-300">Resolver</button>` : `<div class="feedback mb-4 text-lg font-semibold ${userAnswerLetter === question.gabarito ? 'correct-feedback' : 'incorrect-feedback'}">${userAnswerLetter === question.gabarito ? '✓ Resposta Correta!' : '✗ Resposta Incorreta!'}</div><button class="fundamentacao-btn w-full text-white bg-[var(--primary-color)] hover:bg-[var(--primary-hover-color)] font-bold py-3 px-4 rounded-lg transition">ℹ️ Ver Fundamentação</button><div class="fundamentacao mt-4 p-4 rounded-lg border-l-4 border-[var(--primary-color)]" style="background-color: var(--fundamentacao-bg); color: var(--fundamentacao-text); display: none;">${question.fundamentacao}</div>`}</div>` : '';
+    const actionsHTML = isSingleMode ? `<div class="p-5 border-t border-[var(--border-color)]">${!isAnswered ? `<button id="resolver-btn" ${!resolverBtnEnabled ? 'disabled' : ''} class="w-full btn-primary">Resolver</button>` : `<div class="feedback mb-4 text-lg font-semibold ${userAnswerLetter === question.gabarito ? 'correct-feedback' : 'incorrect-feedback'}">${userAnswerLetter === question.gabarito ? '✓ Resposta Correta!' : '✗ Resposta Incorreta!'}</div><button class="fundamentacao-btn w-full text-white bg-[var(--primary-color)] hover:bg-[var(--primary-hover-color)] font-bold py-3 px-4 rounded-lg transition">ℹ️ Ver Fundamentação</button><div class="fundamentacao mt-4 p-4 rounded-lg border-l-4 border-[var(--primary-color)]" style="background-color: var(--fundamentacao-bg); color: var(--fundamentacao-text); display: none;">${question.fundamentacao}</div>`}</div>` : '';
     
-    return `<div class="bg-[var(--card-bg-color)] sm:rounded-xl shadow-lg">${questionHeader}${questionTextHTML}<div class="options">${optionsHTML}</div>${actionsHTML}</div>`;
+    return `<div class="question-card bg-[var(--card-bg-color)] sm:rounded-xl shadow-lg border border-[var(--border-color)] overflow-hidden">${questionHeader}${questionTextHTML}${optionsHTML}${actionsHTML}</div>`;
 }
 
 
@@ -386,8 +337,9 @@ function addQuestionEventListeners(element, index, isSingleMode) {
     if (isSingleMode) {
         const isAnswered = userAnswers[index] !== null;
         if (!isAnswered) {
-            element.querySelectorAll('.option').forEach(el => {
-                el.addEventListener('click', () => {
+            element.querySelectorAll('.option-card').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    if (e.target.closest('.eliminate-btn')) return;
                     if (el.classList.contains('eliminated')) return;
                     tempSelectedAnswer = el.dataset.optionLetter;
                     renderCurrentQuestion(true);
@@ -416,18 +368,17 @@ function addQuestionEventListeners(element, index, isSingleMode) {
                 fundBox.style.display = (fundBox.style.display === 'none') ? 'block' : 'none';
             });
         }
-    } else {
-        element.querySelectorAll('.option').forEach(el => {
+    } else { // Modo Lista
+        element.querySelectorAll('.option-card').forEach(el => {
             el.addEventListener('click', () => {
                 const questionIndex = parseInt(el.dataset.questionIndex, 10);
                 const selectedLetter = el.dataset.optionLetter;
                 handleAnswer(questionIndex, selectedLetter);
                 
                 const parentQuestionContainer = document.getElementById(`question-container-${questionIndex}`);
-                const optionsContainer = parentQuestionContainer.querySelector('.options');
                 
-                optionsContainer.querySelectorAll('.option-content').forEach(opt => opt.classList.remove('is-selected'));
-                el.closest('.option-content').classList.add('is-selected');
+                parentQuestionContainer.querySelectorAll('.option-card').forEach(opt => opt.classList.remove('selected'));
+                el.classList.add('selected');
             });
         });
     }
@@ -541,7 +492,7 @@ function setupQuestionNavigation() {
             goToQuestionInput.placeholder = `Inválido`;
             setTimeout(() => {
                 goToQuestionInput.classList.remove('error');
-                goToQuestionInput.placeholder = `Ir para questão`;
+                goToQuestionInput.placeholder = `Ir para`;
             }, 2000);
         }
     };
@@ -572,10 +523,10 @@ document.addEventListener('keydown', (e) => {
     }
 
     switch(e.key.toLowerCase()) {
-        case 'a': document.querySelector('.option[data-option-letter="A"]')?.click(); break;
-        case 'b': document.querySelector('.option[data-option-letter="B"]')?.click(); break;
-        case 'c': document.querySelector('.option[data-option-letter="C"]')?.click(); break;
-        case 'd': document.querySelector('.option[data-option-letter="D"]')?.click(); break;
+        case 'a': document.querySelector('.option-card[data-option-letter="A"]')?.click(); break;
+        case 'b': document.querySelector('.option-card[data-option-letter="B"]')?.click(); break;
+        case 'c': document.querySelector('.option-card[data-option-letter="C"]')?.click(); break;
+        case 'd': document.querySelector('.option-card[data-option-letter="D"]')?.click(); break;
         case 'enter': document.getElementById('resolver-btn')?.click(); break;
         case 'arrowright': if (!nextBtn.disabled) nextBtn.click(); break;
         case 'arrowleft': if (!prevBtn.disabled) prevBtn.click(); break;
@@ -583,10 +534,11 @@ document.addEventListener('keydown', (e) => {
 });
 
 modeSelector.addEventListener('click', (e) => {
-    if (e.target.tagName === 'BUTTON') {
-        quizMode = e.target.dataset.mode;
+    const button = e.target.closest('.mode-btn');
+    if (button) {
+        quizMode = button.dataset.mode;
         modeSelector.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-        e.target.classList.add('active');
+        button.classList.add('active');
     }
 });
 
@@ -600,11 +552,11 @@ finishListBtn.addEventListener('click', () => {
 
     allQuestions.forEach((question, index) => {
         const questionContainer = document.getElementById(`question-container-${index}`);
-        const mainCard = questionContainer.querySelector('.bg-\\[var\\(--card-bg-color\\)\\]');
-        const optionsContainer = questionContainer.querySelector('.options');
+        const mainCard = questionContainer.querySelector('.question-card');
+        const optionsContainer = questionContainer.querySelector('.options-grid');
         const userAnswer = userAnswers[index];
 
-        optionsContainer.querySelectorAll('.option').forEach(optionEl => {
+        optionsContainer.querySelectorAll('.option-card').forEach(optionEl => {
             const optionLetter = optionEl.dataset.optionLetter;
             optionEl.classList.remove('cursor-pointer');
             optionEl.style.pointerEvents = 'none';
@@ -646,7 +598,7 @@ finishListBtn.addEventListener('click', () => {
         });
     });
 
-    const summaryBtnHTML = `<div class="mt-8"><button id="go-to-summary-btn" class="w-full text-white bg-gray-500 hover:bg-gray-600 font-bold py-3 px-4 rounded-lg transition-all duration-300">Ver Resumo do Desempenho</button></div>`;
+    const summaryBtnHTML = `<div class="mt-8"><button id="go-to-summary-btn" class="w-full btn-primary">Ver Resumo do Desempenho</button></div>`;
     const summaryContainer = document.createElement('div');
     summaryContainer.innerHTML = summaryBtnHTML;
     questionsArea.appendChild(summaryContainer);
