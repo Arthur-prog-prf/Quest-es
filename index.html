@@ -125,6 +125,18 @@
         .mode-btn.active { background-color: var(--primary-color); color: white; }
         .dark-mode .mode-btn.active { color: var(--card-bg-color); }
         
+        /* --- ESTILOS PARA O GRÁFICO DE RESULTADO --- */
+        #score-circle {
+            /* Define o estado inicial do círculo (totalmente vazio) */
+            stroke-dasharray: var(--circumference);
+            stroke-dashoffset: var(--circumference);
+        }
+        #score-circle.animate-circle {
+            /* Define a transição e o estado final quando a classe é adicionada */
+            transition: stroke-dashoffset 0.8s ease-out;
+            stroke-dashoffset: var(--offset);
+        }
+
         @media (hover: hover) and (pointer: fine) {
             .swipe-reveal { display: none; }
             .eliminate-btn { display: block; flex-shrink: 0; cursor: pointer; opacity: 0; visibility: hidden; transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out; }
@@ -222,7 +234,7 @@
                         <!-- Círculo de fundo -->
                         <circle class="text-gray-200 dark:text-gray-700" stroke-width="10" stroke="currentColor" fill="transparent" r="45" cx="50" cy="50"/>
                         <!-- Círculo de progresso -->
-                        <circle id="score-circle" class="text-[var(--primary-color)]" stroke-width="10" stroke-linecap="round" stroke="currentColor" fill="transparent" r="45" cx="50" cy="50" style="transition: stroke-dashoffset 0.8s ease-out;"/>
+                        <circle id="score-circle" class="text-[var(--primary-color)]" stroke-width="10" stroke-linecap="round" stroke="currentColor" fill="transparent" r="45" cx="50" cy="50"/>
                     </svg>
                     <!-- Texto da porcentagem -->
                     <span id="score-percentage" class="absolute inset-0 flex items-center justify-center text-3xl font-bold text-[var(--text-color)]">0%</span>
