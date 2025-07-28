@@ -290,7 +290,8 @@ function startQuizUI() {
         progressBar.classList.remove('hidden');
         questionCounterText.classList.remove('hidden');
         finishListBtnContainer.classList.add('hidden');
-        goToQuestionInput.placeholder = `Ir para...`;
+        // CORREÇÃO: Garante que o placeholder inicial está correto.
+        goToQuestionInput.placeholder = `Ir para questão`;
         renderProgressBar();
         renderCurrentQuestion();
         setupQuestionNavigation();
@@ -322,6 +323,8 @@ function renderAllQuestions() {
     questionsArea.innerHTML = '';
     allQuestions.forEach((question, index) => {
         const questionContainer = document.createElement('div');
+        // Adiciona um ID único para cada container de questão no modo lista
+        questionContainer.id = `question-container-${index}`;
         questionContainer.innerHTML = createQuestionHTML(question, index, false);
         questionsArea.appendChild(questionContainer);
         addQuestionEventListeners(questionContainer, index, false);
@@ -423,9 +426,9 @@ function addQuestionEventListeners(element, index, isSingleMode) {
                 const questionIndex = parseInt(el.dataset.questionIndex, 10);
                 const selectedLetter = el.dataset.optionLetter;
                 handleAnswer(questionIndex, selectedLetter);
-                // Re-render only the options for this question to show selection
-                const parentQuestion = el.closest('.bg-\\[var\\(--card-bg-color\\)\\]');
-                const optionsContainer = parentQuestion.querySelector('.options');
+                
+                const parentQuestionContainer = document.getElementById(`question-container-${questionIndex}`);
+                const optionsContainer = parentQuestionContainer.querySelector('.options');
                 
                 optionsContainer.querySelectorAll('.option-content').forEach(opt => opt.classList.remove('is-selected'));
                 el.closest('.option-content').classList.add('is-selected');
@@ -525,12 +528,13 @@ function setupQuestionNavigation() {
             currentQuestionIndex = qNum - 1;
             renderCurrentQuestion();
         } else {
-            goToQuestionInput.classList.add('border-red-500');
+            goToQuestionInput.classList.add('error');
             goToQuestionInput.value = '';
             goToQuestionInput.placeholder = `Inválido`;
             setTimeout(() => {
-                goToQuestionInput.classList.remove('border-red-500');
-                goToQuestionInput.placeholder = `Ir para...`;
+                goToQuestionInput.classList.remove('error');
+                // CORREÇÃO: Garante que o placeholder volta ao normal após o erro.
+                goToQuestionInput.placeholder = `Ir para questão`;
             }, 2000);
         }
     };
