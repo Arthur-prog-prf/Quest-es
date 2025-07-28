@@ -127,12 +127,10 @@
         
         /* --- ESTILOS PARA O GRÁFICO DE RESULTADO --- */
         #score-circle {
-            /* Define o estado inicial do círculo (totalmente vazio) */
             stroke-dasharray: var(--circumference);
             stroke-dashoffset: var(--circumference);
         }
         #score-circle.animate-circle {
-            /* Define a transição e o estado final quando a classe é adicionada */
             transition: stroke-dashoffset 0.8s ease-out;
             stroke-dashoffset: var(--offset);
         }
@@ -232,7 +230,7 @@
                 <div class="relative w-48 h-48 mx-auto my-6">
                     <svg class="w-full h-full" viewBox="0 0 100 100" style="transform: rotate(-90deg)">
                         <!-- Círculo de fundo -->
-                        <circle class="text-gray-200 dark:text-gray-700" stroke-width="10" stroke="currentColor" fill="transparent" r="45" cx="50" cy="50"/>
+                        <circle class="stroke-gray-200 dark:stroke-gray-700" stroke-width="10" fill="transparent" r="45" cx="50" cy="50"/>
                         <!-- Círculo de progresso -->
                         <circle id="score-circle" class="text-[var(--primary-color)]" stroke-width="10" stroke-linecap="round" stroke="currentColor" fill="transparent" r="45" cx="50" cy="50"/>
                     </svg>
