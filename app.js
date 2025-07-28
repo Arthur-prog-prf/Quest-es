@@ -25,6 +25,7 @@ const selectionArea = document.getElementById('selection-area');
 const progressBar = document.getElementById('progress-bar');
 const resultsArea = document.getElementById('results-area');
 const scorePercentage = document.getElementById('score-percentage');
+const scoreCircle = document.getElementById('score-circle');
 const scoreText = document.getElementById('score-text');
 const reviewErrorsBtn = document.getElementById('review-errors-btn');
 const restartQuizBtn = document.getElementById('restart-quiz-btn');
@@ -70,7 +71,6 @@ function showToast(message, type = 'error', duration = 4000) {
 }
 
 function saveProgress() {
-    // Salva o progresso apenas para o modo 'single'
     if (quizMode !== 'single') return;
     const progress = {
         originalQuestions,
@@ -93,7 +93,6 @@ function loadProgress() {
     if (savedProgress) {
         const progress = JSON.parse(savedProgress);
         const oneDay = 24 * 60 * 60 * 1000;
-        // Expira o progresso salvo após 1 dia
         if (new Date().getTime() - progress.timestamp > oneDay) {
             clearProgress();
             return;
@@ -109,7 +108,7 @@ function loadProgress() {
             currentQuestionIndex = progress.currentQuestionIndex;
             eliminatedAnswers = progress.eliminatedAnswers;
             
-            quizMode = 'single'; // Força o modo 'single' ao retomar
+            quizMode = 'single';
             selectionArea.classList.add('hidden');
             quizArea.classList.remove('hidden');
             
@@ -294,11 +293,12 @@ function startQuizUI() {
         renderProgressBar();
         renderCurrentQuestion();
         setupQuestionNavigation();
-    } else { // 'list' mode
+    } else { 
         navigationDiv.classList.add('hidden');
         progressBar.classList.add('hidden');
         questionCounterText.classList.add('hidden');
         finishListBtnContainer.classList.remove('hidden');
+        finishListBtn.textContent = 'Finalizar e Ver Resultado';
         renderAllQuestions();
     }
 }
@@ -384,7 +384,6 @@ function createQuestionHTML(question, index, isSingleMode) {
 
 function addQuestionEventListeners(element, index, isSingleMode) {
     if (isSingleMode) {
-        // Modo Questão por Questão
         const isAnswered = userAnswers[index] !== null;
         if (!isAnswered) {
             element.querySelectorAll('.option').forEach(el => {
@@ -418,7 +417,6 @@ function addQuestionEventListeners(element, index, isSingleMode) {
             });
         }
     } else {
-        // Modo Lista Completa
         element.querySelectorAll('.option').forEach(el => {
             el.addEventListener('click', () => {
                 const questionIndex = parseInt(el.dataset.questionIndex, 10);
@@ -511,8 +509,20 @@ function showResults() {
     const correctAnswers = originalUserAnswers.filter((answer, index) => answer === originalQuestions[index].gabarito).length;
     const total = originalQuestions.length;
     const percentage = total > 0 ? Math.round((correctAnswers / total) * 100) : 0;
+    
     scorePercentage.textContent = `${percentage}%`;
     scoreText.textContent = `Você acertou ${correctAnswers} de ${total} questões.`;
+
+    const radius = scoreCircle.r.baseVal.value;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (percentage / 100) * circumference;
+
+    scoreCircle.classList.remove('animate-circle');
+    scoreCircle.style.setProperty('--circumference', circumference);
+    scoreCircle.style.setProperty('--offset', offset);
+    void scoreCircle.offsetWidth; 
+    scoreCircle.classList.add('animate-circle');
+
     const incorrectQuestions = originalQuestions.filter((_, index) => originalUserAnswers[index] !== null && originalUserAnswers[index] !== originalQuestions[index].gabarito);
     reviewErrorsBtn.disabled = incorrectQuestions.length === 0;
     reviewErrorsBtn.classList.toggle('opacity-50', incorrectQuestions.length === 0);
@@ -585,23 +595,19 @@ startBtn.addEventListener('click', fetchQuestions);
 prevBtn.addEventListener('click', () => { if (currentQuestionIndex > 0) { currentQuestionIndex--; renderCurrentQuestion(); } });
 nextBtn.addEventListener('click', () => { if (nextBtn.querySelector('span').textContent === 'Finalizar') { showResults(); } else if (currentQuestionIndex < allQuestions.length - 1) { currentQuestionIndex++; renderCurrentQuestion(); } });
 
-// CORREÇÃO: Lógica para o botão de finalizar a lista
 finishListBtn.addEventListener('click', () => {
-    // 1. Esconde o botão de finalizar
     finishListBtnContainer.classList.add('hidden');
 
-    // 2. Itera por todas as questões para aplicar o feedback
     allQuestions.forEach((question, index) => {
         const questionContainer = document.getElementById(`question-container-${index}`);
         const mainCard = questionContainer.querySelector('.bg-\\[var\\(--card-bg-color\\)\\]');
         const optionsContainer = questionContainer.querySelector('.options');
         const userAnswer = userAnswers[index];
 
-        // 3. Desabilita as opções e aplica as classes de correto/incorreto
         optionsContainer.querySelectorAll('.option').forEach(optionEl => {
             const optionLetter = optionEl.dataset.optionLetter;
             optionEl.classList.remove('cursor-pointer');
-            optionEl.style.pointerEvents = 'none'; // Garante que não é clicável
+            optionEl.style.pointerEvents = 'none';
 
             if (optionLetter === question.gabarito) {
                 optionEl.classList.add('correct');
@@ -610,7 +616,6 @@ finishListBtn.addEventListener('click', () => {
             }
         });
 
-        // 4. Cria e adiciona a seção de fundamentação
         const isCorrect = userAnswer === question.gabarito;
         const feedbackClass = isCorrect ? 'correct-feedback' : 'incorrect-feedback';
         let feedbackText = '';
@@ -635,14 +640,12 @@ finishListBtn.addEventListener('click', () => {
         actionsContainer.innerHTML = actionsHTML;
         mainCard.appendChild(actionsContainer);
 
-        // 5. Adiciona o evento de clique para o novo botão de fundamentação
         actionsContainer.querySelector('.fundamentacao-btn').addEventListener('click', () => {
             const fundBox = actionsContainer.querySelector('.fundamentacao');
             fundBox.style.display = (fundBox.style.display === 'none') ? 'block' : 'none';
         });
     });
 
-    // 6. Adiciona um botão no final da página para ir para a tela de resumo
     const summaryBtnHTML = `<div class="mt-8"><button id="go-to-summary-btn" class="w-full text-white bg-gray-500 hover:bg-gray-600 font-bold py-3 px-4 rounded-lg transition-all duration-300">Ver Resumo do Desempenho</button></div>`;
     const summaryContainer = document.createElement('div');
     summaryContainer.innerHTML = summaryBtnHTML;
