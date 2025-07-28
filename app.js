@@ -126,8 +126,76 @@ function loadProgress() {
 // =================================================================
 // LÓGICA DE SWIPE (MOBILE)
 // =================================================================
-// A lógica de swipe foi removida pois o botão de eliminar agora é visível.
-// Se desejar reativar, o código original pode ser reinserido aqui.
+let touchStartX = 0, touchStartY = 0, currentX = 0, swipedElement = null, swipeDirection;
+const swipeThreshold = 80;
+
+function handleTouchStart(e) {
+    if (quizMode !== 'single') return;
+    const target = e.target.closest('.option-card-content');
+    if (!target || userAnswers[currentQuestionIndex] !== null) return;
+
+    swipedElement = target;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    currentX = touchStartX;
+    swipeDirection = undefined;
+}
+
+function handleTouchMove(e) {
+    if (!swipedElement) return;
+    const deltaX = e.touches[0].clientX - touchStartX;
+    const deltaY = e.touches[0].clientY - touchStartY;
+
+    if (swipeDirection === undefined) {
+        if (Math.abs(deltaX) > Math.abs(deltaY) + 5) {
+            swipeDirection = 'horizontal';
+            swipedElement.classList.add('swiping');
+            const revealElement = swipedElement.previousElementSibling;
+            if (revealElement) revealElement.style.opacity = '1';
+        } else {
+            swipeDirection = 'vertical';
+        }
+    }
+
+    if (swipeDirection === 'horizontal') {
+        e.preventDefault();
+        let newX = deltaX;
+        if (newX < 0) newX = 0;
+        swipedElement.style.transform = `translateX(${newX}px)`;
+        currentX = e.touches[0].clientX;
+    }
+}
+
+function handleTouchEnd() {
+    if (!swipedElement || swipeDirection !== 'horizontal') {
+        if (swipedElement) {
+            swipedElement.classList.remove('swiping');
+            swipedElement.style.transform = 'translateX(0px)';
+            const revealElement = swipedElement.previousElementSibling;
+            if (revealElement) revealElement.style.opacity = '0';
+        }
+        swipedElement = null;
+        return;
+    };
+
+    const deltaX = currentX - touchStartX;
+    if (deltaX > swipeThreshold) {
+        const letter = swipedElement.querySelector('.option-card').dataset.optionLetter;
+        toggleEliminate(letter);
+        renderCurrentQuestion(true);
+    } else {
+        swipedElement.classList.remove('swiping');
+        swipedElement.style.transform = 'translateX(0px)';
+        const revealElement = swipedElement.previousElementSibling;
+        if (revealElement) revealElement.style.opacity = '0';
+    }
+    swipedElement = null;
+}
+
+questionsArea.addEventListener('touchstart', handleTouchStart, { passive: false });
+questionsArea.addEventListener('touchmove', handleTouchMove, { passive: false });
+questionsArea.addEventListener('touchend', handleTouchEnd);
+
 
 // =================================================================
 // FUNÇÕES PRINCIPAIS DO QUIZ
@@ -315,13 +383,19 @@ function createQuestionHTML(question, index, isSingleMode) {
         
         const letterCircle = `<div class="option-letter-circle flex-shrink-0 rounded-md h-8 w-8 flex items-center justify-center font-bold text-sm transition-colors">${option.letter}</div>`;
         
-        const eliminateButton = (isSingleMode && !isAnswered) ? `<button class="eliminate-btn p-2 rounded-full" data-eliminate-letter="${option.letter}" title="Eliminar alternativa"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg></button>` : '';
+        const eliminateButton = `<button class="eliminate-btn p-2 rounded-full" data-eliminate-letter="${option.letter}" title="Eliminar alternativa"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg></button>`;
+        const swipeRevealIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
 
         optionsHTML += `
-            <div class="${optionClass}" data-option-letter="${option.letter}" data-question-index="${index}">
-                ${letterCircle}
-                <span class="option-text flex-1 mx-4">${option.text}</span>
-                ${eliminateButton}
+            <div class="option-card-container">
+                <div class="swipe-reveal">${swipeRevealIcon}</div>
+                <div class="option-card-content">
+                    <div class="${optionClass}" data-option-letter="${option.letter}" data-question-index="${index}">
+                        ${letterCircle}
+                        <span class="option-text flex-1 mx-4">${option.text}</span>
+                        ${isSingleMode && !isAnswered ? eliminateButton : ''}
+                    </div>
+                </div>
             </div>`;
     });
     optionsHTML += '</div>';
