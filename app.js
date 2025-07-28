@@ -290,7 +290,6 @@ function startQuizUI() {
         progressBar.classList.remove('hidden');
         questionCounterText.classList.remove('hidden');
         finishListBtnContainer.classList.add('hidden');
-        // CORREÇÃO: Garante que o placeholder inicial está correto.
         goToQuestionInput.placeholder = `Ir para questão`;
         renderProgressBar();
         renderCurrentQuestion();
@@ -323,7 +322,6 @@ function renderAllQuestions() {
     questionsArea.innerHTML = '';
     allQuestions.forEach((question, index) => {
         const questionContainer = document.createElement('div');
-        // Adiciona um ID único para cada container de questão no modo lista
         questionContainer.id = `question-container-${index}`;
         questionContainer.innerHTML = createQuestionHTML(question, index, false);
         questionsArea.appendChild(questionContainer);
@@ -533,7 +531,6 @@ function setupQuestionNavigation() {
             goToQuestionInput.placeholder = `Inválido`;
             setTimeout(() => {
                 goToQuestionInput.classList.remove('error');
-                // CORREÇÃO: Garante que o placeholder volta ao normal após o erro.
                 goToQuestionInput.placeholder = `Ir para questão`;
             }, 2000);
         }
@@ -587,7 +584,73 @@ materiaSelect.addEventListener('change', () => { popularAssuntos(); startBtn.dis
 startBtn.addEventListener('click', fetchQuestions);
 prevBtn.addEventListener('click', () => { if (currentQuestionIndex > 0) { currentQuestionIndex--; renderCurrentQuestion(); } });
 nextBtn.addEventListener('click', () => { if (nextBtn.querySelector('span').textContent === 'Finalizar') { showResults(); } else if (currentQuestionIndex < allQuestions.length - 1) { currentQuestionIndex++; renderCurrentQuestion(); } });
-finishListBtn.addEventListener('click', showResults);
+
+// CORREÇÃO: Lógica para o botão de finalizar a lista
+finishListBtn.addEventListener('click', () => {
+    // 1. Esconde o botão de finalizar
+    finishListBtnContainer.classList.add('hidden');
+
+    // 2. Itera por todas as questões para aplicar o feedback
+    allQuestions.forEach((question, index) => {
+        const questionContainer = document.getElementById(`question-container-${index}`);
+        const mainCard = questionContainer.querySelector('.bg-\\[var\\(--card-bg-color\\)\\]');
+        const optionsContainer = questionContainer.querySelector('.options');
+        const userAnswer = userAnswers[index];
+
+        // 3. Desabilita as opções e aplica as classes de correto/incorreto
+        optionsContainer.querySelectorAll('.option').forEach(optionEl => {
+            const optionLetter = optionEl.dataset.optionLetter;
+            optionEl.classList.remove('cursor-pointer');
+            optionEl.style.pointerEvents = 'none'; // Garante que não é clicável
+
+            if (optionLetter === question.gabarito) {
+                optionEl.classList.add('correct');
+            } else if (optionLetter === userAnswer) {
+                optionEl.classList.add('incorrect');
+            }
+        });
+
+        // 4. Cria e adiciona a seção de fundamentação
+        const isCorrect = userAnswer === question.gabarito;
+        const feedbackClass = isCorrect ? 'correct-feedback' : 'incorrect-feedback';
+        let feedbackText = '';
+
+        if (userAnswer === null) {
+            feedbackText = 'Você não respondeu esta questão.';
+        } else {
+            feedbackText = isCorrect ? '✓ Resposta Correta!' : '✗ Resposta Incorreta!';
+        }
+
+        const actionsHTML = `
+            <div class="p-4 border-t border-[var(--border-color)]">
+                <div class="feedback mb-4 text-lg font-semibold ${feedbackClass}">${feedbackText}</div>
+                <button class="fundamentacao-btn w-full text-white bg-[var(--primary-color)] hover:bg-[var(--primary-hover-color)] font-bold py-3 px-4 rounded-lg transition">ℹ️ Ver Fundamentação</button>
+                <div class="fundamentacao mt-4 p-4 rounded-lg border-l-4 border-[var(--primary-color)]" style="background-color: var(--fundamentacao-bg); color: var(--fundamentacao-text); display: none;">
+                    ${question.fundamentacao}
+                </div>
+            </div>
+        `;
+        
+        const actionsContainer = document.createElement('div');
+        actionsContainer.innerHTML = actionsHTML;
+        mainCard.appendChild(actionsContainer);
+
+        // 5. Adiciona o evento de clique para o novo botão de fundamentação
+        actionsContainer.querySelector('.fundamentacao-btn').addEventListener('click', () => {
+            const fundBox = actionsContainer.querySelector('.fundamentacao');
+            fundBox.style.display = (fundBox.style.display === 'none') ? 'block' : 'none';
+        });
+    });
+
+    // 6. Adiciona um botão no final da página para ir para a tela de resumo
+    const summaryBtnHTML = `<div class="mt-8"><button id="go-to-summary-btn" class="w-full text-white bg-gray-500 hover:bg-gray-600 font-bold py-3 px-4 rounded-lg transition-all duration-300">Ver Resumo do Desempenho</button></div>`;
+    const summaryContainer = document.createElement('div');
+    summaryContainer.innerHTML = summaryBtnHTML;
+    questionsArea.appendChild(summaryContainer);
+    summaryContainer.querySelector('#go-to-summary-btn').addEventListener('click', showResults);
+});
+
+
 restartQuizBtn.addEventListener('click', () => { startQuiz(originalQuestions, true); });
 reviewErrorsBtn.addEventListener('click', () => { const incorrectQuestions = originalQuestions.filter((q, index) => originalUserAnswers[index] !== null && originalUserAnswers[index] !== q.gabarito); if (incorrectQuestions.length > 0) startQuiz(incorrectQuestions, false); });
 newQuizBtn.addEventListener('click', () => { resultsArea.classList.add('hidden'); selectionArea.classList.remove('hidden'); });
