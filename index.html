@@ -215,8 +215,20 @@
             <!-- ÁREA DE RESULTADOS -->
             <div id="results-area" class="hidden bg-[var(--card-bg-color)] p-8 rounded-xl shadow-lg text-center">
                 <h2 class="text-3xl font-bold tracking-tight">Seu Desempenho</h2>
-                <p id="score-percentage" class="text-5xl font-bold my-4 text-[var(--primary-color)]">100%</p>
-                <p id="score-text" class="text-lg text-gray-600 dark:text-gray-300 mb-8">Você acertou 10 de 10 questões.</p>
+                
+                <!-- GRÁFICO DE DESEMPENHO -->
+                <div class="relative w-48 h-48 mx-auto my-6">
+                    <svg class="w-full h-full" viewBox="0 0 100 100" style="transform: rotate(-90deg)">
+                        <!-- Círculo de fundo -->
+                        <circle class="text-gray-200 dark:text-gray-700" stroke-width="10" stroke="currentColor" fill="transparent" r="45" cx="50" cy="50"/>
+                        <!-- Círculo de progresso -->
+                        <circle id="score-circle" class="text-[var(--primary-color)]" stroke-width="10" stroke-linecap="round" stroke="currentColor" fill="transparent" r="45" cx="50" cy="50" style="transition: stroke-dashoffset 0.8s ease-out;"/>
+                    </svg>
+                    <!-- Texto da porcentagem -->
+                    <span id="score-percentage" class="absolute inset-0 flex items-center justify-center text-3xl font-bold text-[var(--text-color)]">0%</span>
+                </div>
+
+                <p id="score-text" class="text-lg text-secondary mb-8">Você acertou 0 de 0 questões.</p>
                 <div class="space-y-4">
                     <button id="review-errors-btn" class="results-btn w-full text-white bg-[var(--primary-color)] font-bold py-3 px-4 rounded-lg transition-all duration-300">Revisar Questões Erradas</button>
                     <button id="restart-quiz-btn" class="results-btn w-full text-white bg-gray-500 hover:bg-gray-600 font-bold py-3 px-4 rounded-lg transition-all duration-300">Refazer o Quiz Completo</button>
