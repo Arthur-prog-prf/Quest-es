@@ -193,7 +193,7 @@
         .progress-dot.incorrect { background-color: var(--incorrect-border); }
         .progress-dot.current { box-shadow: 0 0 0 2px var(--card-bg-color), 0 0 0 4px var(--primary-color); }
 
-        /* ESTILOS DE SWIPE E BOTÃO ELIMINAR (ATUALIZADO) */
+        /* ESTILOS DE SWIPE E BOTÃO ELIMINAR */
         .option-card-container { position: relative; overflow: hidden; border-radius: 0.5rem; }
         .option-card-content { position: relative; background-color: var(--card-bg-color); transition: transform 0.2s ease; width: 100%; }
         .option-card-content.swiping { transition: none; }
@@ -203,7 +203,6 @@
         .swipe-reveal { position: absolute; left: 0; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; padding: 0 1.5rem; background-color: var(--incorrect-border); color: white; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
 
         /* Desktop: A partir da largura de tela 'md' (768px), mostramos o botão e escondemos o swipe */
-        /* Usamos também (hover: hover) para garantir que só se aplica a dispositivos com mouse */
         @media (min-width: 768px) and (hover: hover) {
             .eliminate-btn { 
                 display: block; 
@@ -215,6 +214,30 @@
             .eliminate-btn:hover { color: var(--primary-color); }
             .option-card:hover .eliminate-btn { visibility: visible; opacity: 1; }
             .swipe-reveal { display: none; } /* Esconde a área de swipe no desktop */
+        }
+        
+        /* OTIMIZAÇÃO PARA MOBILE (NOVO) */
+        @media (max-width: 640px) { /* sm breakpoint in Tailwind */
+            /* Remove o padding do container principal no quiz */
+            #quiz-area .max-w-3xl {
+                padding-left: 0;
+                padding-right: 0;
+            }
+            /* Remove o arredondamento e bordas laterais do card da questão */
+            .question-card {
+                border-radius: 0;
+                border-left: 0;
+                border-right: 0;
+            }
+            /* Remove o padding horizontal da área das opções */
+            .options-grid {
+                padding-left: 0;
+                padding-right: 0;
+            }
+            /* Garante que as opções individuais não tenham arredondamento */
+            .option-card-container {
+                border-radius: 0;
+            }
         }
     </style>
 </head>
@@ -281,11 +304,13 @@
 
             <!-- ÁREA DO QUIZ -->
             <div id="quiz-area" class="hidden">
-                <div id="progress-bar" class="progress-bar"></div>
-                <div id="question-counter-text" class="text-center text-sm text-secondary mb-4"></div>
-                <div id="questions-area" class="space-y-6"></div>
-                <div id="finish-list-btn-container" class="mt-8 hidden">
-                    <button id="finish-list-btn" class="w-full btn-primary">Finalizar e Ver Resultado</button>
+                <div class="max-w-3xl mx-auto">
+                    <div id="progress-bar" class="progress-bar"></div>
+                    <div id="question-counter-text" class="text-center text-sm text-secondary mb-4"></div>
+                    <div id="questions-area" class="space-y-6"></div>
+                    <div id="finish-list-btn-container" class="mt-8 hidden">
+                        <button id="finish-list-btn" class="w-full btn-primary">Finalizar e Ver Resultado</button>
+                    </div>
                 </div>
             </div>
             
