@@ -182,9 +182,7 @@
             text-decoration: line-through;
             color: var(--eliminated-text-color);
         }
-        .eliminate-btn { color: var(--text-secondary-color); }
-        .eliminate-btn:hover { color: var(--primary-color); }
-
+        
         .correct-feedback { color: var(--correct-border); }
         .incorrect-feedback { color: var(--incorrect-border); }
 
@@ -195,8 +193,21 @@
         .progress-dot.incorrect { background-color: var(--incorrect-border); }
         .progress-dot.current { box-shadow: 0 0 0 2px var(--card-bg-color), 0 0 0 4px var(--primary-color); }
 
+        /* ESTILOS DE SWIPE E BOTÃO ELIMINAR */
+        .option-card-container { position: relative; overflow: hidden; border-radius: 0.5rem; }
+        .option-card-content { position: relative; background-color: var(--card-bg-color); transition: transform 0.2s ease; width: 100%; }
+        .option-card-content.swiping { transition: none; }
+        .swipe-reveal { position: absolute; left: 0; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; padding: 0 1.5rem; background-color: var(--incorrect-border); color: white; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
+        
+        /* Por padrão, o botão de eliminar fica escondido */
+        .eliminate-btn { display: none; }
+
+        /* Em dispositivos com mouse (desktop), mostramos o botão ao passar o mouse */
         @media (hover: hover) and (pointer: fine) {
-            .header-btn:hover, .nav-btn:hover { background-color: var(--header-btn-active-bg); }
+            .eliminate-btn { display: block; visibility: hidden; opacity: 0; transition: opacity 0.2s, visibility 0.2s; color: var(--text-secondary-color); }
+            .eliminate-btn:hover { color: var(--primary-color); }
+            .option-card:hover .eliminate-btn { visibility: visible; opacity: 1; }
+            .swipe-reveal { display: none; } /* Esconde a área de swipe no desktop */
         }
     </style>
 </head>
