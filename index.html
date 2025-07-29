@@ -216,27 +216,23 @@
             .swipe-reveal { display: none; } /* Esconde a área de swipe no desktop */
         }
         
-        /* OTIMIZAÇÃO PARA MOBILE (NOVO) */
+        /* OTIMIZAÇÃO MÁXIMA PARA MOBILE (ATUALIZADO) */
         @media (max-width: 640px) { /* sm breakpoint in Tailwind */
-            /* Remove o padding do container principal no quiz */
-            #quiz-area .max-w-3xl {
-                padding-left: 0;
-                padding-right: 0;
+            #quiz-area {
+                /* Puxa a área do quiz para as bordas da tela, cancelando o padding do container pai */
+                margin-left: -1rem; /* Equivalente a -px-4 do Tailwind */
+                margin-right: -1rem;
             }
-            /* Remove o arredondamento e bordas laterais do card da questão */
             .question-card {
                 border-radius: 0;
                 border-left: 0;
                 border-right: 0;
+                box-shadow: none; /* Remove a sombra para um look mais integrado */
             }
-            /* Remove o padding horizontal da área das opções */
-            .options-grid {
-                padding-left: 0;
-                padding-right: 0;
-            }
-            /* Garante que as opções individuais não tenham arredondamento */
-            .option-card-container {
-                border-radius: 0;
+            /* Adiciona um padding de volta à barra de progresso e ao contador para alinhamento */
+            #progress-bar, #question-counter-text {
+                padding-left: 1rem;
+                padding-right: 1rem;
             }
         }
     </style>
@@ -302,15 +298,13 @@
                 </div>
             </div>
 
-            <!-- ÁREA DO QUIZ -->
+            <!-- ÁREA DO QUIZ (ESTRUTURA SIMPLIFICADA) -->
             <div id="quiz-area" class="hidden">
-                <div class="max-w-3xl mx-auto">
-                    <div id="progress-bar" class="progress-bar"></div>
-                    <div id="question-counter-text" class="text-center text-sm text-secondary mb-4"></div>
-                    <div id="questions-area" class="space-y-6"></div>
-                    <div id="finish-list-btn-container" class="mt-8 hidden">
-                        <button id="finish-list-btn" class="w-full btn-primary">Finalizar e Ver Resultado</button>
-                    </div>
+                <div id="progress-bar" class="progress-bar"></div>
+                <div id="question-counter-text" class="text-center text-sm text-secondary mb-4"></div>
+                <div id="questions-area" class="space-y-6"></div>
+                <div id="finish-list-btn-container" class="mt-8 px-4 sm:px-0">
+                    <button id="finish-list-btn" class="w-full btn-primary">Finalizar e Ver Resultado</button>
                 </div>
             </div>
             
