@@ -182,7 +182,7 @@ function handleTouchEnd() {
     if (deltaX > swipeThreshold) {
         const letter = swipedElement.querySelector('.option-card').dataset.optionLetter;
         toggleEliminate(letter);
-        renderCurrentQuestion(true);
+        renderCurrentQuestion(true); // Minor update, no animation
     } else {
         swipedElement.classList.remove('swiping');
         swipedElement.style.transform = 'translateX(0px)';
@@ -310,20 +310,31 @@ function startQuizUI() {
     }
 }
 
-function renderCurrentQuestion(preserveSelection = false) {
+/**
+ * Renders the current question.
+ * @param {boolean} isMinorUpdate - If true, re-renders without the fade-in animation. Used for selecting/eliminating options.
+ */
+function renderCurrentQuestion(isMinorUpdate = false) {
     questionsArea.innerHTML = '';
     updateProgressBar();
     questionCounterText.innerHTML = `Questão <strong>${currentQuestionIndex + 1}</strong> de <strong>${allQuestions.length}</strong>`;
 
-    if (!preserveSelection) tempSelectedAnswer = null;
+    // Only reset the temporary answer if it's a major update (changing questions)
+    if (!isMinorUpdate) {
+        tempSelectedAnswer = null;
+    }
 
     const question = allQuestions[currentQuestionIndex];
     const questionHTML = createQuestionHTML(question, currentQuestionIndex, true);
     const questionContainer = document.createElement('div');
     questionContainer.innerHTML = questionHTML;
-    questionContainer.className = 'fade-in';
+    
+    // Only add the fade-in animation for major updates
+    if (!isMinorUpdate) {
+        questionContainer.className = 'fade-in';
+    }
+    
     questionsArea.appendChild(questionContainer);
-
 
     addQuestionEventListeners(questionsArea, currentQuestionIndex, true);
     updateNavigationButtons();
@@ -406,14 +417,14 @@ function addQuestionEventListeners(element, index, isSingleMode) {
                     if (e.target.closest('.eliminate-btn')) return;
                     if (el.classList.contains('eliminated')) return;
                     tempSelectedAnswer = el.dataset.optionLetter;
-                    renderCurrentQuestion(true);
+                    renderCurrentQuestion(true); // Minor update, no animation
                 });
             });
             element.querySelectorAll('.eliminate-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     toggleEliminate(btn.dataset.eliminateLetter);
-                    renderCurrentQuestion(true);
+                    renderCurrentQuestion(true); // Minor update, no animation
                 });
             });
             const resolverBtn = element.querySelector('#resolver-btn');
@@ -421,7 +432,7 @@ function addQuestionEventListeners(element, index, isSingleMode) {
                 resolverBtn.addEventListener('click', () => {
                     if (tempSelectedAnswer) {
                         handleAnswer(index, tempSelectedAnswer);
-                        renderCurrentQuestion();
+                        renderCurrentQuestion(); // Re-render with feedback, with animation
                     }
                 });
             }
@@ -549,7 +560,7 @@ function setupQuestionNavigation() {
         const qNum = parseInt(value, 10);
         if (qNum >= 1 && qNum <= allQuestions.length) {
             currentQuestionIndex = qNum - 1;
-            renderCurrentQuestion();
+            renderCurrentQuestion(); // Major update, with animation
         } else {
             goToQuestionInput.classList.add('error');
             goToQuestionInput.value = '';
@@ -608,8 +619,8 @@ modeSelector.addEventListener('click', (e) => {
 
 materiaSelect.addEventListener('change', () => { popularAssuntos(); startBtn.disabled = !materiaSelect.value; });
 startBtn.addEventListener('click', fetchQuestions);
-prevBtn.addEventListener('click', () => { if (currentQuestionIndex > 0) { currentQuestionIndex--; renderCurrentQuestion(); } });
-nextBtn.addEventListener('click', () => { if (nextBtn.querySelector('span').textContent === 'Finalizar') { showResults(); } else if (currentQuestionIndex < allQuestions.length - 1) { currentQuestionIndex++; renderCurrentQuestion(); } });
+prevBtn.addEventListener('click', () => { if (currentQuestionIndex > 0) { currentQuestionIndex--; renderCurrentQuestion(); } }); // Major update, with animation
+nextBtn.addEventListener('click', () => { if (nextBtn.querySelector('span').textContent === 'Finalizar') { showResults(); } else if (currentQuestionIndex < allQuestions.length - 1) { currentQuestionIndex++; renderCurrentQuestion(); } }); // Major update, with animation
 
 finishListBtn.addEventListener('click', () => {
     finishListBtnContainer.classList.add('hidden');
