@@ -41,6 +41,7 @@ const themeIconDark = document.getElementById('theme-icon-dark');
 const modeSelector = document.getElementById('mode-selector');
 const finishListBtnContainer = document.getElementById('finish-list-btn-container');
 const finishListBtn = document.getElementById('finish-list-btn');
+const imprimirSimuladoBtn = document.getElementById('imprimir-simulado-btn'); // Botão de imprimir
 
 // =================================================================
 // ESTADO DO QUIZ
@@ -553,6 +554,8 @@ function showResults() {
     reviewErrorsBtn.disabled = incorrectQuestions.length === 0;
     reviewErrorsBtn.classList.toggle('opacity-50', incorrectQuestions.length === 0);
     reviewErrorsBtn.classList.toggle('cursor-not-allowed', incorrectQuestions.length === 0);
+    
+    imprimirSimuladoBtn.disabled = originalQuestions.length === 0;
 }
 
 function setupQuestionNavigation() {
@@ -713,3 +716,90 @@ function toggleTheme() {
     localStorage.setItem('theme', newTheme);
 }
 themeToggleBtn.addEventListener('click', toggleTheme);
+
+// === NOVA FUNÇÃO E EVENT LISTENER PARA IMPRESSÃO ===
+imprimirSimuladoBtn.addEventListener('click', imprimirSimulado);
+
+function imprimirSimulado() {
+    if (originalQuestions.length === 0) {
+        showToast('Não há questões para imprimir.');
+        return;
+    }
+
+    const materia = originalQuestions[0]?.materia || "Quiz Jurídico";
+    const assunto = originalQuestions[0]?.assunto || "Simulado";
+
+    let conteudoQuestoes = '';
+    let conteudoGabarito = '';
+    let conteudoFundamentacao = '';
+
+    originalQuestions.forEach((q, index) => {
+        conteudoQuestoes += `
+            <div class="questao">
+                <p><strong>Questão ${index + 1}:</strong> ${q.pergunta}</p>
+                <ul>
+                    <li>a) ${q.alternativa_a}</li>
+                    <li>b) ${q.alternativa_b}</li>
+                    <li>c) ${q.alternativa_c}</li>
+                    <li>d) ${q.alternativa_d}</li>
+                </ul>
+            </div>
+        `;
+
+        conteudoGabarito += `<li>${index + 1} - ${q.gabarito.toUpperCase()}</li>`;
+
+        conteudoFundamentacao += `
+            <div class="fundamentacao-item">
+                <p><strong>Questão ${index + 1}:</strong> ${q.fundamentacao}</p>
+            </div>
+        `;
+    });
+
+    const htmlParaImprimir = \`
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <title>Simulado - ${materia} - ${assunto}</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
+                h1, h2 { border-bottom: 2px solid #ccc; padding-bottom: 10px; }
+                .page-break { page-break-after: always; }
+                .questao { margin-bottom: 20px; }
+                .questao ul { list-style-type: none; padding-left: 20px; }
+                .gabarito-lista { list-style-type: none; padding: 0; column-count: 5; }
+                .gabarito-lista li { margin-bottom: 5px; }
+                .fundamentacao-item { margin-bottom: 15px; }
+                @media print {
+                    .page-break { page-break-after: always; }
+                    button { display: none; }
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Simulado de ${materia}</h1>
+            <h2>Questões</h2>
+            ${conteudoQuestoes}
+            <div class="page-break"></div>
+            <h2>Gabarito</h2>
+            <ul class="gabarito-lista">
+                ${conteudoGabarito}
+            </ul>
+            <div class="page-break"></div>
+            <h2>Fundamentação</h2>
+            <div>
+                ${conteudoFundamentacao}
+            </div>
+        </body>
+        </html>
+    \`;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(htmlParaImprimir);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+    }, 250);
+}
