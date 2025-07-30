@@ -555,7 +555,10 @@ function showResults() {
     reviewErrorsBtn.classList.toggle('opacity-50', incorrectQuestions.length === 0);
     reviewErrorsBtn.classList.toggle('cursor-not-allowed', incorrectQuestions.length === 0);
     
-    imprimirSimuladoBtn.disabled = originalQuestions.length === 0;
+    // === CORREÇÃO APLICADA AQUI ===
+    if (imprimirSimuladoBtn) {
+        imprimirSimuladoBtn.disabled = originalQuestions.length === 0;
+    }
 }
 
 function setupQuestionNavigation() {
@@ -717,8 +720,10 @@ function toggleTheme() {
 }
 themeToggleBtn.addEventListener('click', toggleTheme);
 
-// === NOVA FUNÇÃO E EVENT LISTENER PARA IMPRESSÃO ===
-imprimirSimuladoBtn.addEventListener('click', imprimirSimulado);
+// === NOVA FUNÇÃO E EVENT LISTENER PARA IMPRESSÃO (COM CORREÇÃO) ===
+if (imprimirSimuladoBtn) {
+    imprimirSimuladoBtn.addEventListener('click', imprimirSimulado);
+}
 
 function imprimirSimulado() {
     if (originalQuestions.length === 0) {
