@@ -5,18 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plataforma de Quiz Jurídico</title>
     
-    <!-- Incluindo o Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Incluindo a biblioteca do Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- Fontes do Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Estilos base e variáveis -->
     <style>
         :root {
             --font-size: 16px;
@@ -246,13 +242,11 @@
 </head>
 <body class="antialiased">
 
-    <!-- CABEÇALHO FIXO -->
     <header class="bg-[var(--card-bg-color)]/80 backdrop-blur-sm shadow-sm fixed top-0 left-0 right-0 z-20 border-b border-[var(--border-color)]">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center gap-3">
                     <div class="w-9 h-9 flex items-center justify-center rounded-lg" style="background: var(--primary-gradient)">
-                        <!-- === ÍCONE REVERTIDO PARA O LIVRO === -->
                         <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                            <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
                         </svg>
@@ -271,11 +265,9 @@
         </div>
     </header>
 
-    <!-- CONTEÚDO PRINCIPAL -->
     <main class="pt-24 pb-24">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <!-- ÁREA DE SELEÇÃO INICIAL -->
             <div id="selection-area" class="bg-[var(--card-bg-color)] p-6 sm:p-8 rounded-xl shadow-lg space-y-6 border border-[var(--border-color)] fade-in">
                 <div class="text-center">
                     <h1 id="quiz-title" class="text-3xl sm:text-4xl font-extrabold tracking-tight">Bem-vindo à Plataforma</h1>
@@ -283,7 +275,6 @@
                 </div>
                 
                 <div class="space-y-4">
-                    <!-- Seleção de Matéria e Assunto -->
                     <div>
                         <label for="materia-select" class="block text-sm font-medium mb-1">Matéria</label>
                         <div class="relative"><select id="materia-select" class="w-full p-3 border border-[var(--border-color)] rounded-lg bg-[var(--card-bg-color)] appearance-none focus:border-[var(--primary-color)] focus:ring-2 focus:ring-[var(--primary-color)] transition-all duration-200"><option value="">-- Carregando Matérias... --</option></select><div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300"><svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg></div></div>
@@ -293,7 +284,6 @@
                         <div class="relative"><select id="assunto-select" disabled class="w-full p-3 border border-[var(--border-color)] rounded-lg bg-[var(--card-bg-color)] appearance-none focus:border-[var(--primary-color)] focus:ring-2 focus:ring-[var(--primary-color)] transition-all duration-200 disabled:opacity-50"><option value="">-- Escolha um Assunto --</option></select><div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300"><svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg></div></div>
                     </div>
 
-                    <!-- Seleção de Modo -->
                     <div class="pt-2">
                         <label class="block text-sm font-medium mb-2 text-center">Modo de Visualização</label>
                         <div id="mode-selector" class="flex border border-[var(--border-color)] rounded-lg overflow-hidden p-1 bg-[var(--bg-color)]">
@@ -308,7 +298,6 @@
                 </div>
             </div>
 
-            <!-- ÁREA DO QUIZ (ESTRUTURA SIMPLIFICADA) -->
             <div id="quiz-area" class="hidden">
                 <div id="progress-bar" class="progress-bar"></div>
                 <div id="question-counter-text" class="text-center text-sm text-secondary mb-4"></div>
@@ -318,7 +307,6 @@
                 </div>
             </div>
             
-            <!-- ÁREA DE RESULTADOS -->
             <div id="results-area" class="hidden bg-[var(--card-bg-color)] p-6 sm:p-8 rounded-xl shadow-lg text-center border border-[var(--border-color)] fade-in">
                 <h2 class="text-3xl font-bold tracking-tight">Seu Desempenho</h2>
                 
@@ -329,13 +317,13 @@
 
                 <p id="score-text" class="text-lg text-secondary mb-8">Você acertou 0 de 0 questões.</p>
                 <div class="space-y-4">
+                    <button id="imprimir-simulado-btn" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-4 rounded-lg transition">🖨️ Imprimir Simulado</button>
                     <button id="review-errors-btn" class="w-full btn-primary">Revisar Questões Erradas</button>
                     <button id="restart-quiz-btn" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition">Refazer o Quiz Completo</button>
                     <button id="new-quiz-btn" class="w-full text-[var(--primary-color)] font-bold py-3 px-4 rounded-lg transition mt-4 hover:bg-[var(--header-btn-active-bg)]">Escolher Novo Quiz</button>
                 </div>
             </div>
 
-            <!-- SKELETON LOADER -->
             <div id="skeleton-loader" class="hidden bg-[var(--card-bg-color)] p-4 sm:rounded-xl shadow-lg space-y-4 border border-[var(--border-color)]">
                 <div class="skeleton-box h-8 w-3/4"></div><div class="skeleton-box h-4 w-1/2"></div><div class="border-t border-[var(--border-color)] my-4"></div>
                 <div class="space-y-3">
@@ -349,7 +337,6 @@
         </div>
     </main>
 
-    <!-- NAVEGAÇÃO FIXA INFERIOR -->
     <div class="navigation hidden fixed bottom-0 left-0 right-0 bg-[var(--card-bg-color)]/80 backdrop-blur-sm border-t border-[var(--border-color)] shadow-t-lg">
         <div class="max-w-3xl mx-auto px-2 sm:px-6 lg:px-8 flex items-center justify-between h-16 gap-2 sm:gap-4">
             <button id="prev-btn" disabled class="nav-btn flex items-center justify-center space-x-1.5 px-2 sm:px-3 py-2 rounded-lg font-semibold transition disabled:opacity-50 flex-shrink-0"><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg><span>Anterior</span></button>
@@ -358,10 +345,8 @@
         </div>
     </div>
 
-    <!-- CONTAINER DE NOTIFICAÇÕES (TOAST) -->
     <div id="toast-container"></div>
     
-    <!-- MODAL PARA RETOMAR PROGRESSO -->
     <div id="resume-modal" class="hidden modal-overlay">
         <div class="bg-[var(--card-bg-color)] p-8 rounded-xl shadow-lg text-center max-w-sm w-full mx-4 fade-in border border-[var(--border-color)]">
             <h2 class="text-2xl font-bold mb-4">Quiz em Andamento</h2>
@@ -373,7 +358,6 @@
         </div>
     </div>
 
-    <!-- Nosso arquivo JavaScript principal -->
     <script src="app.js"></script>
 </body>
 </html>
