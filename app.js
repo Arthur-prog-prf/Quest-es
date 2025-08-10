@@ -813,3 +813,4 @@ function imprimirSimulado() {
         printWindow.print();
         printWindow.close();
     }, 250);
+}
