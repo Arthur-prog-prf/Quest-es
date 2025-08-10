@@ -1,8 +1,14 @@
 // =================================================================
-// CONFIGURAÇÃO DO SUPABASE
+//  ATENÇÃO: ÁREA DE CONFIGURAÇÃO OBRIGATÓRIA
 // =================================================================
-const SUPABASE_URL = 'https://dibhqftndeggtrxbxjsn.supabase.co'; 
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpYmhxZnRuZGVnZ3RyeGJ4anNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNDg5NTAsImV4cCI6MjA2NzkyNDk1MH0.WV-UK5Au_Hhqp8R6D2mjwiRBtICrmISXoMgSCmx4ZgQ'; 
+//
+// COLE SUA NOVA URL DO PROJETO SUPABASE AQUI (Encontre em: Project Settings -> API)
+const SUPABASE_URL = 'https://hanadycmgnmdctwnxmwy.supabase.co'; 
+//
+// COLE SUA NOVA CHAVE "ANON" DO SUPABASE AQUI (Encontre em: Project Settings -> API)
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhbmFkeWNtZ25tZGN0d254bXd5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDc5MTQ3NywiZXhwIjoyMDcwMzY3NDc3fQ.pxhlcvQzk4AHJkPikXdP5i0pI-jOInmfdEt4u-M_gA4'; 
+//
+// =================================================================
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
