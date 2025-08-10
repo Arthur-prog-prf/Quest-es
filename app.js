@@ -766,7 +766,7 @@ function imprimirSimulado() {
         `;
     });
 
-    const htmlParaImprimir = \`
+    const htmlParaImprimir = `
         <!DOCTYPE html>
         <html lang="pt-BR">
         <head>
