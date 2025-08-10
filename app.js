@@ -6,7 +6,7 @@
 const SUPABASE_URL = 'https://hanadycmgnmdctwnxmwy.supabase.co'; 
 //
 // COLE SUA NOVA CHAVE "ANON" DO SUPABASE AQUI (Encontre em: Project Settings -> API)
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhbmFkeWNtZ25tZGN0d254bXd5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDc5MTQ3NywiZXhwIjoyMDcwMzY3NDc3fQ.pxhlcvQzk4AHJkPikXdP5i0pI-jOInmfdEt4u-M_gA4'; 
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhbmFkeWNtZ25tZGN0d254bXd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3OTE0NzcsImV4cCI6MjA3MDM2NzQ3N30.4c75PU71g985hDRtsr8kmMnub-FKqZnxbvYzImRogzg'; 
 //
 // =================================================================
 
