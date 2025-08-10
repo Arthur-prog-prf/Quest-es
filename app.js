@@ -561,7 +561,6 @@ function showResults() {
     reviewErrorsBtn.classList.toggle('opacity-50', incorrectQuestions.length === 0);
     reviewErrorsBtn.classList.toggle('cursor-not-allowed', incorrectQuestions.length === 0);
     
-    // === CORREÇÃO APLICADA AQUI ===
     if (imprimirSimuladoBtn) {
         imprimirSimuladoBtn.disabled = originalQuestions.length === 0;
     }
@@ -766,11 +765,14 @@ function imprimirSimulado() {
         `;
     });
 
+    // === CORREÇÃO APLICADA AQUI ===
+    // O erro estava aqui. A string estava sendo fechada prematuramente com ` ; `
+    // e o restante do HTML ficava fora da string, causando o erro de sintaxe.
+    // A correção foi garantir que todo o HTML esteja dentro dos crases (``).
     const htmlParaImprimir = `
         <!DOCTYPE html>
         <html lang="pt-BR">
         <head>
-        `;
             <meta charset="UTF-8">
             <title>Simulado - ${materia} - ${assunto}</title>
             <style>
@@ -804,7 +806,7 @@ function imprimirSimulado() {
             </div>
         </body>
         </html>
-    \`;
+    `;
 
     const printWindow = window.open('', '_blank');
     printWindow.document.write(htmlParaImprimir);
