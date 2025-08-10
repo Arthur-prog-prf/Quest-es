@@ -770,6 +770,7 @@ function imprimirSimulado() {
         <!DOCTYPE html>
         <html lang="pt-BR">
         <head>
+        `;
             <meta charset="UTF-8">
             <title>Simulado - ${materia} - ${assunto}</title>
             <style>
