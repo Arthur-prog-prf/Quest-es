@@ -839,9 +839,6 @@ function imprimirSimulado() {
                     @page {
                         margin: 2cm; /* Margem de 2cm em todos os lados */
                     }
-                    body {
-                        margin: 0;
-                    }
                     .page-break { page-break-after: always; }
                     button { display: none; }
                 }
