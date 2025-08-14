@@ -47,7 +47,8 @@ const themeIconDark = document.getElementById('theme-icon-dark');
 const modeSelector = document.getElementById('mode-selector');
 const finishListBtnContainer = document.getElementById('finish-list-btn-container');
 const finishListBtn = document.getElementById('finish-list-btn');
-const imprimirSimuladoBtn = document.getElementById('imprimir-simulado-btn'); // Botão de imprimir
+const imprimirSimuladoBtn = document.getElementById('imprimir-simulado-btn'); // Botão na tela de resultados
+const printSelectionBtn = document.getElementById('print-selection-btn'); // NOVO: Botão na tela de seleção
 
 // =================================================================
 // ESTADO DO QUIZ
@@ -628,7 +629,14 @@ modeSelector.addEventListener('click', (e) => {
     }
 });
 
-materiaSelect.addEventListener('change', () => { popularAssuntos(); startBtn.disabled = !materiaSelect.value; });
+// === MODIFICADO: Habilitar/desabilitar ambos os botões ===
+materiaSelect.addEventListener('change', () => { 
+    popularAssuntos(); 
+    const hasMateria = !!materiaSelect.value;
+    startBtn.disabled = !hasMateria;
+    printSelectionBtn.disabled = !hasMateria;
+});
+
 startBtn.addEventListener('click', fetchQuestions);
 prevBtn.addEventListener('click', () => { if (currentQuestionIndex > 0) { currentQuestionIndex--; renderCurrentQuestion(); } }); // Major update, with animation
 nextBtn.addEventListener('click', () => { if (nextBtn.querySelector('span').textContent === 'Finalizar') { showResults(); } else if (currentQuestionIndex < allQuestions.length - 1) { currentQuestionIndex++; renderCurrentQuestion(); } }); // Major update, with animation
@@ -725,10 +733,50 @@ function toggleTheme() {
 }
 themeToggleBtn.addEventListener('click', toggleTheme);
 
-// === NOVA FUNÇÃO E EVENT LISTENER PARA IMPRESSÃO (COM CORREÇÃO) ===
+// === LÓGICA DE IMPRESSÃO ===
+
+// Botão da tela de resultados
 if (imprimirSimuladoBtn) {
     imprimirSimuladoBtn.addEventListener('click', imprimirSimulado);
 }
+
+// NOVO: Botão da tela de seleção
+if (printSelectionBtn) {
+    printSelectionBtn.addEventListener('click', async () => {
+        const materia = materiaSelect.value;
+        const assunto = assuntoSelect.value;
+
+        if (!materia) {
+            showToast('Por favor, selecione uma matéria para imprimir.');
+            return;
+        }
+
+        printSelectionBtn.disabled = true;
+        printSelectionBtn.textContent = 'Carregando questões...';
+
+        try {
+            let query = supabase.from('questoes').select('*').eq('materia', materia);
+            if (assunto && assunto !== 'todos') {
+                query = query.eq('assunto', assunto);
+            }
+            const { data, error } = await query;
+
+            if (error) throw error;
+            if (data.length === 0) throw new Error("Nenhuma questão encontrada para imprimir.");
+            
+            // A função imprimirSimulado usa a variável global, então nós a definimos aqui
+            originalQuestions = data;
+            imprimirSimulado();
+
+        } catch (error) {
+            showToast('Erro ao carregar para impressão: ' + error.message);
+        } finally {
+            printSelectionBtn.disabled = false;
+            printSelectionBtn.innerHTML = '🖨️ Imprimir Simulado';
+        }
+    });
+}
+
 
 function imprimirSimulado() {
     if (originalQuestions.length === 0) {
@@ -765,10 +813,6 @@ function imprimirSimulado() {
         `;
     });
 
-    // === CORREÇÃO APLICADA AQUI ===
-    // O erro estava aqui. A string estava sendo fechada prematuramente com ` ; `
-    // e o restante do HTML ficava fora da string, causando o erro de sintaxe.
-    // A correção foi garantir que todo o HTML esteja dentro dos crases (``).
     const htmlParaImprimir = `
         <!DOCTYPE html>
         <html lang="pt-BR">
