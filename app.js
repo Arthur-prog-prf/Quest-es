@@ -837,7 +837,10 @@ function imprimirSimulado() {
                 
                 @media print {
                     @page {
-                        margin: 2cm; /* Margem de 2cm em todos os lados */
+                        margin: 0; 
+                    }
+                    body {
+                        padding: 2cm;
                     }
                     .page-break { page-break-after: always; }
                     button { display: none; }
