@@ -820,7 +820,6 @@ function imprimirSimulado() {
             <meta charset="UTF-8">
             <title>Simulado - ${materia} - ${assunto}</title>
             <style>
-                /* Estilos gerais que também se aplicam à impressão */
                 body { 
                     font-family: Arial, sans-serif; 
                     line-height: 1.6; 
@@ -836,22 +835,15 @@ function imprimirSimulado() {
                 .gabarito-lista li { margin-bottom: 5px; }
                 .fundamentacao-item { margin-bottom: 15px; }
                 
-                /* Estilos específicos para impressão */
                 @media print {
                     @page {
-                        /* Define a margem para todas as páginas */
-                        margin: 2cm; 
+                        margin: 0; 
                     }
-                    /* Resetamos a margem do body para não interferir com a @page rule */
                     body {
-                       margin: 0;
-                       padding: 0;
+                        padding: 2cm;
                     }
                     .page-break { page-break-after: always; }
                     button { display: none; }
-                    .questao {
-                        page-break-inside: avoid; /* Tenta não quebrar uma questão no meio */
-                    }
                 }
             </style>
         </head>
