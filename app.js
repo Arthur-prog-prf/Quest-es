@@ -737,7 +737,7 @@ themeToggleBtn.addEventListener('click', toggleTheme);
 
 // Botão da tela de resultados
 if (imprimirSimuladoBtn) {
-    imprimirSimuladoBtn.addEventListener('click', imprimirSimulado);
+    imprimirSimuladoBtn.addEventListener('click', () => imprimirSimulado());
 }
 
 // NOVO: Botão da tela de seleção
@@ -820,15 +820,28 @@ function imprimirSimulado() {
             <meta charset="UTF-8">
             <title>Simulado - ${materia} - ${assunto}</title>
             <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
-                h1, h2 { border-bottom: 2px solid #ccc; padding-bottom: 10px; }
+                body { 
+                    font-family: Arial, sans-serif; 
+                    line-height: 1.6; 
+                }
+                h1, h2 { 
+                    border-bottom: 2px solid #ccc; 
+                    padding-bottom: 10px; 
+                }
                 .page-break { page-break-after: always; }
                 .questao { margin-bottom: 20px; }
                 .questao ul { list-style-type: none; padding-left: 20px; }
                 .gabarito-lista { list-style-type: none; padding: 0; column-count: 5; }
                 .gabarito-lista li { margin-bottom: 5px; }
                 .fundamentacao-item { margin-bottom: 15px; }
+                
                 @media print {
+                    @page {
+                        margin: 2cm; /* Margem de 2cm em todos os lados */
+                    }
+                    body {
+                        margin: 0;
+                    }
                     .page-break { page-break-after: always; }
                     button { display: none; }
                 }
