@@ -862,12 +862,29 @@ function imprimirSimulado() {
         </html>
     `;
 
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(htmlParaImprimir);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-    }, 250);
+    // Lógica de impressão via Iframe para maior compatibilidade móvel
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'absolute';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    iframe.style.visibility = 'hidden';
+    document.body.appendChild(iframe);
+
+    iframe.contentDocument.write(htmlParaImprimir);
+    iframe.contentDocument.close();
+
+    iframe.onload = function() {
+        try {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+        } catch (e) {
+            showToast('Erro ao imprimir. Tente em um computador desktop.');
+            console.error("Print error:", e);
+        }
+        
+        setTimeout(() => {
+            document.body.removeChild(iframe);
+        }, 1000);
+    };
 }
