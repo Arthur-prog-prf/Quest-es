@@ -16,6 +16,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ELEMENTOS DO DOM
 // =================================================================
 const startBtn = document.getElementById('start-btn');
+const periodoSelect = document.getElementById('periodo-select'); // NOVO
 const materiaSelect = document.getElementById('materia-select');
 const assuntoSelect = document.getElementById('assunto-select');
 const quizArea = document.getElementById('quiz-area');
@@ -47,8 +48,8 @@ const themeIconDark = document.getElementById('theme-icon-dark');
 const modeSelector = document.getElementById('mode-selector');
 const finishListBtnContainer = document.getElementById('finish-list-btn-container');
 const finishListBtn = document.getElementById('finish-list-btn');
-const imprimirSimuladoBtn = document.getElementById('imprimir-simulado-btn'); // Botão na tela de resultados
-const printSelectionBtn = document.getElementById('print-selection-btn'); // NOVO: Botão na tela de seleção
+const imprimirSimuladoBtn = document.getElementById('imprimir-simulado-btn');
+const printSelectionBtn = document.getElementById('print-selection-btn');
 
 // =================================================================
 // ESTADO DO QUIZ
@@ -58,11 +59,11 @@ let allQuestions = [];
 let userAnswers = [];
 let originalUserAnswers = [];
 let currentQuestionIndex = 0;
-let materiasEAssuntos = [];
+let todosFiltrosData = []; // Substitui 'materiasEAssuntos' por algo mais abrangente
 let fontSize = 16;
 let tempSelectedAnswer = null;
 let eliminatedAnswers = [];
-let quizMode = 'single'; // 'single' ou 'list'
+let quizMode = 'single';
 
 // =================================================================
 // FUNÇÕES DE QUALIDADE DE VIDA
@@ -190,7 +191,7 @@ function handleTouchEnd() {
     if (deltaX > swipeThreshold) {
         const letter = swipedElement.querySelector('.option-card').dataset.optionLetter;
         toggleEliminate(letter);
-        renderCurrentQuestion(true); // Minor update, no animation
+        renderCurrentQuestion(true); 
     } else {
         swipedElement.classList.remove('swiping');
         swipedElement.style.transform = 'translateX(0px)';
@@ -209,50 +210,118 @@ questionsArea.addEventListener('touchend', handleTouchEnd);
 // FUNÇÕES PRINCIPAIS DO QUIZ
 // =================================================================
 
-async function popularFiltros() {
+// --- NOVA LÓGICA DE FILTROS EM CASCATA ---
+
+async function carregarDadosFiltros() {
     try {
-        const { data, error } = await supabase.from('questoes').select('materia, assunto');
+        // Busca Periodo, Materia e Assunto de todas as questões
+        const { data, error } = await supabase.from('questoes').select('periodo, materia, assunto');
         if (error) throw error;
-        materiasEAssuntos = data;
-        const materiasUnicas = [...new Set(data.map(item => item.materia))].sort();
-        materiaSelect.innerHTML = '<option value="">-- Selecione a Matéria --</option>';
-        materiasUnicas.forEach(materia => {
-            const option = document.createElement('option');
-            option.value = materia;
-            option.textContent = materia;
-            materiaSelect.appendChild(option);
-        });
+        
+        todosFiltrosData = data;
+        popularPeriodos();
     } catch (error) {
-        showToast('Não foi possível carregar as matérias: ' + error.message);
-        materiaSelect.innerHTML = '<option value="">-- Erro ao carregar --</option>';
+        showToast('Erro ao carregar filtros: ' + error.message);
+        periodoSelect.innerHTML = '<option value="">Erro ao carregar</option>';
     }
+}
+
+function popularPeriodos() {
+    const periodosUnicos = [...new Set(todosFiltrosData.map(item => item.periodo).filter(p => p))].sort();
+    
+    periodoSelect.innerHTML = '<option value="">-- Selecione o Período --</option>';
+    periodosUnicos.forEach(periodo => {
+        const option = document.createElement('option');
+        option.value = periodo;
+        option.textContent = periodo;
+        periodoSelect.appendChild(option);
+    });
+
+    // Resetar dependentes
+    materiaSelect.innerHTML = '<option value="">-- Selecione um Período primeiro --</option>';
+    materiaSelect.disabled = true;
+    assuntoSelect.innerHTML = '<option value="">-- Escolha uma Matéria --</option>';
+    assuntoSelect.disabled = true;
+    checkStartButton();
+}
+
+function popularMaterias() {
+    const periodoSelecionado = periodoSelect.value;
+    
+    if (!periodoSelecionado) {
+        materiaSelect.innerHTML = '<option value="">-- Selecione um Período primeiro --</option>';
+        materiaSelect.disabled = true;
+        assuntoSelect.innerHTML = '<option value="">-- Escolha uma Matéria --</option>';
+        assuntoSelect.disabled = true;
+        checkStartButton();
+        return;
+    }
+
+    // Filtra matérias disponíveis NO PERÍODO selecionado
+    const materiasDoPeriodo = [...new Set(todosFiltrosData
+        .filter(item => item.periodo === periodoSelecionado)
+        .map(item => item.materia)
+    )].sort();
+
+    materiaSelect.innerHTML = '<option value="">-- Selecione a Matéria --</option>';
+    materiasDoPeriodo.forEach(materia => {
+        const option = document.createElement('option');
+        option.value = materia;
+        option.textContent = materia;
+        materiaSelect.appendChild(option);
+    });
+    materiaSelect.disabled = false;
+
+    // Resetar assunto quando muda o período/matéria
+    assuntoSelect.innerHTML = '<option value="">-- Escolha uma Matéria --</option>';
+    assuntoSelect.disabled = true;
+    checkStartButton();
 }
 
 function popularAssuntos() {
+    const periodoSelecionado = periodoSelect.value;
     const materiaSelecionada = materiaSelect.value;
-    assuntoSelect.innerHTML = '<option value="todos">-- Todos os Assuntos --</option>';
-    assuntoSelect.disabled = true;
-    
-    if (materiaSelecionada) {
-        const assuntosDaMateria = [...new Set(materiasEAssuntos
-            .filter(item => item.materia === materiaSelecionada)
-            .map(item => item.assunto)
-        )].sort();
-        assuntosDaMateria.forEach(assunto => {
-            const option = document.createElement('option');
-            option.value = assunto;
-            option.textContent = assunto;
-            assuntoSelect.appendChild(option);
-        });
-        assuntoSelect.disabled = false;
+
+    if (!materiaSelecionada) {
+        assuntoSelect.innerHTML = '<option value="">-- Escolha uma Matéria --</option>';
+        assuntoSelect.disabled = true;
+        checkStartButton();
+        return;
     }
+    
+    // Filtra assuntos disponíveis NA MATÉRIA E NO PERÍODO selecionados
+    const assuntosDaMateria = [...new Set(todosFiltrosData
+        .filter(item => item.periodo === periodoSelecionado && item.materia === materiaSelecionada)
+        .map(item => item.assunto)
+    )].sort();
+
+    assuntoSelect.innerHTML = '<option value="todos">-- Todos os Assuntos --</option>';
+    assuntosDaMateria.forEach(assunto => {
+        const option = document.createElement('option');
+        option.value = assunto;
+        option.textContent = assunto;
+        assuntoSelect.appendChild(option);
+    });
+    assuntoSelect.disabled = false;
+    checkStartButton();
 }
 
+function checkStartButton() {
+    // Agora precisa de Período E Matéria para começar
+    const ready = !!periodoSelect.value && !!materiaSelect.value;
+    startBtn.disabled = !ready;
+    printSelectionBtn.disabled = !ready;
+}
+
+// --- FIM DA NOVA LÓGICA DE FILTROS ---
+
 async function fetchQuestions() {
+    const periodo = periodoSelect.value;
     const materia = materiaSelect.value;
     const assunto = assuntoSelect.value;
-    if (!materia) {
-        showToast('Por favor, selecione uma matéria.');
+
+    if (!periodo || !materia) {
+        showToast('Por favor, selecione período e matéria.');
         return;
     }
     
@@ -260,9 +329,10 @@ async function fetchQuestions() {
     skeletonLoader.classList.remove('hidden');
     quizArea.classList.add('hidden');
 
-
     try {
-        let query = supabase.from('questoes').select('*').eq('materia', materia);
+        // Adicionado filtro .eq('periodo', periodo)
+        let query = supabase.from('questoes').select('*').eq('periodo', periodo).eq('materia', materia);
+        
         if (assunto && assunto !== 'todos') {
             query = query.eq('assunto', assunto);
         }
@@ -318,16 +388,11 @@ function startQuizUI() {
     }
 }
 
-/**
- * Renders the current question.
- * @param {boolean} isMinorUpdate - If true, re-renders without the fade-in animation. Used for selecting/eliminating options.
- */
 function renderCurrentQuestion(isMinorUpdate = false) {
     questionsArea.innerHTML = '';
     updateProgressBar();
     questionCounterText.innerHTML = `Questão <strong>${currentQuestionIndex + 1}</strong> de <strong>${allQuestions.length}</strong>`;
 
-    // Only reset the temporary answer if it's a major update (changing questions)
     if (!isMinorUpdate) {
         tempSelectedAnswer = null;
     }
@@ -337,7 +402,6 @@ function renderCurrentQuestion(isMinorUpdate = false) {
     const questionContainer = document.createElement('div');
     questionContainer.innerHTML = questionHTML;
     
-    // Only add the fade-in animation for major updates
     if (!isMinorUpdate) {
         questionContainer.className = 'fade-in';
     }
@@ -425,14 +489,14 @@ function addQuestionEventListeners(element, index, isSingleMode) {
                     if (e.target.closest('.eliminate-btn')) return;
                     if (el.classList.contains('eliminated')) return;
                     tempSelectedAnswer = el.dataset.optionLetter;
-                    renderCurrentQuestion(true); // Minor update, no animation
+                    renderCurrentQuestion(true); 
                 });
             });
             element.querySelectorAll('.eliminate-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     toggleEliminate(btn.dataset.eliminateLetter);
-                    renderCurrentQuestion(true); // Minor update, no animation
+                    renderCurrentQuestion(true); 
                 });
             });
             const resolverBtn = element.querySelector('#resolver-btn');
@@ -440,7 +504,7 @@ function addQuestionEventListeners(element, index, isSingleMode) {
                 resolverBtn.addEventListener('click', () => {
                     if (tempSelectedAnswer) {
                         handleAnswer(index, tempSelectedAnswer);
-                        renderCurrentQuestion(); // Re-render with feedback, with animation
+                        renderCurrentQuestion(); 
                     }
                 });
             }
@@ -451,7 +515,7 @@ function addQuestionEventListeners(element, index, isSingleMode) {
                 fundBox.style.display = (fundBox.style.display === 'none') ? 'block' : 'none';
             });
         }
-    } else { // Modo Lista
+    } else { 
         element.querySelectorAll('.option-card').forEach(el => {
             el.addEventListener('click', () => {
                 const questionIndex = parseInt(el.dataset.questionIndex, 10);
@@ -572,7 +636,7 @@ function setupQuestionNavigation() {
         const qNum = parseInt(value, 10);
         if (qNum >= 1 && qNum <= allQuestions.length) {
             currentQuestionIndex = qNum - 1;
-            renderCurrentQuestion(); // Major update, with animation
+            renderCurrentQuestion(); 
         } else {
             goToQuestionInput.classList.add('error');
             goToQuestionInput.value = '';
@@ -596,7 +660,7 @@ function setupQuestionNavigation() {
 
 document.addEventListener('DOMContentLoaded', () => {
     applyInitialTheme();
-    popularFiltros();
+    carregarDadosFiltros(); // Nova função de carregamento
     loadProgress();
 });
 
@@ -629,17 +693,13 @@ modeSelector.addEventListener('click', (e) => {
     }
 });
 
-// === MODIFICADO: Habilitar/desabilitar ambos os botões ===
-materiaSelect.addEventListener('change', () => { 
-    popularAssuntos(); 
-    const hasMateria = !!materiaSelect.value;
-    startBtn.disabled = !hasMateria;
-    printSelectionBtn.disabled = !hasMateria;
-});
+// NOVOS LISTENERS PARA OS FILTROS EM CASCATA
+periodoSelect.addEventListener('change', popularMaterias);
+materiaSelect.addEventListener('change', popularAssuntos);
 
 startBtn.addEventListener('click', fetchQuestions);
-prevBtn.addEventListener('click', () => { if (currentQuestionIndex > 0) { currentQuestionIndex--; renderCurrentQuestion(); } }); // Major update, with animation
-nextBtn.addEventListener('click', () => { if (nextBtn.querySelector('span').textContent === 'Finalizar') { showResults(); } else if (currentQuestionIndex < allQuestions.length - 1) { currentQuestionIndex++; renderCurrentQuestion(); } }); // Major update, with animation
+prevBtn.addEventListener('click', () => { if (currentQuestionIndex > 0) { currentQuestionIndex--; renderCurrentQuestion(); } }); 
+nextBtn.addEventListener('click', () => { if (nextBtn.querySelector('span').textContent === 'Finalizar') { showResults(); } else if (currentQuestionIndex < allQuestions.length - 1) { currentQuestionIndex++; renderCurrentQuestion(); } }); 
 
 finishListBtn.addEventListener('click', () => {
     finishListBtnContainer.classList.add('hidden');
@@ -735,19 +795,18 @@ themeToggleBtn.addEventListener('click', toggleTheme);
 
 // === LÓGICA DE IMPRESSÃO ===
 
-// Botão da tela de resultados
 if (imprimirSimuladoBtn) {
     imprimirSimuladoBtn.addEventListener('click', () => imprimirSimulado());
 }
 
-// NOVO: Botão da tela de seleção
 if (printSelectionBtn) {
     printSelectionBtn.addEventListener('click', async () => {
+        const periodo = periodoSelect.value;
         const materia = materiaSelect.value;
         const assunto = assuntoSelect.value;
 
-        if (!materia) {
-            showToast('Por favor, selecione uma matéria para imprimir.');
+        if (!periodo || !materia) {
+            showToast('Selecione período e matéria para imprimir.');
             return;
         }
 
@@ -755,7 +814,8 @@ if (printSelectionBtn) {
         printSelectionBtn.textContent = 'Carregando questões...';
 
         try {
-            let query = supabase.from('questoes').select('*').eq('materia', materia);
+            // Adicionado filtro .eq('periodo', periodo)
+            let query = supabase.from('questoes').select('*').eq('periodo', periodo).eq('materia', materia);
             if (assunto && assunto !== 'todos') {
                 query = query.eq('assunto', assunto);
             }
@@ -764,7 +824,6 @@ if (printSelectionBtn) {
             if (error) throw error;
             if (data.length === 0) throw new Error("Nenhuma questão encontrada para imprimir.");
             
-            // A função imprimirSimulado usa a variável global, então nós a definimos aqui
             originalQuestions = data;
             imprimirSimulado();
 
@@ -772,7 +831,7 @@ if (printSelectionBtn) {
             showToast('Erro ao carregar para impressão: ' + error.message);
         } finally {
             printSelectionBtn.disabled = false;
-            printSelectionBtn.innerHTML = '🖨️ Imprimir Simulado';
+            printSelectionBtn.innerHTML = '🖨️ Imprimir Questões';
         }
     });
 }
@@ -784,8 +843,9 @@ function imprimirSimulado() {
         return;
     }
 
+    const periodo = originalQuestions[0]?.periodo || "";
     const materia = originalQuestions[0]?.materia || "Quiz Jurídico";
-    const assunto = originalQuestions[0]?.assunto || "Simulado";
+    const assunto = originalQuestions[0]?.assunto || "Geral";
 
     let conteudoQuestoes = '';
     let conteudoGabarito = '';
@@ -818,7 +878,7 @@ function imprimirSimulado() {
         <html lang="pt-BR">
         <head>
             <meta charset="UTF-8">
-            <title>Simulado - ${materia} - ${assunto}</title>
+            <title>Simulado - ${periodo} - ${materia}</title>
             <style>
                 body { 
                     font-family: Arial, sans-serif; 
@@ -848,7 +908,8 @@ function imprimirSimulado() {
             </style>
         </head>
         <body>
-            <h1>Simulado de ${materia}</h1>
+            <h1>Simulado de ${materia} (${periodo})</h1>
+            <p>Assunto: ${assunto === 'todos' ? 'Todos os assuntos' : assunto}</p>
             <h2>Questões</h2>
             ${conteudoQuestoes}
             <div class="page-break"></div>
@@ -865,7 +926,6 @@ function imprimirSimulado() {
         </html>
     `;
 
-    // Lógica de impressão via Iframe para maior compatibilidade móvel
     const iframe = document.createElement('iframe');
     iframe.style.position = 'absolute';
     iframe.style.width = '0';
