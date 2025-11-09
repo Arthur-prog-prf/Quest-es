@@ -271,17 +271,23 @@
             <div id="selection-area" class="bg-[var(--card-bg-color)] p-6 sm:p-8 rounded-xl shadow-lg space-y-6 border border-[var(--border-color)] fade-in">
                 <div class="text-center">
                     <h1 id="quiz-title" class="text-3xl sm:text-4xl font-extrabold tracking-tight">Bem-vindo à Plataforma</h1>
-                    <p id="quiz-description" class="mt-3 text-lg text-secondary">Selecione a matéria e o assunto para começar seus estudos.</p>
+                    <p id="quiz-description" class="mt-3 text-lg text-secondary">Selecione o período, a matéria e o assunto para começar seus estudos.</p>
                 </div>
                 
                 <div class="space-y-4">
+                    <!-- NOVO FILTRO: PERÍODO -->
+                    <div>
+                        <label for="periodo-select" class="block text-sm font-medium mb-1">Período</label>
+                        <div class="relative"><select id="periodo-select" class="w-full p-3 border border-[var(--border-color)] rounded-lg bg-[var(--card-bg-color)] appearance-none focus:border-[var(--primary-color)] focus:ring-2 focus:ring-[var(--primary-color)] transition-all duration-200"><option value="">-- Carregando Períodos... --</option></select><div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300"><svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg></div></div>
+                    </div>
+
                     <div>
                         <label for="materia-select" class="block text-sm font-medium mb-1">Matéria</label>
-                        <div class="relative"><select id="materia-select" class="w-full p-3 border border-[var(--border-color)] rounded-lg bg-[var(--card-bg-color)] appearance-none focus:border-[var(--primary-color)] focus:ring-2 focus:ring-[var(--primary-color)] transition-all duration-200"><option value="">-- Carregando Matérias... --</option></select><div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300"><svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg></div></div>
+                        <div class="relative"><select id="materia-select" disabled class="w-full p-3 border border-[var(--border-color)] rounded-lg bg-[var(--card-bg-color)] appearance-none focus:border-[var(--primary-color)] focus:ring-2 focus:ring-[var(--primary-color)] transition-all duration-200 disabled:opacity-50"><option value="">-- Selecione um Período primeiro --</option></select><div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300"><svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg></div></div>
                     </div>
                     <div>
                         <label for="assunto-select" class="block text-sm font-medium mb-1">Assunto</label>
-                        <div class="relative"><select id="assunto-select" disabled class="w-full p-3 border border-[var(--border-color)] rounded-lg bg-[var(--card-bg-color)] appearance-none focus:border-[var(--primary-color)] focus:ring-2 focus:ring-[var(--primary-color)] transition-all duration-200 disabled:opacity-50"><option value="">-- Escolha um Assunto --</option></select><div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300"><svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg></div></div>
+                        <div class="relative"><select id="assunto-select" disabled class="w-full p-3 border border-[var(--border-color)] rounded-lg bg-[var(--card-bg-color)] appearance-none focus:border-[var(--primary-color)] focus:ring-2 focus:ring-[var(--primary-color)] transition-all duration-200 disabled:opacity-50"><option value="">-- Escolha uma Matéria --</option></select><div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300"><svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg></div></div>
                     </div>
 
                     <div class="pt-2">
@@ -293,7 +299,6 @@
                     </div>
                 </div>
 
-                <!-- === ÁREA DOS BOTÕES MODIFICADA === -->
                 <div class="pt-4 space-y-3">
                     <button id="start-btn" disabled class="w-full btn-primary">Iniciar Exercício</button>
                     <button id="print-selection-btn" disabled class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">🖨️ Imprimir Questões</button>
