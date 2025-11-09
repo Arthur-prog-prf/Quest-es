@@ -345,7 +345,12 @@ async function fetchQuestions() {
     quizArea.classList.add('hidden');
 
     try {
-        let query = supabase.from('questoes').select('*').eq('materia', materia);
+        // Adicionando .order('id', { ascending: true }) para garantir a ordem pelo ID
+        let query = supabase
+            .from('questoes')
+            .select('*')
+            .eq('materia', materia)
+            .order('id', { ascending: true }); // ORDENAÇÃO ADICIONADA AQUI
 
         // Tratamento especial se o periodo for "Geral" (o nosso placeholder para null)
         if (periodo === "Geral") {
