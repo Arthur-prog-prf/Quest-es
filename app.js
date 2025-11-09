@@ -16,7 +16,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ELEMENTOS DO DOM
 // =================================================================
 const startBtn = document.getElementById('start-btn');
-const periodoSelect = document.getElementById('periodo-select'); // NOVO
+const periodoSelect = document.getElementById('periodo-select');
 const materiaSelect = document.getElementById('materia-select');
 const assuntoSelect = document.getElementById('assunto-select');
 const quizArea = document.getElementById('quiz-area');
@@ -59,7 +59,7 @@ let allQuestions = [];
 let userAnswers = [];
 let originalUserAnswers = [];
 let currentQuestionIndex = 0;
-let todosFiltrosData = []; // Substitui 'materiasEAssuntos' por algo mais abrangente
+let todosFiltrosData = []; 
 let fontSize = 16;
 let tempSelectedAnswer = null;
 let eliminatedAnswers = [];
@@ -210,53 +210,42 @@ questionsArea.addEventListener('touchend', handleTouchEnd);
 // FUNÇÕES PRINCIPAIS DO QUIZ
 // =================================================================
 
-// --- NOVA LÓGICA DE FILTROS EM CASCATA (COM TRATAMENTO DE ERRO) ---
-
 async function carregarDadosFiltros() {
     try {
-        // Tenta buscar 'periodo'. Se a coluna não existir, o Supabase pode retornar erro ou nulo.
-        // Vamos fazer uma query mais robusta.
-        let { data, error } = await supabase.from('questoes').select('periodo, materia, assunto');
+        const { data, error } = await supabase.from('questoes').select('periodo, materia, assunto');
+        if (error) throw error;
         
-        if (error) {
-             // Se der erro específico de coluna 'periodo' não encontrada, tentamos buscar sem ela
-             if (error.message.includes('periodo')) {
-                 console.warn("Coluna 'periodo' não encontrada. Carregando sem ela.");
-                 const response = await supabase.from('questoes').select('materia, assunto');
-                 if (response.error) throw response.error;
-                 // Adiciona 'periodo: null' manualmente para manter a consistência
-                 data = response.data.map(item => ({ ...item, periodo: null }));
-             } else {
-                 throw error;
-             }
-        }
-
-        // Normaliza os dados: se periodo for null/undefined/vazio, vira "Geral"
-        todosFiltrosData = data.map(item => ({
-            ...item,
-            periodo: item.periodo || "Geral" 
-        }));
-        
+        todosFiltrosData = data;
         popularPeriodos();
     } catch (error) {
-        console.error(error);
-        showToast('Erro ao carregar filtros. Verifique o console.');
+        showToast('Erro ao carregar filtros: ' + error.message);
         periodoSelect.innerHTML = '<option value="">Erro ao carregar</option>';
     }
 }
 
 function popularPeriodos() {
-    const periodosUnicos = [...new Set(todosFiltrosData.map(item => item.periodo))].sort();
+    // Filtra valores nulos/vazios e pega apenas os períodos reais
+    const periodosReais = [...new Set(todosFiltrosData
+        .map(item => item.periodo)
+        .filter(p => p && p !== "Geral") // Remove nulos e o "Geral" se ele veio do banco por engano
+    )].sort();
     
     periodoSelect.innerHTML = '<option value="">-- Selecione o Período --</option>';
-    periodosUnicos.forEach(periodo => {
+    
+    // ADICIONA A OPÇÃO "GERAL" MANUALMENTE NO INÍCIO
+    const optionGeral = document.createElement('option');
+    optionGeral.value = "Geral";
+    optionGeral.textContent = "Geral (Todas as questões)";
+    periodoSelect.appendChild(optionGeral);
+
+    // Adiciona os demais períodos encontrados no banco
+    periodosReais.forEach(periodo => {
         const option = document.createElement('option');
         option.value = periodo;
         option.textContent = periodo;
         periodoSelect.appendChild(option);
     });
 
-    // Resetar dependentes
     materiaSelect.innerHTML = '<option value="">-- Selecione um Período primeiro --</option>';
     materiaSelect.disabled = true;
     assuntoSelect.innerHTML = '<option value="">-- Escolha uma Matéria --</option>';
@@ -276,13 +265,18 @@ function popularMaterias() {
         return;
     }
 
-    const materiasDoPeriodo = [...new Set(todosFiltrosData
-        .filter(item => item.periodo === periodoSelecionado)
-        .map(item => item.materia)
-    )].sort();
+    // Se for "Geral", mostra TODAS as matérias disponíveis.
+    let materiasFiltradas;
+    if (periodoSelecionado === "Geral") {
+        materiasFiltradas = todosFiltrosData;
+    } else {
+        materiasFiltradas = todosFiltrosData.filter(item => item.periodo === periodoSelecionado);
+    }
+
+    const materiasUnicas = [...new Set(materiasFiltradas.map(item => item.materia))].sort();
 
     materiaSelect.innerHTML = '<option value="">-- Selecione a Matéria --</option>';
-    materiasDoPeriodo.forEach(materia => {
+    materiasUnicas.forEach(materia => {
         const option = document.createElement('option');
         option.value = materia;
         option.textContent = materia;
@@ -306,13 +300,18 @@ function popularAssuntos() {
         return;
     }
     
-    const assuntosDaMateria = [...new Set(todosFiltrosData
-        .filter(item => item.periodo === periodoSelecionado && item.materia === materiaSelecionada)
-        .map(item => item.assunto)
-    )].sort();
+    // Se for "Geral", pega assuntos de toda a matéria, ignorando período.
+    let dadosFiltrados;
+    if (periodoSelecionado === "Geral") {
+        dadosFiltrados = todosFiltrosData.filter(item => item.materia === materiaSelecionada);
+    } else {
+        dadosFiltrados = todosFiltrosData.filter(item => item.periodo === periodoSelecionado && item.materia === materiaSelecionada);
+    }
+
+    const assuntosUnicos = [...new Set(dadosFiltrados.map(item => item.assunto))].sort();
 
     assuntoSelect.innerHTML = '<option value="todos">-- Todos os Assuntos --</option>';
-    assuntosDaMateria.forEach(assunto => {
+    assuntosUnicos.forEach(assunto => {
         const option = document.createElement('option');
         option.value = assunto;
         option.textContent = assunto;
@@ -327,8 +326,6 @@ function checkStartButton() {
     startBtn.disabled = !ready;
     printSelectionBtn.disabled = !ready;
 }
-
-// --- FIM DA NOVA LÓGICA DE FILTROS ---
 
 async function fetchQuestions() {
     const periodo = periodoSelect.value;
@@ -345,38 +342,29 @@ async function fetchQuestions() {
     quizArea.classList.add('hidden');
 
     try {
-        // Adicionando .order('id', { ascending: true }) para garantir a ordem pelo ID
+        // Inicia query e já ordena por ID
         let query = supabase
             .from('questoes')
             .select('*')
             .eq('materia', materia)
-            .order('id', { ascending: true }); // ORDENAÇÃO ADICIONADA AQUI
-
-        // Tratamento especial se o periodo for "Geral" (o nosso placeholder para null)
-        if (periodo === "Geral") {
-             // Se sua coluna periodo ainda não existe, essa parte do filtro pode falhar se não tratada.
-             // O ideal é que você crie a coluna. Se ela existir mas estiver vazia (null), usamos .is('periodo', null)
-             // Mas se você preencheu com "Geral" no banco, use .eq
-             
-             // Vamos tentar assumir que você vai criar a coluna e deixar null por enquanto:
-             query = query.or(`periodo.is.null,periodo.eq.Geral,periodo.eq.""`);
-        } else {
-             query = query.eq('periodo', periodo);
+            .order('id', { ascending: true });
+        
+        // SÓ APLICA O FILTRO DE PERÍODO SE NÃO FOR "GERAL"
+        if (periodo !== "Geral") {
+            query = query.eq('periodo', periodo);
         }
         
         if (assunto && assunto !== 'todos') {
             query = query.eq('assunto', assunto);
         }
-
         const { data, error } = await query;
         if (error) throw error;
-        if (!data || data.length === 0) throw new Error("Nenhuma questão encontrada.");
+        if (!data || data.length === 0) throw new Error("Nenhuma questão encontrada para a seleção atual.");
         
         originalQuestions = data; 
         startQuiz(originalQuestions, true);
     } catch (error) {
-        console.error(error);
-        showToast('Erro ao carregar questões. Verifique o console.');
+        showToast('Erro ao carregar as questões: ' + error.message);
         selectionArea.classList.remove('hidden');
     } finally {
         skeletonLoader.classList.add('hidden');
@@ -693,7 +681,7 @@ function setupQuestionNavigation() {
 
 document.addEventListener('DOMContentLoaded', () => {
     applyInitialTheme();
-    carregarDadosFiltros(); // Nova função de carregamento
+    carregarDadosFiltros(); 
     loadProgress();
 });
 
@@ -726,7 +714,6 @@ modeSelector.addEventListener('click', (e) => {
     }
 });
 
-// NOVOS LISTENERS PARA OS FILTROS EM CASCATA
 periodoSelect.addEventListener('change', popularMaterias);
 materiaSelect.addEventListener('change', popularAssuntos);
 
@@ -847,11 +834,11 @@ if (printSelectionBtn) {
         printSelectionBtn.textContent = 'Carregando questões...';
 
         try {
-            let query = supabase.from('questoes').select('*').eq('materia', materia);
+            // Inicia query e já ordena por ID
+            let query = supabase.from('questoes').select('*').eq('materia', materia).order('id', { ascending: true });
             
-            if (periodo === "Geral") {
-                 query = query.or(`periodo.is.null,periodo.eq.Geral,periodo.eq.""`);
-            } else {
+            // MESMA LÓGICA AQUI: Se não for Geral, filtra.
+            if (periodo !== "Geral") {
                  query = query.eq('periodo', periodo);
             }
             
@@ -882,9 +869,9 @@ function imprimirSimulado() {
         return;
     }
 
-    const periodo = originalQuestions[0]?.periodo || "Geral";
+    const periodo = (periodoSelect.value === "Geral") ? "Geral" : (originalQuestions[0]?.periodo || "");
     const materia = originalQuestions[0]?.materia || "Quiz Jurídico";
-    const assunto = originalQuestions[0]?.assunto || "Geral";
+    const assunto = (assuntoSelect.value === "todos") ? "Todos os assuntos" : (originalQuestions[0]?.assunto || "Geral");
 
     let conteudoQuestoes = '';
     let conteudoGabarito = '';
@@ -948,7 +935,7 @@ function imprimirSimulado() {
         </head>
         <body>
             <h1>Simulado de ${materia} (${periodo})</h1>
-            <p>Assunto: ${assunto === 'todos' ? 'Todos os assuntos' : assunto}</p>
+            <p>Assunto: ${assunto}</p>
             <h2>Questões</h2>
             ${conteudoQuestoes}
             <div class="page-break"></div>
