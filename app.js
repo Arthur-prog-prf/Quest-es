@@ -210,24 +210,43 @@ questionsArea.addEventListener('touchend', handleTouchEnd);
 // FUNÇÕES PRINCIPAIS DO QUIZ
 // =================================================================
 
-// --- NOVA LÓGICA DE FILTROS EM CASCATA ---
+// --- NOVA LÓGICA DE FILTROS EM CASCATA (COM TRATAMENTO DE ERRO) ---
 
 async function carregarDadosFiltros() {
     try {
-        // Busca Periodo, Materia e Assunto de todas as questões
-        const { data, error } = await supabase.from('questoes').select('periodo, materia, assunto');
-        if (error) throw error;
+        // Tenta buscar 'periodo'. Se a coluna não existir, o Supabase pode retornar erro ou nulo.
+        // Vamos fazer uma query mais robusta.
+        let { data, error } = await supabase.from('questoes').select('periodo, materia, assunto');
         
-        todosFiltrosData = data;
+        if (error) {
+             // Se der erro específico de coluna 'periodo' não encontrada, tentamos buscar sem ela
+             if (error.message.includes('periodo')) {
+                 console.warn("Coluna 'periodo' não encontrada. Carregando sem ela.");
+                 const response = await supabase.from('questoes').select('materia, assunto');
+                 if (response.error) throw response.error;
+                 // Adiciona 'periodo: null' manualmente para manter a consistência
+                 data = response.data.map(item => ({ ...item, periodo: null }));
+             } else {
+                 throw error;
+             }
+        }
+
+        // Normaliza os dados: se periodo for null/undefined/vazio, vira "Geral"
+        todosFiltrosData = data.map(item => ({
+            ...item,
+            periodo: item.periodo || "Geral" 
+        }));
+        
         popularPeriodos();
     } catch (error) {
-        showToast('Erro ao carregar filtros: ' + error.message);
+        console.error(error);
+        showToast('Erro ao carregar filtros. Verifique o console.');
         periodoSelect.innerHTML = '<option value="">Erro ao carregar</option>';
     }
 }
 
 function popularPeriodos() {
-    const periodosUnicos = [...new Set(todosFiltrosData.map(item => item.periodo).filter(p => p))].sort();
+    const periodosUnicos = [...new Set(todosFiltrosData.map(item => item.periodo))].sort();
     
     periodoSelect.innerHTML = '<option value="">-- Selecione o Período --</option>';
     periodosUnicos.forEach(periodo => {
@@ -257,7 +276,6 @@ function popularMaterias() {
         return;
     }
 
-    // Filtra matérias disponíveis NO PERÍODO selecionado
     const materiasDoPeriodo = [...new Set(todosFiltrosData
         .filter(item => item.periodo === periodoSelecionado)
         .map(item => item.materia)
@@ -272,7 +290,6 @@ function popularMaterias() {
     });
     materiaSelect.disabled = false;
 
-    // Resetar assunto quando muda o período/matéria
     assuntoSelect.innerHTML = '<option value="">-- Escolha uma Matéria --</option>';
     assuntoSelect.disabled = true;
     checkStartButton();
@@ -289,7 +306,6 @@ function popularAssuntos() {
         return;
     }
     
-    // Filtra assuntos disponíveis NA MATÉRIA E NO PERÍODO selecionados
     const assuntosDaMateria = [...new Set(todosFiltrosData
         .filter(item => item.periodo === periodoSelecionado && item.materia === materiaSelecionada)
         .map(item => item.assunto)
@@ -307,7 +323,6 @@ function popularAssuntos() {
 }
 
 function checkStartButton() {
-    // Agora precisa de Período E Matéria para começar
     const ready = !!periodoSelect.value && !!materiaSelect.value;
     startBtn.disabled = !ready;
     printSelectionBtn.disabled = !ready;
@@ -330,20 +345,33 @@ async function fetchQuestions() {
     quizArea.classList.add('hidden');
 
     try {
-        // Adicionado filtro .eq('periodo', periodo)
-        let query = supabase.from('questoes').select('*').eq('periodo', periodo).eq('materia', materia);
+        let query = supabase.from('questoes').select('*').eq('materia', materia);
+
+        // Tratamento especial se o periodo for "Geral" (o nosso placeholder para null)
+        if (periodo === "Geral") {
+             // Se sua coluna periodo ainda não existe, essa parte do filtro pode falhar se não tratada.
+             // O ideal é que você crie a coluna. Se ela existir mas estiver vazia (null), usamos .is('periodo', null)
+             // Mas se você preencheu com "Geral" no banco, use .eq
+             
+             // Vamos tentar assumir que você vai criar a coluna e deixar null por enquanto:
+             query = query.or(`periodo.is.null,periodo.eq.Geral,periodo.eq.""`);
+        } else {
+             query = query.eq('periodo', periodo);
+        }
         
         if (assunto && assunto !== 'todos') {
             query = query.eq('assunto', assunto);
         }
+
         const { data, error } = await query;
         if (error) throw error;
-        if (data.length === 0) throw new Error("Nenhuma questão encontrada para a seleção atual.");
+        if (!data || data.length === 0) throw new Error("Nenhuma questão encontrada.");
         
         originalQuestions = data; 
         startQuiz(originalQuestions, true);
     } catch (error) {
-        showToast('Erro ao carregar as questões: ' + error.message);
+        console.error(error);
+        showToast('Erro ao carregar questões. Verifique o console.');
         selectionArea.classList.remove('hidden');
     } finally {
         skeletonLoader.classList.add('hidden');
@@ -814,8 +842,14 @@ if (printSelectionBtn) {
         printSelectionBtn.textContent = 'Carregando questões...';
 
         try {
-            // Adicionado filtro .eq('periodo', periodo)
-            let query = supabase.from('questoes').select('*').eq('periodo', periodo).eq('materia', materia);
+            let query = supabase.from('questoes').select('*').eq('materia', materia);
+            
+            if (periodo === "Geral") {
+                 query = query.or(`periodo.is.null,periodo.eq.Geral,periodo.eq.""`);
+            } else {
+                 query = query.eq('periodo', periodo);
+            }
+            
             if (assunto && assunto !== 'todos') {
                 query = query.eq('assunto', assunto);
             }
@@ -843,7 +877,7 @@ function imprimirSimulado() {
         return;
     }
 
-    const periodo = originalQuestions[0]?.periodo || "";
+    const periodo = originalQuestions[0]?.periodo || "Geral";
     const materia = originalQuestions[0]?.materia || "Quiz Jurídico";
     const assunto = originalQuestions[0]?.assunto || "Geral";
 
